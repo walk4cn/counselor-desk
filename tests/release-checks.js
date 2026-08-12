@@ -20,9 +20,11 @@ assert.equal(publicSurface.status, 0, publicSurface.stderr || publicSurface.stdo
 assert.match(publicSurface.stdout, /Public surface check passed/);
 
 const html = require('node:fs').readFileSync(path.join(root, 'index.html'), 'utf8');
+const packageBuilder = require('node:fs').readFileSync(path.join(root, 'scripts', 'build-package.js'), 'utf8');
 const compactHeader = html.match(/@media \(max-width:480px\)\s*\{([\s\S]*?)\n\}/);
 assert.ok(compactHeader, 'Expected a compact mobile header media query');
 assert.match(compactHeader[1], /\.topbar-search-wrap\{display:none\}/);
 assert.match(compactHeader[1], /\.topbar\{padding:0 12px/);
+for (const token of ['docs/v4.0-全面验收报告.md', 'v4.0-全面验收报告.md', '品牌与素材说明.md', 'assetsSource', "'installer.nsh'"]) assert.ok(packageBuilder.includes(token), `release package is missing: ${token}`);
 
 console.log('PASS release-checks');

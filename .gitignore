@@ -41,3 +41,10 @@ tmp/
 test-results/
 playwright-report/
 screenshots/
+
+# 旧版 QA / 文档渲染工作区
+.playwright-cli/
+_docx_qa/
+_lo_profile_user_guide/
+_build_user_guide.py
+_render_user_guide.py

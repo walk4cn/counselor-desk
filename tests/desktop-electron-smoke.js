@@ -1,0 +1,32 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+
+const root = path.join(__dirname, '..');
+const electron = path.join(root, 'desktop', 'node_modules', 'electron', 'dist', process.platform === 'win32' ? 'electron.exe' : 'Electron');
+if (!fs.existsSync(electron)) {
+  console.log('SKIP desktop-electron-smoke: Electron binary is not installed');
+  process.exit(0);
+}
+const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cwb-electron-smoke-'));
+try {
+  const result = spawnSync(electron, ['--no-sandbox', 'desktop'], {
+    cwd:root,
+    env:Object.assign({}, process.env, { CWB_DESKTOP_SMOKE:'1', CWB_DESKTOP_USER_DATA:userData }),
+    encoding:'utf8', timeout:120000,
+  });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  const output = `${result.stdout}\n${result.stderr}`;
+  assert.match(output, /"ok":true/);
+  assert.match(output, /"schemaVersion":7/);
+  assert.match(output, /"attachment":true/);
+  assert.match(output, /"migration":true/);
+  assert.match(output, /"backup":/);
+  assert.match(output, /"sqlite":true/);
+  if (result.stdout.trim()) console.log(result.stdout.trim());
+  console.log('PASS desktop-electron-smoke');
+} finally {
+  fs.rmSync(userData, { recursive:true, force:true });
+}

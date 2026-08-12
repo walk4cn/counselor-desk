@@ -173,6 +173,7 @@ function toCSV(rows) {
 
   /* ---------- 1. 逐模块闭环 ---------- */
   for (const m of SPEC) {
+    const expectedHead = m.coll === 'stay' ? m.head.slice(0, 2).concat(['班级'], m.head.slice(2)) : m.head;
     out.push(`=== ${m.coll} · ${m.label} ===`);
     if (!goView(m.view)) { ok(`能进入「${m.label}」视图`, false); continue; }
     await sleep(70);
@@ -195,7 +196,7 @@ function toCSV(rows) {
     await sleep(30);
     const tplCsv = await grab();
     const tplHead = tplCsv ? parseCSV(tplCsv)[0] : [];
-    ok('「模板」表头与规格一致', tplHead[0] === '记录编号(record_id)' && tplHead.slice(1).map(x => x.replace(/\([a-z_]+\)$/i, '')).join('|') === m.head.join('|'));
+    ok('「模板」表头与规格一致', tplHead[0] === '记录编号(record_id)' && tplHead.slice(1).map(x => x.replace(/\([a-z_]+\)$/i, '')).join('|') === expectedHead.join('|'));
 
     /* 导出 */
     capBlob = null;
@@ -205,7 +206,7 @@ function toCSV(rows) {
     ok('「导出 CSV」产生了内容', !!csv);
     if (!csv) continue;
     const rows = parseCSV(csv);
-    ok('「导出」表头与规格一致', rows[0][0] === '记录编号(record_id)' && rows[0].slice(1).map(x => x.replace(/\([a-z_]+\)$/i, '')).join('|') === m.head.join('|'));
+    ok('「导出」表头与规格一致', rows[0][0] === '记录编号(record_id)' && rows[0].slice(1).map(x => x.replace(/\([a-z_]+\)$/i, '')).join('|') === expectedHead.join('|'));
 
     const before = store(m.coll).length;
     ok(`导出行数 == 库内条数（${rows.length - 1} / ${before}）`, rows.length - 1 === before);

@@ -82,7 +82,7 @@
   <!-- 副标题 -->
   <g transform="translate(60, 240)">
     <text x="0" y="0" font-family="Inter, 'PingFang SC', sans-serif" font-size="18" font-weight="500" fill="#e3f7f9">为一线辅导员而生 · 让重复的事变简单</text>
-    <text x="0" y="28" font-family="Inter, 'PingFang SC', sans-serif" font-size="14" font-weight="400" fill="#8aa8c4" letter-spacing="0.5">单文件 HTML · 零依赖 · 离线可用 · v3.8.0</text>
+  <text x="0" y="28" font-family="Inter, 'PingFang SC', sans-serif" font-size="14" font-weight="400" fill="#8aa8c4" letter-spacing="0.5">单文件 HTML · IndexedDB · Electron · v4.0.0</text>
   </g>
 
   <!-- 标签胶囊：低空学院·工程版 -->
@@ -102,7 +102,7 @@
   <g transform="translate(390, 305)">
     <rect x="0" y="0" width="170" height="32" rx="16" fill="#12a06b" fill-opacity="0.18" stroke="#12a06b" stroke-width="1"/>
     <path d="M 14 16 L 18 20 L 26 12" fill="none" stroke="#3fd6a4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="36" y="21" font-family="Inter, 'PingFang SC', sans-serif" font-size="12" font-weight="600" fill="#3fd6a4">4 套测试全 PASS</text>
+    <text x="36" y="21" font-family="Inter, 'PingFANG SC', sans-serif" font-size="12" font-weight="600" fill="#3fd6a4">本地优先 · 可恢复</text>
   </g>
 
   <!-- 标签胶囊：MIT -->

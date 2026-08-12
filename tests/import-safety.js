@@ -22,8 +22,8 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   await sleep(500);
   const cwb = w.CWB;
 
-  assert.equal(Object.keys(cwb.importSchemas || {}).length, 18,
-    'all 18 generic modules must publish one import schema');
+  assert.equal(Object.keys(cwb.importSchemas || {}).length, 24,
+    'all generic modules must publish one import schema');
   for (const [collection, schema] of Object.entries(cwb.importSchemas || {})) {
     assert.ok(schema.fields && schema.fields.record_id, `${collection} must expose stable record_id`);
     assert.ok(Object.values(schema.fields).some(field => field.required), `${collection} must declare required fields`);

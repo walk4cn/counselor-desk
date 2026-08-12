@@ -1,0 +1,23 @@
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.join(__dirname, '..', 'desktop');
+const required = ['package.json','main.cjs','preload.cjs','database.cjs','electron-builder.yml','installer.nsh','README.md'];
+for (const name of required) if (!fs.existsSync(path.join(root, name))) throw new Error(`missing desktop/${name}`);
+const main = fs.readFileSync(path.join(root, 'main.cjs'), 'utf8');
+const database = fs.readFileSync(path.join(root, 'database.cjs'), 'utf8');
+const preload = fs.readFileSync(path.join(root, 'preload.cjs'), 'utf8');
+const builder = fs.readFileSync(path.join(root, 'electron-builder.yml'), 'utf8');
+const installer = fs.readFileSync(path.join(root, 'installer.nsh'), 'utf8');
+const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+for (const token of ['app.getPath(\'userData\')','atomicWrite','desktop:save-snapshot','desktop:create-backup','desktop:migrate-legacy','before-quit','exportData','backupAttachments','MAX_ATTACHMENT_BYTES']) if (!main.includes(token)) throw new Error(`desktop main contract missing: ${token}`);
+for (const token of ['database.sqlite','openStructuredDatabase','structuredDb']) if (!main.includes(token)) throw new Error(`desktop SQLite contract missing: ${token}`);
+for (const token of ['better-sqlite3','CREATE TABLE IF NOT EXISTS snapshots','journal_mode = WAL','findAttachment','clearAttachments']) if (!database.includes(token)) throw new Error(`desktop database schema missing: ${token}`);
+for (const token of ['loadSnapshot','saveSnapshot','createBackup','restoreBackup','uninstall']) if (!preload.includes(token)) throw new Error(`desktop preload contract missing: ${token}`);
+if (!String(manifest.scripts && manifest.scripts.dist).includes('--projectDir ..')) throw new Error('desktop build must resolve the repository root as projectDir');
+if (!builder.includes('nsis:') || !builder.includes('deleteAppDataOnUninstall: false') || !builder.includes('include: desktop/installer.nsh')) throw new Error('uninstall retention contract missing');
+for (const token of ['customUnInstall','IfSilent cwbUninstallChoiceDone','同时删除本机数据和附件','RMDir /r "$APPDATA\\Counselor Desk"']) if (!installer.includes(token)) throw new Error(`uninstall choice contract missing: ${token}`);
+for (const token of ['mac:','- dmg','- zip','public.app-category.education','signAndEditExecutable: false']) if (!builder.includes(token)) throw new Error(`cross-platform builder contract missing: ${token}`);
+for (const script of ['dist:win','dist:mac','rebuild:native']) if (!manifest.scripts || !manifest.scripts[script]) throw new Error(`desktop script missing: ${script}`);
+for (const file of ['desktop/main.cjs','desktop/preload.cjs','desktop/database.cjs','index.html','vendor/**']) if (!builder.includes(file)) throw new Error(`builder file contract missing: ${file}`);
+console.log('PASS desktop-contract');
