@@ -28,6 +28,17 @@
 </div>
 
 <p align="center">
+  <img src="./assets/counselor-desk-hero.png" alt="辅导员工作台：校园、工作台、学生档案与本地备份的编辑插图" width="100%" />
+</p>
+
+> **v4.0 的一句话**：把“今天要处理什么”和“这名学生发生过什么”放在同一条可追溯的工作流里。<br>
+> 这是一个个人本地工作台，不是学校正式业务平台，也不提供账号体系、云同步或后台上报。
+
+### ✦ 本版视觉与文档升级
+
+主页、favicon、应用图标和横幅已统一到“深空航蓝 + 信号青”的本地优先视觉系统；新增的恢复安全插图位于 [`assets/illustration-recovery.png`](./assets/illustration-recovery.png)。设计令牌、生成式素材来源和替换边界见[品牌与素材说明](./docs/品牌与素材说明.md)。
+
+<p align="center">
   <img src="./assets/github-hero-v4.png" alt="辅导员工作台 v4.0 本地工作桌" width="100%" />
 </p>
 

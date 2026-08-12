@@ -60,22 +60,7 @@ if (fs.existsSync(assetsSource)) {
   copyDirectory(assetsSource, assetsTarget);
 }
 const docsTarget = path.join(target, 'docs');
-for (const relative of [
-  '辅导员工作台使用手册.md',
-  '数据格式与联动约定.md',
-  '二次开发指南.md',
-  'v4.0-全面验收报告.md',
-  'v4.0-架构与验收.md',
-  '品牌与素材说明.md',
-  '平台构建矩阵.md',
-  '公开仓库维护指南.md',
-]) {
-  const source = path.join(root, 'docs', relative);
-  if (fs.existsSync(source)) {
-    fs.mkdirSync(docsTarget, { recursive: true });
-    fs.copyFileSync(source, path.join(docsTarget, relative));
-  }
-}
+if (fs.existsSync(path.join(root, 'docs'))) copyDirectory(path.join(root, 'docs'), docsTarget);
 for (const filename of ['CHANGELOG.md', 'CONTRIBUTING.md', 'SECURITY.md']) {
   const source = path.join(root, filename);
   if (fs.existsSync(source)) fs.copyFileSync(source, path.join(target, filename));
