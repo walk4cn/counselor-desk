@@ -36,11 +36,7 @@
 
 ### ✦ 本版视觉与文档升级
 
-主页、favicon、应用图标和横幅已统一到“深空航蓝 + 信号青”的本地优先视觉系统；新增的恢复安全插图位于 [`assets/illustration-recovery.png`](./assets/illustration-recovery.png)。设计令牌、生成式素材来源和替换边界见[品牌与素材说明](./docs/品牌与素材说明.md)。
-
-<p align="center">
-  <img src="./assets/github-hero-v4.png" alt="辅导员工作台 v4.0 本地工作桌" width="100%" />
-</p>
+主页、favicon、应用图标和横幅已统一到“深空航蓝 + 信号青”的本地优先视觉系统；新增的晨光欢迎插图位于 [`assets/welcome-morning.png`](./assets/welcome-morning.png)，恢复安全插图位于 [`assets/illustration-recovery.png`](./assets/illustration-recovery.png)。设计令牌、生成式素材来源和替换边界见[品牌与素材说明](./docs/品牌与素材说明.md)。
 
 > 这不是要替代学校正式业务系统的“大平台”。它更像辅导员自己的工作桌：今天要回访谁、哪张表要交、哪条记录还没补、下次换电脑如何带走数据，都能在一个本地窗口里找到答案。
 
@@ -85,6 +81,16 @@ macOS 用户从 GitHub 体验版附件下载 `辅导员工作台-v4.0.0-macOS-�
 桌面版的真实附件保险库路径请在“模板库 → 分类文件库”页面查看“桌面版已启用加密附件保险库”提示。仓库的 `output/desktop/` 只是开发者构建产物目录，不是用户数据目录。完整步骤见[桌面版安装与数据路径](./docs/v4-desktop-installation.md)。
 
 ## 🧩 先把每天最费时间的事理顺
+
+### 🌤️ 第一次打开：先认识你，再陪你开始一天
+
+第一次打开工作台会出现一次轻量欢迎卡片：输入姓名或希望被称呼的方式，选择喜欢的配色，勾选是否每天接收暖心问候和教育金句。保存后，工作台会把偏好留在本机；之后每天首次打开时，随机展示一句问候和一则有出处的教育金句。这个体验不依赖网络，也不会把称呼或学生数据上传到服务器。
+
+如果后来想调整，进入“设置 → 首次欢迎体验”即可重新设置；问候、金句和主题都可以分别开关。完整的金句来源清单见[教育金句与来源](./docs/教育金句与来源.md)。
+
+<p align="center">
+  <img src="./assets/welcome-morning.png" width="100%" alt="晨光中的辅导员工作桌、开放的记录本与植物插图" />
+</p>
 
 很多日常工作并不难，真正让人疲惫的是资料总在不同地方，做完一遍还要重复整理：
 
@@ -153,47 +159,47 @@ macOS 用户从 GitHub 体验版附件下载 `辅导员工作台-v4.0.0-macOS-�
 
 ## 📸 功能界面一览
 
-下面的截图统一使用日间主题，按两列大图展示完整工作流：从首次进入、学生台账，到任务、谈话、假期去向、政策资料、模板库和分类文件库。截图均使用示例或脱敏数据，不包含真实学生信息。
+下面精选 8 张代表性截图，统一使用日间主题、示例或脱敏数据，并按单张大图展示，便于在 GitHub、文档站和移动端阅读。
 
-<p align="center">
-  <img src="./assets/screenshots/onboarding.png" width="49%" alt="首次使用引导与首页待办" />
-  <img src="./assets/screenshots/dashboard.png" width="49%" alt="首页今日要处理与学生工作提醒" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/dashboard.png" width="100%" alt="首页今日要处理与学生工作提醒" />
+  <figcaption>首页：从今日待办、危机预警和谈话提醒开始工作。</figcaption>
+</figure>
 
-<p align="center">
-  <img src="./assets/screenshots/students.png" width="49%" alt="学生台账与关注等级筛选" />
-  <img src="./assets/screenshots/calendar.png" width="49%" alt="工作节点与周期提醒" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/students.png" width="100%" alt="学生台账与关注等级筛选" />
+  <figcaption>学生台账：字段筛选、照片、关注等级与档案入口集中在一张表。</figcaption>
+</figure>
 
-<p align="center">
-  <img src="./assets/screenshots/tasks.png" width="49%" alt="工作任务清单、分类与截止提醒" />
-  <img src="./assets/screenshots/talks.png" width="49%" alt="谈心谈话记录与回访提醒" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/import-preview.png" width="100%" alt="学生大表导入预览与字段识别" />
+  <figcaption>导入预览：先识别字段和异常，再确认写入。</figcaption>
+</figure>
 
-<p align="center">
-  <img src="./assets/screenshots/leave.png" width="49%" alt="学生假期去向和离返校管理" />
-  <img src="./assets/screenshots/policy.png" width="49%" alt="政策智库与学校政策文件管理" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/talks.png" width="100%" alt="谈心谈话记录与回访提醒" />
+  <figcaption>谈心谈话：记录方式、摘要、回访日期与材料留痕一目了然。</figcaption>
+</figure>
 
-<p align="center">
-  <img src="./assets/screenshots/material.png" width="49%" alt="讲话稿、班会素材与工作资料收藏" />
-  <img src="./assets/screenshots/graduate.png" width="49%" alt="毕业生就业台账与去向统计" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/data-center.png" width="100%" alt="数据存储、备份与迁移" />
+  <figcaption>数据中心：备份、恢复、迁移与本地存储状态可追溯。</figcaption>
+</figure>
 
-<p align="center">
-  <img src="./assets/screenshots/node.png" width="49%" alt="工作日历、节点和提前提醒" />
-  <img src="./assets/screenshots/templates.png" width="49%" alt="通知、流程和表单模板库" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/files.png" width="100%" alt="分类文件库与本地资料上传入口" />
+  <figcaption>资料库：政策、表格模板和班会材料按类别归档。</figcaption>
+</figure>
 
-<p align="center">
-  <img src="./assets/screenshots/files.png" width="49%" alt="分类文件库与本地资料上传入口" />
-  <img src="./assets/screenshots/import-preview.png" width="49%" alt="学生大表导入预览与字段识别" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/focus.png" width="100%" alt="重点学生档案与隐私保护锁" />
+  <figcaption>重点学生：关注记录与界面访问锁保持在同一工作流内。</figcaption>
+</figure>
 
-<p align="center">
-  <img src="./assets/screenshots/data-center.png" width="49%" alt="数据存储、备份与迁移" />
-  <img src="./assets/screenshots/focus.png" width="49%" alt="重点学生档案与隐私保护锁" />
-</p>
+<figure align="center">
+  <img src="./assets/screenshots/dark.png" width="100%" alt="深色主题与窄屏自适应界面" />
+  <figcaption>主题与窄屏：深色模式和移动布局保持清晰层级。</figcaption>
+</figure>
 
 ## 🖥️ 桌面版与网页版
 

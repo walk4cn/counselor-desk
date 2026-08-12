@@ -16,6 +16,20 @@
 
 业务记录应有稳定 `id`、`created_at`、`updated_at`、`schema_version`。学生优先使用 `student_number` 与 `student_level` 识别；其他集合通常使用稳定 `id`。空值、布尔值、数字、枚举和未知字段必须经过归一化后再写入。
 
+### `settings.welcome_experience`
+
+首次欢迎体验使用普通设置集合保存，桌面 SQLite 与网页 IndexedDB 通过现有备份格式迁移：
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `version` | number | `1` | 欢迎体验设置版本 |
+| `completed` / `skipped` | boolean | `false` | 是否完成或跳过首次设置 |
+| `addressed_as` | string | `""` | 希望显示的称呼；留空时使用姓名 + “老师” |
+| `greeting_enabled` / `quote_enabled` | boolean | `true` | 是否显示每日问候 / 教育金句 |
+| `last_open_date` | `YYYY-MM-DD` | `""` | 最近一次展示日期，用于避免同日刷新重复弹出 |
+| `last_greeting_index` | number | `-1` | 最近问候索引 |
+| `last_quote_id` | string | `""` | 最近金句 ID，用于避免连续重复 |
+
 ## 导入导出
 
 - 每个业务集合提供 CSV 模板、导入预览和 UTF-8 BOM CSV 导出。

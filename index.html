@@ -763,9 +763,12 @@ tbody tr:last-child td{border-bottom:none}
   *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
 }
 .onboarding{display:grid;grid-template-columns:1.2fr 1fr auto;gap:18px;align-items:center;background:linear-gradient(135deg,var(--accent-soft),var(--signal-soft));border:1px solid var(--accent-line);border-radius:var(--r);padding:18px 20px;margin-bottom:16px;box-shadow:var(--sh-sm)}
-.onboarding h2{margin:3px 0 5px;font-size:20px}.onboarding p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.65}.onboarding-steps{display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:var(--ink-3)}.onboarding-steps span{padding:5px 8px;border-radius:7px;background:rgba(255,255,255,.45)}.onboarding-steps .done{color:var(--ok);text-decoration:line-through}.onboarding-actions{display:flex;flex-direction:column;gap:7px;min-width:122px}.settings-section{border-top:1px solid var(--line-2);padding-top:16px;margin-top:18px}.learning-list{display:grid;gap:12px}.learning-item{border:1px solid var(--line);border-radius:var(--r-sm);padding:15px 16px;background:var(--card-2)}.learning-item-hd{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.learning-item h3{font-size:15px;margin:0 0 4px}.learning-item p{font-size:13.5px;line-height:1.7;color:var(--ink-2);white-space:pre-wrap;margin:10px 0}.learning-progress{height:6px;border-radius:99px;background:var(--line-2);overflow:hidden;margin:10px 0}.learning-progress i{display:block;height:100%;background:var(--signal);border-radius:inherit}
+.welcome-modal{width:min(680px,calc(100vw - 28px));overflow:hidden;border:1px solid var(--accent-line);background:var(--card);box-shadow:0 24px 70px rgba(13,31,56,.22)}.welcome-modal .modal-hd{background:linear-gradient(135deg,var(--accent-soft),var(--signal-soft));border-bottom:1px solid var(--accent-line)}.welcome-modal .modal-hd h3{font-size:18px;letter-spacing:-.01em}.welcome-setup{display:grid;grid-template-columns:1.08fr .92fr;gap:20px;padding:4px 2px}.welcome-setup-copy{padding:14px 2px}.welcome-kicker{display:inline-flex;align-items:center;gap:7px;color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.welcome-kicker .ic{width:15px;height:15px}.welcome-setup-copy h2{font-size:28px;line-height:1.2;margin:11px 0 9px;letter-spacing:-.03em}.welcome-setup-copy p{margin:0;color:var(--ink-2);line-height:1.75;font-size:13.5px}.welcome-note{display:flex;gap:9px;align-items:flex-start;margin-top:17px;padding:11px 12px;border-radius:12px;background:var(--card-2);border:1px solid var(--line-2);color:var(--ink-3);font-size:12px;line-height:1.6}.welcome-note .ic{color:var(--signal);flex:none;margin-top:1px}.welcome-panel{padding:14px;border-radius:16px;background:linear-gradient(160deg,var(--card-2),var(--accent-soft));border:1px solid var(--line);display:flex;flex-direction:column;gap:12px}.welcome-panel .lab{font-size:12px}.welcome-preview{border-radius:13px;padding:13px 14px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.68);box-shadow:0 8px 22px rgba(13,31,56,.08)}[data-theme="dark"] .welcome-preview{background:rgba(255,255,255,.06);border-color:var(--line)}.welcome-preview p{margin:0;font-size:14px;line-height:1.65;color:var(--ink)}.welcome-preview small{display:block;color:var(--ink-3);font-size:11px;margin-top:8px}.welcome-palette{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.welcome-palette button{appearance:none;border:1px solid var(--line);border-radius:11px;padding:7px 5px;background:var(--card);cursor:pointer;color:var(--ink-2);font-size:11px;min-width:0}.welcome-palette button:hover{border-color:var(--accent);transform:translateY(-1px)}.welcome-palette button.is-selected{border:2px solid var(--accent);padding:6px 4px;box-shadow:0 0 0 3px var(--accent-soft)}.welcome-swatch{display:flex;height:22px;border-radius:7px;overflow:hidden;margin-bottom:6px}.welcome-swatch i{flex:1}.welcome-daily{position:relative;padding:8px 4px 2px}.welcome-daily::before{content:'✦';position:absolute;top:-8px;right:4px;color:var(--signal);font-size:22px;opacity:.7}.welcome-daily h2{font-size:25px;line-height:1.25;margin:2px 0 10px;letter-spacing:-.03em}.welcome-daily p{margin:0;color:var(--ink-2);font-size:14px;line-height:1.8}.welcome-quote{margin-top:16px;padding:14px 15px 13px;border-left:3px solid var(--signal);border-radius:0 12px 12px 0;background:linear-gradient(90deg,var(--signal-soft),transparent);font-family:Georgia,'Songti SC','STSong',serif}.welcome-quote blockquote{margin:0;font-size:16px;line-height:1.7;color:var(--ink);letter-spacing:.02em}.welcome-quote cite{display:block;margin-top:8px;color:var(--ink-3);font:11px/1.5 var(--font-sans,system-ui,sans-serif)}.welcome-footer-note{margin-top:14px;color:var(--ink-4);font-size:11px;line-height:1.5}.welcome-modal .modal-ft{background:var(--card-2)}
 .import-summary{display:grid;grid-template-columns:repeat(5,minmax(80px,1fr));gap:8px;margin-bottom:14px}.import-stat{padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--card-2)}.import-stat b{display:block;font-size:19px;margin-top:3px}.import-map-grid{display:grid;grid-template-columns:minmax(130px,1fr) minmax(160px,1fr);gap:7px;align-items:center}.import-table-wrap{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:9px}.import-table-wrap table{margin:0}.import-issue{color:var(--danger);font-size:12px}.import-sensitive{border-left:3px solid var(--warn);background:var(--warn-bg);padding:10px 12px;border-radius:7px;margin:12px 0}@media(max-width:700px){.import-summary{grid-template-columns:repeat(2,1fr)}.import-map-grid{grid-template-columns:1fr}.modal.wide{width:calc(100vw - 16px)}}
 @media (max-width:900px){.onboarding{grid-template-columns:1fr}.onboarding-actions{flex-direction:row;flex-wrap:wrap}.onboarding-actions .btn{flex:1}.settings-section .grid2{grid-template-columns:1fr}}
+@media (max-width:700px){.welcome-setup{grid-template-columns:1fr;gap:8px}.welcome-setup-copy h2{font-size:24px}.welcome-palette{grid-template-columns:repeat(3,1fr)}.welcome-modal .modal-bd{padding:16px}.welcome-daily h2{font-size:22px}}
+.modal .welcome-modal{width:100%;max-width:none}
+@media (max-width:900px){.mask{align-items:flex-start;overflow-y:auto;padding:12px 8px calc(78px + env(safe-area-inset-bottom))}.mask .modal{max-height:calc(100vh - 92px)}}
 /* v4.0 workspace surfaces */
 .v4-head{display:flex;align-items:flex-start;gap:16px;justify-content:space-between;margin-bottom:18px}
 .v4-head h1{margin:0 0 5px;font-size:24px;letter-spacing:-.02em}
@@ -815,6 +818,7 @@ tbody tr:last-child td{border-bottom:none}
   <symbol id="i-talk" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.4 8.4 0 013.8-.9h.5a8.5 8.5 0 018 8v.5z"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 2l1.3 5.7L19 9l-5.7 1.3L12 16l-1.3-5.7L5 9l5.7-1.3L12 2zM19 15l.7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7L19 15zM5 15l.6 1.8L7.5 17l-1.9.2L5 19l-.6-1.8L2.5 17l1.9-.2L5 15z"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
@@ -2087,6 +2091,7 @@ function seedDemo() {
     classes: '24机器人1班,24机器人2班', platform_url: '', platform_api_on: false,
     seeded: true, backup_notified_at: '',
     onboarding: { version: 1, completed: false, skipped: false, currentStep: 0, checklist: {} },
+    welcome_experience: { version: 1, completed: false, skipped: false, addressed_as: '', greeting_enabled: true, quote_enabled: true, last_open_date: '', last_greeting_index: -1, last_quote_id: '' },
     ui: { preset: 'blueprint', accent: '', background: { dataUrl: '', opacity: 0.16 }, density: 'comfortable', homeWidgets: { order: [], hidden: [] } },
     security: { enabled: false, pass_hash: '', timeout_minutes: 30, last_unlock: 0 },
   };
@@ -2699,6 +2704,107 @@ const onboarding = {
   skip() { ensureV39Settings(); DB.settings.onboarding.skipped = true; save('settings'); render(); },
   reset() { ensureV39Settings(); DB.settings.onboarding = { version:1, completed:false, skipped:false, currentStep:0, checklist:{} }; save('settings'); render(); },
   visible() { ensureV39Settings(); return !DB.settings.onboarding.completed && !DB.settings.onboarding.skipped; },
+};
+const WELCOME_GREETING_LINES = [
+  '{{display}}好，愿今天的每一项工作都推进得顺顺利利。',
+  '早上好，{{display}}。愿你带着从容和清晰，开启今天的陪伴与记录。',
+  '{{display}}，新的一天从一份温柔的秩序开始。祝你工作愉快。',
+  '早安，{{display}}。愿今天有被看见的努力，也有及时抵达的好消息。',
+  '{{display}}好，愿你今天少一点忙乱，多一点笃定。',
+  '新的一天，{{display}}。愿每一次沟通都留下理解，每一项工作都留下回响。',
+  '{{display}}，愿今天的工作像晨光一样，清澈、踏实、慢慢展开。',
+  '早上好，{{display}}。先照顾好自己的节奏，再陪学生走好每一步。',
+  '{{display}}好，愿今天的清单有序完成，心里始终保留一处松弛。',
+  '早安，{{display}}。每一份耐心，都会在学生的成长里留下光。',
+  '{{display}}，愿今天遇见的每个问题，都能找到温和而有力的答案。',
+  '新的一天辛苦了，{{display}}。愿你的专业被信任，你的善意被记住。',
+  '{{display}}好，愿今天有好天气，也有好心情。',
+  '早安，{{display}}。愿你在细节里保持敏锐，在陪伴里保持温度。',
+  '{{display}}，今天也请相信：认真做过的事，时间都会给出回声。',
+  '早上好，{{display}}。愿你从容开工，稳稳接住今天的每一个小目标。',
+  '{{display}}好，愿今天的工作有节奏、有进展，也有值得微笑的瞬间。',
+  '新的一天，愿{{display}}心有微光，手有方法，脚下有路。',
+ ];
+const EDUCATION_QUOTES = [
+  { id:'analects-xue', text:'学而时习之，不亦说乎？有朋自远方来，不亦乐乎？', author:'《论语·学而》', source:'Chinese Text Project', url:'https://ctext.org/text.pl?if=en&node=1102&show=parallel' },
+  { id:'analects-gentle', text:'人不知而不愠，不亦君子乎？', author:'《论语·学而》', source:'Chinese Text Project', url:'https://ctext.org/text.pl?if=en&node=1102&show=parallel' },
+  { id:'analects-teacher', text:'三人行，必有我师焉。择其善者而从之，其不善者而改之。', author:'《论语·述而》', source:'Chinese Text Project', url:'https://ctext.org/text.pl?if=en&node=416765&remap=gb&show=parallel' },
+  { id:'analects-reflect', text:'学而不思则罔，思而不学则殆。', author:'《论语·为政》', source:'Chinese Text Project', url:'https://ctext.org/analects/wei-zheng' },
+  { id:'analects-review', text:'温故而知新，可以为师矣。', author:'《论语·为政》', source:'Chinese Text Project', url:'https://ctext.org/analects/wei-zheng' },
+  { id:'analects-love', text:'知之者不如好之者，好之者不如乐之者。', author:'《论语·雍也》', source:'Chinese Text Project', url:'https://ctext.org/analects/yong-ye' },
+  { id:'shishuo-role', text:'师者，所以传道受业解惑也。', author:'韩愈《师说》', source:'Chinese Text Project', url:'https://ctext.org/wiki.pl?chapter=959513&if=en&remap=gb' },
+  { id:'shishuo-equal', text:'是故弟子不必不如师，师不必贤于弟子。', author:'韩愈《师说》', source:'Chinese Text Project', url:'https://ctext.org/wiki.pl?chapter=959513&if=en&remap=gb' },
+  { id:'shishuo-learners', text:'古之学者必有师。', author:'韩愈《师说》', source:'Chinese Text Project', url:'https://ctext.org/wiki.pl?chapter=959513&if=en&remap=gb' },
+  { id:'tao-heart', text:'捧着一颗心来，不带半根草去。', author:'陶行知', source:'山西大学师德师风建设', url:'https://rsc.sxu.edu.cn/sdsf/sdsfjs/e500d3c57a954b9c921149785258fb41.htm' },
+  { id:'tao-truth', text:'千教万教，教人求真；千学万学，学做真人。', author:'陶行知', source:'南京晓庄学院校风说明', url:'https://news.njxzc.edu.cn/56/b0/c4005a22192/page.htm' },
+  { id:'tao-purpose', text:'为一大事来，做一大事去。', author:'陶行知', source:'山西大学师德师风建设', url:'https://rsc.sxu.edu.cn/sdsf/sdsfjs/e500d3c57a954b9c921149785258fb41.htm' },
+  { id:'tao-create', text:'处处是创造之地，天天是创造之时，人人是创造之人。', author:'陶行知', source:'上海师范大学资料页', url:'https://xzx.shnu.edu.cn/9c/0a/c18438a498698/page.htm' },
+  { id:'ye-agriculture', text:'教育的性质类似农业，而绝对不像工业。', author:'叶圣陶', source:'乌海市发展和改革委员会', url:'https://fgw.wuhai.gov.cn/eportal/ui?articleKey=588667&columnId=260631&pageId=260483' },
+  { id:'ye-not-teach', text:'教，是为了不教。', author:'叶圣陶', source:'教育部课程材料', url:'https://www.moe.gov.cn/ewebeditor/uploadfile/20110310145629611.pdf' },
+  { id:'unesco-building', text:'没有教师，学校只是一座建筑。', author:'UNESCO（中文译写）', source:'UNESCO Global Action Week', url:'https://www.unesco.org/en/articles/we-will-not-meet-our-education-goals-without-teachers' },
+  { id:'unesco-human', text:'教师让教育真正发生，也让学习保持人本的温度。', author:'UNESCO（中文译写）', source:'UNESCO Teachers Cannot Be Coded', url:'https://www.unesco.org/en/teachers-cannot-be-coded' },
+  { id:'cqc-growth', text:'地瘦栽松柏，家贫子读书。', author:'陈俊卿（教育勉励语）', source:'重庆城市科技学院“静待花开”', url:'https://www.cqc.edu.cn/jjjc/2023/1009/c2340a72749/page.htm' },
+  { id:'tao-travel', text:'人生天地间，各自有禀赋。', author:'陶行知', source:'山西大学师德师风建设', url:'https://rsc.sxu.edu.cn/sdsf/sdsfjs/e500d3c57a954b9c921149785258fb41.htm' },
+  { id:'analects-benevolence', text:'择其善者而从之，其不善者而改之。', author:'《论语·述而》', source:'Chinese Text Project', url:'https://ctext.org/text.pl?if=en&node=416765&remap=gb&show=parallel' },
+];
+function welcomeDisplayName() {
+  ensureV39Settings();
+  const w = DB.settings.welcome_experience || {};
+  const explicit = String(w.addressed_as || '').trim();
+  if (explicit && explicit !== '示例老师') return explicit;
+  const name = String(DB.settings.counselor_name || '').trim();
+  if (name && name !== '示例老师') return /老师|先生|女士|老师$/.test(name) ? name : `${name}老师`;
+  return '老师';
+}
+function welcomePick(length, previous) {
+  if (!length) return 0;
+  if (length < 2) return 0;
+  let index = Math.floor(Math.random() * length), guard = 0;
+  while (String(index) === String(previous) && guard++ < 8) index = Math.floor(Math.random() * length);
+  return index;
+}
+function welcomeGreetingText(index) {
+  return String(WELCOME_GREETING_LINES[index] || WELCOME_GREETING_LINES[0]).replace(/\{\{display\}\}/g, esc(welcomeDisplayName()));
+}
+const welcomeExperience = {
+  reset() { ensureV39Settings(); DB.settings.welcome_experience = Object.assign({ version:1, completed:false, skipped:false, addressed_as:'', greeting_enabled:true, quote_enabled:true, last_open_date:'', last_greeting_index:-1, last_quote_id:'' }, DB.settings.welcome_experience || {}, { completed:false, skipped:false, last_open_date:'' }); save('settings'); },
+  showSetup() {
+    ensureV39Settings();
+    const w = DB.settings.welcome_experience;
+    const currentName = DB.settings.counselor_name === '示例老师' ? '' : String(DB.settings.counselor_name || '');
+    const currentCollege = DB.settings.college_name === '示例学院' ? '' : String(DB.settings.college_name || '');
+    const currentAddress = String(w.addressed_as || '');
+    const selected = DB.settings.ui.preset || 'blueprint';
+    const palette = Object.entries(THEME_PRESETS).map(([key, preset]) => `<button type="button" class="${key === selected ? 'is-selected' : ''}" data-welcome-preset="${key}" aria-pressed="${key === selected}"><span class="welcome-swatch"><i style="background:${preset.bg}"></i><i style="background:${preset.accent}"></i><i style="background:${preset.signal}"></i></span><span>${esc(preset.label)}</span></button>`).join('');
+    const close = ui.modal({ title:'先把工作台调成你的样子', size:'wide', sticky:true, body:`<div class="welcome-setup">
+      <div class="welcome-setup-copy"><div class="welcome-kicker"><svg class="ic"><use href="#i-sun"/></svg>GOOD MORNING · COUNSELOR DESK</div><h2>以后每次打开，都有人先向你问好。</h2><p>用几十秒告诉我们怎么称呼你、喜欢哪种色彩。设置会保存在本机，只在这台设备上使用；以后每天打开工作台，会收到一条随机问候和一则教育金句。</p><div class="welcome-note"><svg class="ic ic-sm"><use href="#i-lock"/></svg><span>你的称呼与主题属于本机偏好，不会自动上传。随时可以在“设置 → 首次欢迎体验”中修改。</span></div></div>
+      <div class="welcome-panel"><div class="form-row"><label class="lab" for="welcome-name">你的姓名（可选）</label><input class="inp" id="welcome-name" maxlength="24" value="${esc(currentName)}" placeholder="例如：张三"></div><div class="form-row"><label class="lab" for="welcome-address">希望怎么称呼你</label><input class="inp" id="welcome-address" maxlength="24" value="${esc(currentAddress)}" placeholder="例如：张老师；留空会按“姓名+老师”称呼"></div><div class="form-row"><label class="lab" for="welcome-college">所属学院（可选）</label><input class="inp" id="welcome-college" maxlength="40" value="${esc(currentCollege)}" placeholder="例如：学生工作部 / 机器人工程学院"></div><div class="form-row"><div class="lab" style="margin-bottom:7px">选择一套工作台配色</div><div class="welcome-palette">${palette}</div></div><div class="welcome-preview"><p id="welcome-preview-text">${welcomeGreetingText(w.last_greeting_index >= 0 ? w.last_greeting_index : 0)}</p><small>这是你每天打开工作台时会看到的问候风格。</small></div></div>
+    </div>`, footer:'<button class="btn btn-ghost" data-welcome-skip>先用默认设置</button><span class="sp"></span><button class="btn btn-primary" data-welcome-save>保存我的偏好</button>', onOpen(mask, mClose) {
+      const name = $('#welcome-name', mask), address = $('#welcome-address', mask), college = $('#welcome-college', mask), preview = $('#welcome-preview-text', mask);
+      if (name && window.innerWidth > 900) setTimeout(() => name.focus(), 70);
+      const updatePreview = () => { const display = String(address.value || (name.value ? `${name.value}老师` : '老师')).trim(); preview.textContent = WELCOME_GREETING_LINES[0].replace(/\{\{display\}\}/g, display || '老师'); };
+      name.oninput = updatePreview; address.oninput = updatePreview;
+      $$('[data-welcome-preset]', mask).forEach(button => button.onclick = () => { $$('[data-welcome-preset]', mask).forEach(item => { const active = item === button; item.classList.toggle('is-selected', active); item.setAttribute('aria-pressed', String(active)); }); });
+      $('[data-welcome-skip]', mask).onclick = () => { w.completed = true; w.skipped = true; save('settings'); mClose(); render(); setTimeout(() => welcomeExperience.showDaily(true), 160); };
+      $('[data-welcome-save]', mask).onclick = () => { const selectedButton = $('.welcome-palette .is-selected', mask); const nextName = String(name.value || '').trim(); const nextAddress = String(address.value || '').trim(); const nextCollege = String(college.value || '').trim(); if (nextName) DB.settings.counselor_name = nextName; else if (DB.settings.counselor_name === '示例老师') DB.settings.counselor_name = ''; if (nextCollege) DB.settings.college_name = nextCollege; else if (DB.settings.college_name === '示例学院') DB.settings.college_name = ''; const nextWelcome = Object.assign({}, w, { addressed_as:nextAddress || (nextName ? `${nextName}老师` : ''), completed:true, skipped:false }); const presetName = selectedButton && selectedButton.dataset.welcomePreset || selected; theme.applyPreset(presetName, false); DB.settings.welcome_experience = nextWelcome; save('settings'); paintWho(); render(); mClose(); ui.toast('偏好已保存，欢迎来到你的工作台', 'ok', 3200); setTimeout(() => welcomeExperience.showDaily(true), 180); };
+    }});
+    return close;
+  },
+  showDaily(force) {
+    ensureV39Settings();
+    const w = DB.settings.welcome_experience;
+    if (!w.greeting_enabled && !w.quote_enabled) return false;
+    if (!force && w.last_open_date === today()) return false;
+    const greetingIndex = w.greeting_enabled ? welcomePick(WELCOME_GREETING_LINES.length, w.last_greeting_index) : w.last_greeting_index;
+    const quotePool = EDUCATION_QUOTES.filter(item => item.id !== w.last_quote_id);
+    const quote = w.quote_enabled ? (quotePool[Math.floor(Math.random() * Math.max(1, quotePool.length))] || EDUCATION_QUOTES[0]) : null;
+    w.last_open_date = today(); if (w.greeting_enabled) w.last_greeting_index = greetingIndex; if (quote) w.last_quote_id = quote.id; save('settings');
+    const greeting = w.greeting_enabled ? `<div class="welcome-daily"><div class="welcome-kicker"><svg class="ic"><use href="#i-sun"/></svg>今日问候</div><h2>${welcomeGreetingText(greetingIndex)}</h2><p>愿你今天的工作有节奏、有进展，也有值得微笑的瞬间。</p></div>` : '';
+    const quoteHtml = quote ? `<div class="welcome-quote"><blockquote>“${esc(quote.text)}”</blockquote><cite>— ${esc(quote.author)} · <a href="${esc(quote.url)}" target="_blank" rel="noopener">${esc(quote.source)}</a></cite></div>` : '';
+    ui.modal({ title:'早安，今天也辛苦了', size:'narrow', body:`<div class="welcome-modal"><div style="height:8px;background:linear-gradient(90deg,var(--accent),var(--signal),#f3b562)"></div><div style="padding:19px 20px 20px">${greeting}${quoteHtml}<div class="welcome-footer-note">这是一份本机暖心提示。你可以在设置中关闭问候或每日金句，也可以随时换一套主题。</div></div></div>`, footer:'<button class="btn" data-welcome-refresh>换一句</button><span class="sp"></span><button class="btn btn-primary" data-close>开始工作</button>', onOpen(mask, close) { $('[data-welcome-refresh]', mask).onclick = () => { close(); setTimeout(() => welcomeExperience.showDaily(true), 80); }; }});
+    return true;
+  },
+  start() { ensureV39Settings(); const w = DB.settings.welcome_experience; if (!w.completed && !w.skipped) return setTimeout(() => this.showSetup(), 280); return setTimeout(() => this.showDaily(false), 280); },
 };
 function renderOnboarding() {
   if (!onboarding.visible()) return '';
@@ -5220,11 +5326,13 @@ function openSettings() {
       { key:'org_code', label:'组织代码', hint:'与服务端平台保持一致' },
       { key:'platform_url', label:'平台地址（选填）' },
     ],
-    extra: `<div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-sun"/></svg>界面个性化</div><div class="grid2"><div class="form-row"><label class="lab">配色方案</label><select class="inp" id="settings-preset">${Object.entries(THEME_PRESETS).map(([k,p]) => `<option value="${k}">${p.label}</option>`).join('')}</select></div><div class="form-row"><label class="lab">背景透明度 <span id="settings-opacity-value" class="tiny"></span></label><input class="inp" id="settings-opacity" type="range" min="0" max="0.35" step="0.01"></div></div><div class="form-row"><label class="lab">背景图片</label><input class="inp" id="settings-background" type="file" accept="image/*"><div class="hint">支持最大 4MB 的 JPG、PNG、WebP 等图片；过大的图片会在本机自动压缩后保存，透明度最高 35%。</div></div><button class="btn btn-sm" type="button" data-theme-reset>恢复默认外观</button><button class="btn btn-sm" type="button" data-onboarding-reset style="margin-left:8px">重新查看首次引导</button></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-lock"/></svg>登录锁与敏感操作</div><div class="hint" style="margin-bottom:8px">这是界面访问锁，不是数据库加密。浏览器存储中的数据仍可能被技术手段读取。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" type="button" data-security-set>设置 / 修改密码</button><button class="btn btn-sm" type="button" data-security-lock>立即上锁</button><button class="btn btn-sm btn-danger" type="button" data-security-disable>关闭登录锁</button></div></div>`,
+    extra: `<div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-sun"/></svg>界面个性化</div><div class="grid2"><div class="form-row"><label class="lab">配色方案</label><select class="inp" id="settings-preset">${Object.entries(THEME_PRESETS).map(([k,p]) => `<option value="${k}">${p.label}</option>`).join('')}</select></div><div class="form-row"><label class="lab">背景透明度 <span id="settings-opacity-value" class="tiny"></span></label><input class="inp" id="settings-opacity" type="range" min="0" max="0.35" step="0.01"></div></div><div class="form-row"><label class="lab">背景图片</label><input class="inp" id="settings-background" type="file" accept="image/*"><div class="hint">支持最大 4MB 的 JPG、PNG、WebP 等图片；过大的图片会在本机自动压缩后保存，透明度最高 35%。</div></div><button class="btn btn-sm" type="button" data-theme-reset>恢复默认外观</button><button class="btn btn-sm" type="button" data-onboarding-reset style="margin-left:8px">重新查看首次引导</button></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-sparkles"/></svg>首次欢迎体验</div><div class="grid2"><label class="chk"><input type="checkbox" id="settings-welcome-greeting"><span>每天打开显示暖心问候</span></label><label class="chk"><input type="checkbox" id="settings-welcome-quote"><span>同时显示每日教育金句</span></label></div><div class="hint" style="margin:8px 0 10px">称呼、问候与主题只保存在本机；关闭后仍可通过“重新设置欢迎体验”再次开启。</div><button class="btn btn-sm" type="button" data-welcome-reset>重新设置欢迎体验</button></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-lock"/></svg>登录锁与敏感操作</div><div class="hint" style="margin-bottom:8px">这是界面访问锁，不是数据库加密。浏览器存储中的数据仍可能被技术手段读取。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" type="button" data-security-set>设置 / 修改密码</button><button class="btn btn-sm" type="button" data-security-lock>立即上锁</button><button class="btn btn-sm btn-danger" type="button" data-security-disable>关闭登录锁</button></div></div>`,
     extraBtn: `<button class="btn btn-sm" data-act="v4-modules-config" style="margin-right:8px">管理模块入口</button><button class="btn btn-danger btn-sm" data-clear style="margin-right:auto">清空全部数据</button>`,
     onOpen(mask, close) {
       ensureV39Settings();
       const preset = $('#settings-preset', mask); const opacity = $('#settings-opacity', mask); const opacityValue = $('#settings-opacity-value', mask);
+      const welcomeGreeting = $('#settings-welcome-greeting', mask); const welcomeQuote = $('#settings-welcome-quote', mask);
+      welcomeGreeting.checked = DB.settings.welcome_experience.greeting_enabled !== false; welcomeQuote.checked = DB.settings.welcome_experience.quote_enabled !== false;
       preset.value = DB.settings.ui.preset || 'blueprint'; opacity.value = String(DB.settings.ui.background.opacity || 0.16); opacityValue.textContent = Math.round(Number(opacity.value) * 100) + '%';
       preset.onchange = () => theme.applyPreset(preset.value, true);
       opacity.oninput = () => { opacityValue.textContent = Math.round(Number(opacity.value) * 100) + '%'; theme.applyBackground(Object.assign({}, DB.settings.ui.background, { opacity:Number(opacity.value) }), true); };
@@ -5240,6 +5348,7 @@ function openSettings() {
       };
       $('[data-theme-reset]', mask).onclick = () => { theme.reset(true); preset.value = 'blueprint'; opacity.value = '0.16'; opacityValue.textContent = '16%'; };
       $('[data-onboarding-reset]', mask).onclick = () => { onboarding.reset(); close(); ui.toast('首次引导已重新开启', 'ok'); };
+      $('[data-welcome-reset]', mask).onclick = () => { welcomeExperience.reset(); close(); render(); ui.toast('欢迎体验已重新开启', 'ok'); setTimeout(() => welcomeExperience.showSetup(), 180); };
       $('[data-security-set]', mask).onclick = () => { close(); ui.modal({ title:'设置登录锁', size:'narrow', sticky:true, body:'<p class="muted" style="margin-top:0">设置 4–12 位数字密码，用于进入工作台和敏感操作二次验证。</p><input class="inp" id="security-new-pass" type="password" inputmode="numeric" maxlength="12" placeholder="新密码"><input class="inp" id="security-new-pass2" type="password" inputmode="numeric" maxlength="12" placeholder="再次输入" style="margin-top:8px">', footer:'<button class="btn" data-close>取消</button><button class="btn btn-primary" data-security-save>启用保护</button>', onOpen(m, c) { $('[data-security-save]', m).onclick = () => { const a = $('#security-new-pass', m).value, b = $('#security-new-pass2', m).value; if (a !== b) return ui.toast('两次密码不一致', 'warn'); try { security.configure(a); c(); render(); ui.toast('登录锁已启用', 'ok'); } catch (e) { ui.toast(e.message, 'warn'); } }; } }); };
       $('[data-security-lock]', mask).onclick = () => { security.lock(); close(); render(); ui.toast('已上锁', 'ok'); };
       $('[data-security-disable]', mask).onclick = () => security.require('关闭登录锁', () => { security.disable(); ui.toast('登录锁已关闭', 'ok'); });
@@ -5254,7 +5363,7 @@ function openSettings() {
       const clearButton = $('[data-clear]', mask);
       clearButton.parentNode.insertBefore(restoreButton, clearButton);
     },
-    onSave(v) { Object.assign(DB.settings, v); save('settings'); ui.toast('设置已保存', 'ok'); render(); paintWho(); }
+    onSave(v) { Object.assign(DB.settings, v); ensureV39Settings(); DB.settings.welcome_experience.greeting_enabled = !!$('#settings-welcome-greeting', document).checked; DB.settings.welcome_experience.quote_enabled = !!$('#settings-welcome-quote', document).checked; save('settings'); ui.toast('设置已保存', 'ok'); render(); paintWho(); }
   });
 }
 
@@ -6554,6 +6663,7 @@ const THEME_PRESETS = {
 function ensureV39Settings() {
   DB.settings = DB.settings || {};
   DB.settings.onboarding = Object.assign({ version:1, completed:false, skipped:false, currentStep:0, checklist:{} }, DB.settings.onboarding || {});
+  DB.settings.welcome_experience = Object.assign({ version:1, completed:false, skipped:false, addressed_as:'', greeting_enabled:true, quote_enabled:true, last_open_date:'', last_greeting_index:-1, last_quote_id:'' }, DB.settings.welcome_experience || {});
   DB.settings.ui = Object.assign({ preset:'blueprint', accent:'', background:{ dataUrl:'', opacity:0.16 }, density:'comfortable', hiddenModules:[], homeWidgets:{ order:[], hidden:[] } }, DB.settings.ui || {});
   DB.settings.ui.background = Object.assign({ dataUrl:'', opacity:0.16 }, DB.settings.ui.background || {});
   DB.settings.security = Object.assign({ enabled:false, pass_hash:'', timeout_minutes:30, last_unlock:0 }, DB.settings.security || {});
@@ -7934,6 +8044,7 @@ function boot() {
   theme.applyBackground(DB.settings.ui.background, false);
   injectNavExtras(); applyFold(); renderPinned(); updatePinStates(); bindNavSearch();
   render();
+  welcomeExperience.start();
   console.log('%c辅导员工作台 ' + APP_VERSION, 'color:#3b82f6;font-weight:700');
 }
 
@@ -8478,7 +8589,7 @@ function installV4Integration() {
 
 window.CWB = {
   version: APP_VERSION,
-  db: DB, store, storage, schema, importSchemas:IMPORT_SCHEMAS, studentImportSchema:STUDENT_IMPORT_SCHEMA, ui, hooks, bridge, modules, onboarding, theme, security, importer, testData, sync,
+  db: DB, store, storage, schema, importSchemas:IMPORT_SCHEMAS, studentImportSchema:STUDENT_IMPORT_SCHEMA, ui, hooks, bridge, modules, onboarding, welcome:welcomeExperience, theme, security, importer, testData, sync,
   consts: { DUTIES, FOCUS, LEVELS, PRIOS, SOURCES, TALK_WAYS, CRISIS_LEVELS, CRISIS_WAYS, STU_TYPES, HONOR_TYPES, MORAL_LEVELS, POLITICS,
     PLEAVE_TYPES, ATTEND_TYPES, NODE_REPEAT, WARN_TYPES, WARN_LEVELS, HELP_TYPES, GRANT_KINDS,
     FOCUS_CATEGORIES, FOCUS_LEVELS, FOCUS_STATUS, PSYCH_SCALES, PSYCH_LEVELS, GRAD_YEARS, EMPLOY_STATUS, SALARY_RANGES,
