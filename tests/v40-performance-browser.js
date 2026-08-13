@@ -26,7 +26,7 @@ const { chromium, requireBrowserExecutable } = require('../scripts/browser-runti
       custom_fields:{ source:'browser-performance-gate' },
     }));
     const started = performance.now();
-    const result = await window.CWB.importer.start({ collection:'students', rows, chunkSize:500, fileHash:'browser-performance-gate-v1', onProgress:item => progress.push({ status:item.status, processed:item.processed, at:performance.now() }) });
+    const result = await window.CWB.importer.start({ collection:'students', rows, chunkSize:128, fileHash:'browser-performance-gate-v1', onProgress:item => progress.push({ status:item.status, processed:item.processed, at:performance.now() }) });
     const elapsed = performance.now() - started;
     clearInterval(timer);
     const progressGaps = progress.slice(1).map((item, index) => item.at - progress[index].at);

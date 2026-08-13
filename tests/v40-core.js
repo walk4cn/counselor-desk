@@ -27,6 +27,7 @@ async function loadCore() {
 
   const job = core.createImportJob({ fileHash: 'sha256:test', totalRows: 1201, chunkSize: 500 });
   assert.equal(job.status, 'pending');
+  assert.equal(core.createImportJob({ fileHash: 'sha256:default', totalRows: 1 }).chunkSize, 128);
   const checkpoint = core.advanceImportJob(job, 500);
   assert.equal(checkpoint.lastRow, 500);
   assert.equal(checkpoint.status, 'running');

@@ -33,6 +33,13 @@ const { JSDOM } = require('jsdom');
   assert.equal(progress.at(-1).total, 1201);
   assert.equal(progress.at(-1).status, 'completed');
 
+  const defaultController = api.createChunkedImportController({
+    rows: Array.from({ length: 129 }, (_, index) => ({ index })),
+    onProgress: event => progress.push({ default: true, ...event }),
+  });
+  await defaultController.run();
+  assert.equal(progress.filter(event => event.default).length, 2, 'default import batch should yield after 128 rows');
+
   const matches = api.matchPhotoFilename('20240001_张明_证件照.jpg', [
     { id: 's1', student_number: '20240001', full_name: '张明' },
   ]);

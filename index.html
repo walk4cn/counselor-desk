@@ -8250,7 +8250,7 @@ ACTS['v4-import-jobs'] = async () => {
         if (!rows.length) throw new Error('原文件没有可恢复的有效记录');
         if (job.fileHash && preview.source && preview.source.fileHash && String(job.fileHash) !== String(preview.source.fileHash)) throw new Error('IMPORT_FILE_CHANGED');
         input.disabled = true;
-        const result = await importer.resume(jobId, { rows, fileHash:preview.source && preview.source.fileHash, sheetName:preview.source && preview.source.sheet, headerRow:preview.source && preview.source.headerRow, mappingVersion:'v4', chunkSize:500, onProgress:p => ui.toast(p.status === 'completed' ? '导入任务已恢复完成' : `恢复进度 ${p.processed}/${p.total}`, p.status === 'completed' ? 'ok' : 'info', 1200) });
+        const result = await importer.resume(jobId, { rows, fileHash:preview.source && preview.source.fileHash, sheetName:preview.source && preview.source.sheet, headerRow:preview.source && preview.source.headerRow, mappingVersion:'v4', chunkSize:128, onProgress:p => ui.toast(p.status === 'completed' ? '导入任务已恢复完成' : `恢复进度 ${p.processed}/${p.total}`, p.status === 'completed' ? 'ok' : 'info', 1200) });
         if (result.status === 'completed') { close(); ui.toast('导入任务已恢复并提交', 'ok', 3200); render(); }
         else ui.toast(`任务未完成，当前断点 ${result.checkpoint && result.checkpoint.processed || 0}/${result.checkpoint && result.checkpoint.total || 0}`, 'warn', 3200);
       } catch (error) { input.disabled = false; ui.toast(`恢复失败：${error.message === 'IMPORT_FILE_CHANGED' ? '文件已变化，请选择原文件' : (error.message || '无法恢复')}`, 'err', 4600); }
@@ -9464,7 +9464,7 @@ function installV4Integration() {
     let stagingByNumber;
     let controller;
     controller = runtime.createChunkedImportController({
-      rows: opts.rows || [], checkpoint, chunkSize: opts.chunkSize || 500, fileHash: opts.fileHash, sheetName: opts.sheetName, headerRow: opts.headerRow, mappingVersion: opts.mappingVersion,
+      rows: opts.rows || [], checkpoint, chunkSize: opts.chunkSize || 128, fileHash: opts.fileHash, sheetName: opts.sheetName, headerRow: opts.headerRow, mappingVersion: opts.mappingVersion,
       onProgress(progress) {
         writeImportCheckpoint(id, controller.getCheckpoint());
         if (typeof opts.onProgress === 'function') opts.onProgress(progress);
@@ -9534,7 +9534,7 @@ function installV4Integration() {
       let task;
       try {
         task = this.start({
-          collection:'students', rows:readyRows, chunkSize:opts.chunkSize || 500,
+          collection:'students', rows:readyRows, chunkSize:opts.chunkSize || 128,
           fileHash:preview.source && preview.source.fileHash, sheetName:preview.source && preview.source.sheet,
           headerRow:preview.source && preview.source.headerRow, mappingVersion:'v4', onProgress:opts.onProgress,
         });
