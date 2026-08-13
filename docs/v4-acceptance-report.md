@@ -1,73 +1,29 @@
-# v4.0 全量验收记录（当前工作区）
+# 版本与发布状态
 
-## 已通过
+本页是公开事实记录，不是愿望清单。读者应以 [Releases](https://github.com/7752777/counselor-desk/releases) 中的实际版本、附件、哈希与说明为最终依据。
 
-### 2026-08-12 首次欢迎体验与公开主页补充
+## 当前公开版本
 
-- 首次欢迎设置、主题选择、每日问候 / 金句开关与同日去重由 `tests/welcome-experience.js` 覆盖；称呼与主题通过现有设置备份链路迁移。
-- README 功能截图已收敛为 8 张独立大图；`assets/welcome-morning.png` 为不含可读个人信息的生成式插图，来源与设计规范见《品牌与素材说明》。
-- `tests/release-checks.js`、`tests/electron-package-config.js`、`tests/v40-ui.js` 与 `tests/v40-core.js` 已在本次修改后重新执行并通过。
+- **公开版本**：v4.0.0。
+- **在线体验**：当前 GitHub Pages 展示 v4.0.0，不代表 v4.4 的研发功能已经上线。
+- **桌面包**：只以 Release 中实际存在的 Windows/macOS 附件为准；签名和公证状态必须在 Release 说明中明确。
 
-- IndexedDB v2 统一建库：业务仓储、附件、导入任务、导入暂存区、审计日志和元数据均可 CRUD；学生大批量提交使用压缩分块原子记录，重载后可恢复展开。
-- 导入门禁：0/1/100/5000/10000 行、100 列自定义字段、断点/取消/文件哈希检查点、敏感字段确认和原子提交均有自动化覆盖。
-- 真实 Chrome：10,000 行导入进度最大间隔约 119ms，事件循环最大间隙约 129ms（门槛分别为 500ms 和 200ms）；重载后记录数和首条记录校验通过。
-- 照片/附件：批量、单人补传、匹配队列、缩略图、内容哈希去重、下载/删除、加密备份恢复和便携 HTML 附件内置均有浏览器测试。
-- 备份：Argon2id + AES-256-GCM、完整性校验、错误口令拒绝、损坏文件拒绝、附件哈希与失败回滚均通过；旧 PBKDF2 仅在兼容标记下恢复。
-- 党建、班团、文件库、就业签名清单、ECharts 图表、三视图、首页任务入口、Electron IPC 白名单和 SQLite 加密仓储均通过对应测试。
-- 就业资源清单仅接受 ECDSA-P256-SHA256 签名；纯摘要算法会被拒绝，避免把可重算摘要误当作来源认证。
-- 静态检查、公开 API 检查、29 视图回归、依赖生产审计均通过。
-- macOS 通用桌面包已由 [GitHub Actions run #6](https://github.com/7752777/counselor-desk/actions/runs/31145152289) 在 `macos-15-intel` 上构建成功；DMG/ZIP 架构校验、Bundle ID 校验均通过，并上传 artifact `counselor-desk-36f9ebe22d7718beb232e89bffcd3171f3e0bb36-mac-universal`（artifact digest：`sha256:b933739ed26904629eb746195099d78e1999c1f87c8173d4bfffbd14dde6a6c9`）。
-- 本轮桌面构建使用仓库相对产物目录 `output/desktop/`；为避开构建机 C 盘空间限制，验证时将该被忽略目录临时映射到另一块本地磁盘，绝对路径不属于公开配置。当前 Windows MSI 安装包 `counselor-desk-4.0.0-x64.msi` SHA-256 为 `CAF1EE81B46411D3B50B21EDB116EC369CD430D034638784C0ABB0E5A31E3E07`。
-- MSI 安装包在当前用户目录修复安装返回 `ExitCode=0`；安装后的 `counselor-desk.exe` 为完整 210,149,888 字节主程序，并以全新用户数据目录启动成功，页面标题为“辅导员工作台”。分类文件库显示的保险库路径与启动时指定的用户数据目录一致。
+## v4.4 发布前必须完成
 
-## 未满足正式公开发布门禁
+- [ ] 完整主测试链、学生 P0/P1、真实浏览器 E2E 全部通过，且关键测试没有被跳过。
+- [ ] JSON/手机交换、加密备份、便携模式、附件、迁移和恢复的失败回滚均有回归覆盖。
+- [ ] Windows x64/ARM64 的安装、升级、启动、退出保存、卸载保留/删除数据由真实产物验证。
+- [ ] macOS Universal DMG/ZIP 在 macOS 上完成架构、挂载、启动、SQLite、附件、备份恢复与退出保存验证。
+- [ ] 5,000 学生组合筛选、10,000 行导入预览和大表滚动满足性能门槛。
+- [ ] 八张 2560×1440 产品截图、README 链接、公开内容扫描、下载包临时文件扫描通过。
+- [ ] 同一提交产出网页、离线 HTML、Windows、macOS，并经发布工作流提升到 Release 和 Pages。
 
-- 已使用隐私保护运行器 `scripts/real-import-pilot.js` 对本机真实表格进行内存脱敏后浏览器试跑。Downloads 子集为 15 个去重样本、5 个成功、33.333%，15 个格式指纹；跨三个工作目录子集为 38 个去重样本、17 个成功、44.737%，35 个格式指纹。该结果明确不是 99.7% 运营指标，且格式指纹不等于学校/系统数量，因此仍保持 `not_ready`。
-- 试跑报告只保存文件哈希、格式指纹、行列数和状态，不保存文件名、表头或原始单元格值；正式运营指标仍需人工登记不少于 100 份脱敏表格及不少于 20 个可核验学校/系统来源。
-- 针对用户提供的 `学生基本信息大表.xls`：原始预览识别为 99 行、100 列，自动映射发现重复性别列、学籍状态枚举不在当前标准值、身份证号校验失败，因此 99 行均被拦截；按导入向导将冲突/不兼容列转为自定义字段后，99/99 行预览通过并完成分段提交，未把原始文件写入仓库。
+## 不应提前执行的动作
 
-- 当前工作区没有组织代码签名证书。Windows 安装包和便携包虽已构建并启动冒烟通过，但 `Get-AuthenticodeSignature` 状态为 `NotSigned`；`scripts/check-release-signing.js` 会刻意阻断正式发布。
-- 本次验证机器为 Windows 10 Home，`HyperVisorPresent=False`，且未检测到可用的 Hyper-V、VirtualBox、QEMU 或 WSL；因此本记录包含宿主机干净用户数据测试，不声称已经完成虚拟机测试。
-- 本地 Windows 环境不能直接生成或启动 `.dmg`；macOS 包的真实构建与架构校验由上面的 macOS workflow 完成，公开包仍为 unsigned，正式分发前需要 Apple Developer 签名与公证。
-- 99.7% 导入成功率仍是运营指标，不在脱敏样本不少于 100 份、覆盖不少于 20 种格式并保存追溯报告前对外宣称。
-- 已提供 `scripts/import-operations-report.js`：它对脱敏样本清单计算样本数、格式数、成功率和源清单 SHA-256；条件不足时以非零状态退出，测试夹具不作为真实运营证据。
-- 发布文档已补齐：[迁移与备份说明](v4-migration-and-backup.md)、[隐私说明](v4-privacy.md)、[党建规则版本说明](v4-party-rules.md) 和 [签名发布流程](v4-release-signing.md)。
+- 不发布 v4.4 Tag、Release 或 Pages。
+- 不删除旧 Preview Release、Preview Tag 或远程开发分支。
+- 不在 README、CHANGELOG 或下载页宣称 Windows/macOS 已通过实机验证。
 
-## 可复现命令
+## 历史验证资料
 
-```powershell
-node scripts/build-release.js output/v4-preview.html
-node tests/v40-performance-browser.js
-node tests/v40-backup-attachments.js
-node tests/v40-portable-attachments.js
-node tests/v40-browser-storage.js
-node tests/release-checks.js
-node scripts/check-release-signing.js output/desktop
-node scripts/import-operations-report.js --input <脱敏样本清单.json> --output <导入运营报告.json>
-# 真实文件试跑（只输出哈希与汇总，不保存原始值）
-node scripts/real-import-pilot.js --root <脱敏文件目录> --output <试跑报告.json>
-```
-
-签名证书配置和发布流程见 [v4-release-signing.md](v4-release-signing.md)。
-
-## 2026-08-07 桌面安装链路复验
-
-- 安装配置：MSI `oneClick=true`、`perMachine=false`、`runAfterFinish=true`，创建桌面和开始菜单快捷方式，卸载时保留用户数据。
-- Windows 发行格式：NSIS 安装版和便携版在本机构建后未通过解包启动验收，因此不作为体验发布附件；当前使用 MSI 作为 Windows 安装包，零安装场景使用网页离线版。
-- MSI 安装验证：`msiexec /i counselor-desk-4.0.0-x64.msi /qn REINSTALL=ALL REINSTALLMODE=vomus` 返回 `0`；安装后的 `counselor-desk.exe` 通过 Chrome DevTools 协议加载页面，标题为“辅导员工作台”。
-- 路径验证：进入“模板库 → 分类文件库”后，界面显示“桌面版已启用加密附件保险库”及实际保险库路径；文档不再写死旧构建机的 `...final*` 临时目录。
-# v4.0 归位与桌面链路复验补充
-
-## 2026-08-06 本轮复验
-
-- 独立 V4.0 导航项：0；旧入口 `photos/org/party/files/employment/backup` 均可进入父板块标签。
-- 浏览器实际检查：学生台账三标签、照片管理入口、数据分析图表下钻均通过。
-- 响应式尺寸检查：1366×768、1920×1080、390×844、320×568 均无文档横向溢出，且没有残留 V4 导航标记。
-- 10000 行导入：进度最大间隔约 105ms，主线程事件循环最大间隔约 110ms，满足 500ms/200ms 门槛。
-- 用户提供的 `学生基本信息大表.xls` 已通过脱敏试点脚本读取（99 行、100 列）；报告仅保存哈希和聚合统计，未把原始文件写入仓库。该单样本不能证明 99.7% 运营指标。
-- Electron 主进程、预加载层和 SQLite 存储通过语法检查并完成启动存活验证。
-
-## 发布阻断项
-
-- Windows 正式代码签名证书尚未配置，未签名安装包不得作为正式公开发布物。
-- 真实运营成功率仍缺少不少于 100 份脱敏表格、20 种来源格式及人工来源登记。
+历史版本的验证结论只对应当时的代码和产物，不自动延伸到当前研发分支。正式发布时，本页将替换为对应版本的可复现命令、实际产物哈希、平台结果与明确限制。

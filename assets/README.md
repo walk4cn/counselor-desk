@@ -1,11 +1,17 @@
-# Public visual assets
+# 公开素材
 
-The repository uses the following public, non-identifying assets:
+本目录保存公开主页、Release 说明和用户文档需要的 Logo、Banner、插图与脱敏截图。
 
-- `logo.svg` / `app-icon.svg`: vector brand marks;
-- `banner.svg`: a text-safe vector fallback for the project header;
-- `counselor-desk-hero.png`: generated editorial hero for README and release notes;
-- `illustration-recovery.png`: generated local-first recovery illustration;
-- `screenshots/`: product screenshots rendered with fictional data.
+## 使用边界
 
-Generated illustrations contain no readable student information, real faces, or school logos. See [`../docs/品牌与素材说明.md`](../docs/品牌与素材说明.md) for the prompt record and replacement rules.
+- 图片中不得出现真实学生姓名、学号、联系方式、照片、学校内部标识或未公开业务数据。
+- README 截图应展示实际已公开版本的界面，并提供准确的替代文本。
+- 新增素材应记录来源、许可与用途；不得把内部开发过程或测试材料作为公开产品文档。
+- 替换 Logo、Banner 或欢迎插图时，要同时检查离线包与桌面端是否包含该资源。
+
+| 素材 | 用途 |
+| --- | --- |
+| `logo.svg` / `app-icon.svg` | 仓库与应用标识 |
+| `banner.svg` | README 横幅 |
+| `counselor-desk-hero.png` | 产品主视觉 |
+| `screenshots/` | 功能说明与发布截图 |
