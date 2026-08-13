@@ -1,9 +1,12 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Published v4.4 release tag to deploy
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -23,6 +26,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.release_tag }}
+          fetch-depth: 0
+      - name: Verify published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ inputs.release_tag }}" --repo "${{ github.repository }}" --json tagName,isDraft,isPrerelease \
+            --jq 'select(.tagName == "${{ inputs.release_tag }}" and .isDraft == false)'
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

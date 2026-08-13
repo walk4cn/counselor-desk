@@ -1,176 +1,191 @@
-name: 发布桌面端体验包
+name: Validate and prepare v4.4 release
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing version tag to validate and package
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: desktop-release-${{ github.ref }}
+  group: counselor-desk-release-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
-  prepare-release:
-    name: 创建 GitHub 体验发布
+  validate:
+    name: Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      GH_TOKEN: ${{ github.token }}
-
+    timeout-minutes: 20
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
-      - name: 检出版本信息
-        uses: actions/checkout@v4
-
-      - name: 创建或更新未签名体验版 Release
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verify version tag and source surface
+        id: version
         shell: bash
         run: |
           set -euo pipefail
-          version="$(node -p "require('./package.json').version")"
-          cat > release-notes.md <<'EOF'
-          这是辅导员工作台的未签名体验发布。
-
-          - Windows 用户下载“Windows-安装版.msi”后双击安装；不想安装时可使用“网页离线版.html”。
-          - macOS 用户下载“macOS-安装版.dmg”；Intel 与 Apple Silicon 共用同一个文件。
-          - Windows 和 macOS 分别提供对应的 SHA-256 校验和文件。
-          - Windows SmartScreen 或 macOS Gatekeeper 可能提示未知发布者，因为当前发布未配置组织代码签名或 Apple 公证。请仅从本 Release 下载，并在导入真实学生数据前先使用示例数据验证。
-          - 安装包与源码分开发布；不要将真实学生数据、备份或附件上传到仓库。
-          EOF
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release edit "$GITHUB_REF_NAME" \
-              --prerelease \
-              --title "辅导员工作台 v${version} 未签名体验版" \
-              --notes-file release-notes.md
-          else
-            gh release create "$GITHUB_REF_NAME" \
-              --prerelease \
-              --title "辅导员工作台 v${version} 未签名体验版" \
-              --notes-file release-notes.md
-          fi
+          version="$(node -p \"require('./package.json').version\")"
+          tag="${{ inputs.release_tag || github.ref_name }}"
+          test "$tag" = "v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          pnpm run lint
+          pnpm run check:public
+      - name: Run complete v4.4 test gate
+        run: pnpm test
+      - name: Verify release configuration
+        run: pnpm run test:release
 
   windows:
-    name: 构建 Windows 安装包
-    needs: prepare-release
+    name: Windows NSIS (x64 and ARM64)
+    needs: validate
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-      GH_TOKEN: ${{ github.token }}
-
     steps:
-      - name: 检出源码
-        uses: actions/checkout@v4
-
-      - name: 设置 pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ needs.validate.outputs.tag }}
+      - uses: pnpm/action-setup@v4
         with:
           version: 11.9.0
-
-      - name: 设置 Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: pnpm
-
-      - name: 安装依赖
-        run: pnpm install --frozen-lockfile
-
-      - name: 验证发布面
-        run: |
-          pnpm run lint
-          pnpm run check:public
-          pnpm run test:release
-          node --check desktop/main.cjs
-          node --check desktop/preload.cjs
-          node --check desktop/sqlite-store.cjs
-
-      - name: 构建 Windows 与网页包
-        run: |
-          pnpm run desktop:build:win
-          pnpm run build:release
-
-      - name: 整理并直接上传 Windows 发布文件
+      - run: pnpm install --frozen-lockfile
+      - name: Build NSIS installers
+        run: pnpm run desktop:build:win
+      - name: Verify Windows packages
         shell: pwsh
         run: |
-          $buildDir = 'output/desktop'
-          $releaseDir = 'release-assets'
-          $version = node -p "require('./package.json').version"
-          New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
-          $installer = @(Get-ChildItem -LiteralPath $buildDir -File -Filter 'counselor-desk-*-x64.msi')
-          if ($installer.Count -ne 1) { throw "Expected one installer, found $($installer.Count)" }
-          $installerAsset = Join-Path $releaseDir "CounselorDesk-v$version-Windows-Installer.msi"
-          $offlineAsset = Join-Path $releaseDir "CounselorDesk-v$version-Offline.html"
-          $checksumAsset = Join-Path $releaseDir 'Windows-SHA256.txt'
-          Copy-Item -LiteralPath $installer[0].FullName -Destination $installerAsset
-          Copy-Item -LiteralPath 'output/辅导员工作台.html' -Destination $offlineAsset
-          $checksums = @($installerAsset, $offlineAsset) | ForEach-Object {
-            $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $_
-            "$($hash.Hash) *$(Split-Path $_ -Leaf)"
-          }
-          Set-Content -LiteralPath $checksumAsset -Value $checksums -Encoding utf8
-          $assets = @(
-            "$installerAsset#辅导员工作台-v$version-Windows-安装版.msi",
-            "$offlineAsset#辅导员工作台-v$version-网页离线版.html",
-            "$checksumAsset#Windows-SHA256校验和.txt"
-          )
-          & gh release upload $env:GITHUB_REF_NAME $assets --clobber
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $packages = Get-ChildItem -LiteralPath output/desktop -File -Filter 'counselor-desk-*-*.exe'
+          if ($packages.Count -lt 2) { throw 'Expected x64 and arm64 NSIS installers.' }
+          $x64 = $packages | Where-Object { $_.Name -match 'x64' } | Select-Object -First 1
+          $arm64 = $packages | Where-Object { $_.Name -match 'arm64' } | Select-Object -First 1
+          if (-not $x64 -or -not $arm64) { throw 'Both x64 and arm64 installers are required.' }
+          $env:CWB_DESKTOP_ARTIFACT_DIR = (Resolve-Path output/desktop).Path
+          pnpm exec node tests/desktop-packaged-smoke.js
+          pnpm exec node tests/desktop-installer-smoke.js
+          @($x64, $arm64) | ForEach-Object { (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash + ' *' + $_.Name } | Set-Content output/desktop/Windows-SHA256.txt -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-v4.4
+          path: |
+            output/desktop/*.exe
+            output/desktop/Windows-SHA256.txt
+          if-no-files-found: error
 
   macos:
-    name: 构建 macOS 通用包
-    needs: prepare-release
+    name: macOS Universal (DMG and ZIP)
+    needs: windows
     runs-on: macos-15-intel
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-      GH_TOKEN: ${{ github.token }}
-
     steps:
-      - name: 检出源码
-        uses: actions/checkout@v4
-
-      - name: 设置 pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ needs.validate.outputs.tag }}
+      - uses: pnpm/action-setup@v4
         with:
           version: 11.9.0
-
-      - name: 设置 Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: pnpm
-
-      - name: 安装依赖
-        run: pnpm install --frozen-lockfile
-
-      - name: 验证并构建 macOS 通用包
-        run: |
-          pnpm run lint
-          pnpm run check:public
-          pnpm run test:release
-          pnpm run desktop:build:mac
-
-      - name: 整理并直接上传 macOS 发布文件
+      - run: pnpm install --frozen-lockfile
+      - name: Build universal desktop package
+        run: pnpm run desktop:build:mac
+      - name: Verify universal artifacts and smoke paths
         shell: bash
         run: |
           set -euo pipefail
-          release_dir='release-assets'
-          version="$(node -p "require('./package.json').version")"
-          mkdir -p "$release_dir"
-          dmg="$(find output/desktop -maxdepth 1 -type f -name 'counselor-desk-*-mac-universal.dmg' -print -quit)"
-          zip="$(find output/desktop -maxdepth 1 -type f -name 'counselor-desk-*-mac-universal.zip' -print -quit)"
-          test -n "$dmg"
-          test -n "$zip"
-          dmg_asset="CounselorDesk-v${version}-macOS-Installer.dmg"
-          zip_asset="CounselorDesk-v${version}-macOS-Archive.zip"
-          checksum_asset='macOS-SHA256.txt'
-          cp "$dmg" "$release_dir/$dmg_asset"
-          cp "$zip" "$release_dir/$zip_asset"
-          cd release-assets
-          shasum -a 256 -- "$dmg_asset" "$zip_asset" > "$checksum_asset"
-          gh release upload "$GITHUB_REF_NAME" \
-            "$dmg_asset#辅导员工作台-v${version}-macOS-安装版.dmg" \
-            "$zip_asset#辅导员工作台-v${version}-macOS-压缩包.zip" \
-            "$checksum_asset#macOS-SHA256校验和.txt" \
-            --clobber
+          dmg="$(find output/desktop -maxdepth 1 -name 'counselor-desk-*-mac-universal.dmg' -print -quit)"
+          zip="$(find output/desktop -maxdepth 1 -name 'counselor-desk-*-mac-universal.zip' -print -quit)"
+          test -n "$dmg" && test -n "$zip"
+          unzip -q "$zip" -d mac-app
+          app="$(find mac-app -maxdepth 2 -name '*.app' -print -quit)"
+          test -n "$app"
+          binary="$(find "$app/Contents/MacOS" -type f -print -quit)"
+          test -n "$binary"
+          lipo -archs "$binary" | grep -q x86_64
+          lipo -archs "$binary" | grep -q arm64
+          hdiutil attach "$dmg" -nobrowse -mountpoint mounted-dmg
+          test -n "$(find mounted-dmg -maxdepth 2 -name '*.app' -print -quit)"
+          hdiutil detach mounted-dmg
+          shasum -a 256 "$dmg" "$zip" > output/desktop/macOS-SHA256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-v4.4
+          path: |
+            output/desktop/*-mac-universal.dmg
+            output/desktop/*-mac-universal.zip
+            output/desktop/macOS-SHA256.txt
+          if-no-files-found: error
+
+  web:
+    name: Offline web package
+    needs: macos
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ needs.validate.outputs.tag }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:release
+      - run: sha256sum output/辅导员工作台.html > output/Web-SHA256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-v4.4
+          path: |
+            output/辅导员工作台.html
+            output/Web-SHA256.txt
+          if-no-files-found: error
+
+  release:
+    name: Draft Release
+    needs: [validate, web]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+      - name: Create one draft release after every gate passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag='${{ needs.validate.outputs.tag }}'
+          version='${{ needs.validate.outputs.version }}'
+          gh release create "$tag" --draft --verify-tag --title "辅导员工作台 v$version" --notes "v$version 已完成自动化发布门禁，等待人工确认后公开。未配置代码签名或公证时，发布页会明确标注未签名。" release-assets/**/*

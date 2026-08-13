@@ -10,8 +10,12 @@ assert.match(config, /^icon: assets\/app-icon\.svg$/m, 'The shared icon remains 
 assert.match(config, /^win:\r?\n  icon: assets\/app-icon\.ico$/m, 'Windows builds must use the checked-in ICO asset instead of converting SVG during packaging');
 assert.ok(fs.existsSync(path.resolve(__dirname, '..', 'assets', 'app-icon.ico')), 'the Windows ICO asset must be present for reproducible packaging');
 assert.match(config, /^  shortcutName: 辅导员工作台$/m, 'The desktop shortcut must remain Chinese for ordinary users');
-assert.match(config, /^    - msi$/m, 'Windows release builds must use the verified MSI target');
-assert.doesNotMatch(config, /^    - nsis$/m, 'Windows release builds must not use the failed NSIS installer target');
+assert.match(config, /^    - nsis$/m, 'Windows release builds must use the requested NSIS installer target');
+assert.doesNotMatch(config, /^    - msi$/m, 'Windows release builds must use one installer contract');
 assert.doesNotMatch(config, /^    - portable$/m, 'Windows release builds must not use the failed portable target');
+assert.match(config, /^  - assets\/welcome-education-scene-v2\.png$/m, 'the welcome illustration must ship inside desktop builds');
+for (const runtime of ['v8-migration.js', 'v8-persistence-protocol.js', 'v8-workspace-runtime.js', 'v8-backup-codec.js']) {
+  assert.match(config, new RegExp(`^  - src/core/${runtime.replace('.', '\\.')}$`, 'm'), `${runtime} must ship inside desktop builds`);
+}
 
 console.log('PASS electron-package-config');

@@ -50,7 +50,7 @@ function createSqliteStore(dbPath, getKey) {
     put(collection, record) {
       if (!record || !record.id) throw new Error('REPOSITORY_ID_REQUIRED');
       const createdAt = record.created_at || now();
-      const value = { ...record, schema_version: Number(record.schema_version || 7), created_at: createdAt, updated_at: record.updated_at || now() };
+      const value = { ...record, schema_version: Number(record.schema_version || 8), created_at: createdAt, updated_at: record.updated_at || now() };
       putStatement.run(String(collection), String(value.id), value.updated_at, encodeRecord(value, key()));
       auditStatement.run('put', String(collection), String(value.id), now());
       return value;
@@ -60,7 +60,7 @@ function createSqliteStore(dbPath, getKey) {
       const values = records.map(record => {
         if (!record || !record.id) throw new Error('REPOSITORY_ID_REQUIRED');
         const createdAt = record.created_at || now();
-        return { ...record, schema_version: Number(record.schema_version || 7), created_at: createdAt, updated_at: record.updated_at || now() };
+        return { ...record, schema_version: Number(record.schema_version || 8), created_at: createdAt, updated_at: record.updated_at || now() };
       });
       db.exec('BEGIN');
       try {
@@ -80,18 +80,13 @@ function createSqliteStore(dbPath, getKey) {
       const values = records.map(record => {
         if (!record || !record.id) throw new Error('REPOSITORY_ID_REQUIRED');
         const createdAt = record.created_at || now();
-        return { ...record, schema_version: Number(record.schema_version || 7), created_at: createdAt, updated_at: record.updated_at || now() };
+        return { ...record, schema_version: Number(record.schema_version || 8), created_at: createdAt, updated_at: record.updated_at || now() };
       });
       db.exec('BEGIN');
       try {
         db.prepare('DELETE FROM records WHERE collection=?').run(String(collection));
-        const bulk = { id:'__cwb_bulk_students__', schema_version:7, created_at:now(), updated_at:now(), chunk_count:Math.ceil(values.length / 250) };
-        putStatement.run(String(collection), bulk.id, bulk.updated_at, encodeRecord(bulk, key()));
-        for (let index = 0; index < values.length; index += 250) {
-          const chunk = { id:`__cwb_bulk_students__:${index / 250}`, schema_version:7, created_at:bulk.created_at, updated_at:bulk.updated_at, records_json:JSON.stringify(values.slice(index, index + 250)) };
-          putStatement.run(String(collection), chunk.id, chunk.updated_at, encodeRecord(chunk, key()));
-        }
-        auditStatement.run('replace-many', String(collection), bulk.id, now());
+        for (const value of values) putStatement.run(String(collection), String(value.id), value.updated_at, encodeRecord(value, key()));
+        auditStatement.run('replace-many', String(collection), null, now());
         db.exec('COMMIT');
         return values;
       } catch (error) {

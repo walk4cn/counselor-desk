@@ -8738,7 +8738,6 @@ const sync = {
     const diff = this.previewPhonePackage(pkg);
     const rollback = await testData.createSnapshot(`手机回传前自动备份 ${new Date().toLocaleString('zh-CN')}`);
     const applied = await window.CWB.importExchangePackage(pkg, mode || 'merge');
-    if (typeof window.CWB_V4_SYNC === 'function') { window.CWB_V4_SYNC(); window.CWB_V4_SYNC('custom'); }
     if (window.CWB && window.CWB.audit && window.CWB.audit.log) await window.CWB.audit.log('phone_package_apply', { mode:mode || 'merge' });
     render();
     return Object.assign({}, applied, { rollback_snapshot_id:rollback.id, diff });
@@ -9181,6 +9180,7 @@ function installV4Integration() {
     },
   };
   let queueV8LegacySave = null;
+  let v8LegacySaveSuspended = 0;
   const syncV4Storage = function syncV4Storage(part) {
     const keys = part === 'custom' ? ['v4_positions','v4_party_cases','v4_files','v4_employment_resources','v4_test_snapshots'] : (part ? [part] : collectionKeys);
     for (const key of keys) {
@@ -9424,6 +9424,9 @@ function installV4Integration() {
         preview(id, rows) { const template = typeof id === 'object' ? id : exportTemplates.get(String(id)); if (!template) throw new Error('EXPORT_TEMPLATE_NOT_FOUND'); const fields = template.fields || []; const sensitive = new Set(template.sensitiveFields || []); return { template:cloneData(template), rows:(Array.isArray(rows) ? rows : []).map(row => Object.fromEntries(fields.map(field => [field, template.redactSensitive && sensitive.has(field) ? '***' : row && row[field]]))) }; },
       };
       queueV8LegacySave = part => {
+        // A verified workspace hydrate mirrors every collection atomically.
+        // Do not enqueue redundant full snapshots while importing it.
+        if (v8LegacySaveSuspended) return Promise.resolve({ suspended:true });
         const names = part === 'custom' ? ['custom'] : part ? [part] : ['settings'].concat(collectionKeys, 'custom');
         return Promise.all(names.map(name => {
           const data = name === 'settings' ? cloneData(DB.settings || {}) : name === 'custom' ? cloneData(DB.custom || {}) : cloneData(DB[name] || []);
@@ -9764,28 +9767,24 @@ function installV4Integration() {
     const rollbackAttachments = await collectAttachmentPayload();
     const rollbackWorkspace = await v8Workspace.createBackup({ source:'exchange-restore-rollback', attachments:rollbackAttachments });
     try {
-      const applied = bridge.applyPackage(pkg, selectedMode);
+      let applied;
+      v8LegacySaveSuspended++;
+      try { applied = bridge.applyPackage(pkg, selectedMode); }
+      finally { v8LegacySaveSuspended--; }
       await restoreStagedAttachmentPayload(stagedAttachments);
       if (selectedMode === 'replace') await removeAttachmentsAbsentFromPayload(attachments);
       if (exchangeBackup) await restoreV8WorkspaceBackup(exchangeBackup, selectedMode);
-      if (typeof window.CWB_V4_SYNC === 'function') {
-        await Promise.resolve(window.CWB_V4_SYNC());
-        await Promise.resolve(window.CWB_V4_SYNC('custom'));
-      }
       return applied;
     } catch (error) {
-      try { bridge.applyPackage(rollbackPackage, 'replace'); } catch (_) {}
+      try {
+        v8LegacySaveSuspended++;
+        bridge.applyPackage(rollbackPackage, 'replace');
+      } catch (_) {} finally { v8LegacySaveSuspended--; }
       try {
         await removeAttachmentsAbsentFromPayload(rollbackAttachments);
         await restoreStagedAttachmentPayload(await stageAttachmentPayload(rollbackAttachments, 'EXCHANGE_ROLLBACK'));
       } catch (_) {}
       try { await restoreV8WorkspaceBackup(rollbackWorkspace, 'replace'); } catch (_) {}
-      try {
-        if (typeof window.CWB_V4_SYNC === 'function') {
-          await Promise.resolve(window.CWB_V4_SYNC());
-          await Promise.resolve(window.CWB_V4_SYNC('custom'));
-        }
-      } catch (_) {}
       throw error;
     }
   };

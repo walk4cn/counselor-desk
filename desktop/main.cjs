@@ -4,7 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { createSqliteStore } = require('./sqlite-store.cjs');
 
-const APP_VERSION = '4.0.0';
+const APP_VERSION = '4.4.0';
 let mainWindow;
 let sqliteStore;
 let vaultKeyCache;
@@ -17,6 +17,8 @@ const ALLOWED_COLLECTIONS = new Set([
   'records_learning_materials', 'records_learning_notes', 'records_learning_sessions',
   'records_custom_v4_positions', 'records_custom_v4_party_cases', 'records_custom_v4_files',
   'records_custom_v4_employment_resources', 'attachments', 'import_jobs', 'audit_log', 'meta',
+  'records_custom_v4_test_snapshots', 'records_orgs', 'records_party', 'records_rewards',
+  'records_activities', 'records_grades', 'records_worklogs', 'records_crisis_cases',
 ]);
 function validateCollection(collection) {
   const value = String(collection || '');
@@ -70,7 +72,7 @@ async function getVaultKey() {
 }
 async function writeMainAudit(action, details) {
   if (!sqliteStore) return;
-  try { await getVaultKey(); sqliteStore.put('audit_log', { id:`audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`, action, details:details || {}, operator:'desktop-main', operated_at:new Date().toISOString(), schema_version:7 }); } catch (_) {}
+  try { await getVaultKey(); sqliteStore.put('audit_log', { id:`audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`, action, details:details || {}, operator:'desktop-main', operated_at:new Date().toISOString(), schema_version:8 }); } catch (_) {}
 }
 
 function encryptBuffer(buffer, keyText) {
@@ -123,7 +125,7 @@ ipcMain.handle('desktop:choose-backup-folder', async () => {
 });
 
 ipcMain.handle('desktop:save-backup', async (_event, envelope, requestedFolder) => {
-  if (!envelope || envelope.format !== 'cwbk' || Number(envelope.version) !== 7 || typeof envelope.ciphertext !== 'string' || typeof envelope.integrity !== 'string') throw new Error('BACKUP_ENVELOPE_INVALID');
+  if (!envelope || envelope.format !== 'cwbk' || ![7, 8].includes(Number(envelope.version)) || typeof envelope.ciphertext !== 'string' || typeof envelope.integrity !== 'string') throw new Error('BACKUP_ENVELOPE_INVALID');
   const folder = requestedFolder || (await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory', 'createDirectory'] })).filePaths[0];
   if (!folder) return { saved: false, reason: 'cancelled' };
   const resolved = path.resolve(folder);
