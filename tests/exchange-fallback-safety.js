@@ -43,6 +43,13 @@ async function openWithoutV8() {
     await assert.rejects(() => window.CWB.importExchangePackage(unsafe, 'replace'), /V8_WORKSPACE_REQUIRED/);
     assert.equal(window.CWB.db.tasks.find(row => row.id === 'fallback-current-task')?.title, 'Current task must survive');
     assert.equal(window.CWB.db.tasks.some(row => row.id === 'fallback-incoming-task'), false);
+    const legacy = {
+      package:'counselor-desk', package_version:7,
+      tasks:[{ id:'fallback-legacy-task', title:'Legacy JSON recovery remains available' }],
+    };
+    const applied = await window.CWB.importExchangePackage(legacy, 'replace');
+    assert.equal(applied.tasks, 1);
+    assert.equal(window.CWB.db.tasks.find(row => row.id === 'fallback-legacy-task')?.title, 'Legacy JSON recovery remains available');
     console.log('PASS exchange-fallback-safety');
   } finally {
     dom.window.close();
