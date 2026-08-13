@@ -103,7 +103,7 @@ export function mapStudentHeader(header: unknown): string {
   return `custom_fields${raw}`;
 }
 
-export function chunkRows<T>(rows: readonly T[], chunkSize = 32): T[][] {
+export function chunkRows<T>(rows: readonly T[], chunkSize = 128): T[][] {
   const size = Math.max(1, Math.floor(chunkSize));
   const chunks: T[][] = [];
   for (let index = 0; index < rows.length; index += size) chunks.push(rows.slice(index, index + size));
@@ -127,7 +127,7 @@ export function createImportJob(input: { fileHash: string; totalRows: number; ch
     schema_version: V4_SCHEMA_VERSION,
     fileHash: input.fileHash,
     totalRows: Math.max(0, Math.floor(input.totalRows)),
-    chunkSize: Math.max(1, Math.floor(input.chunkSize || 32)),
+    chunkSize: Math.max(1, Math.floor(input.chunkSize || 128)),
     lastRow: 0,
     status: input.totalRows === 0 ? 'completed' : 'pending',
     updatedAt: new Date().toISOString(),

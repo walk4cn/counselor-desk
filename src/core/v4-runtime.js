@@ -281,7 +281,7 @@
 
   function createChunkedImportController(options) {
     const rows = Array.isArray(options.rows) ? options.rows : [];
-    const chunkSize = Math.max(1, Number(options.chunkSize) || 32);
+    const chunkSize = Math.max(1, Number(options.chunkSize) || 128);
     const onProgress = typeof options.onProgress === 'function' ? options.onProgress : () => {};
     const onChunk = typeof options.onChunk === 'function' ? options.onChunk : async () => {};
     const seed = options.checkpoint && typeof options.checkpoint === 'object' ? options.checkpoint : {};

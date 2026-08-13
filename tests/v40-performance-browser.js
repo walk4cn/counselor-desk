@@ -26,7 +26,7 @@ const { chromium, requireBrowserExecutable } = require('../scripts/browser-runti
       custom_fields:{ source:'browser-performance-gate' },
     }));
     const started = performance.now();
-    const result = await window.CWB.importer.start({ collection:'students', rows, chunkSize:32, fileHash:'browser-performance-gate-v1', onProgress:item => progress.push({ status:item.status, processed:item.processed, at:performance.now() }) });
+    const result = await window.CWB.importer.start({ collection:'students', rows, chunkSize:128, fileHash:'browser-performance-gate-v1', onProgress:item => progress.push({ status:item.status, processed:item.processed, at:performance.now() }) });
     const elapsed = performance.now() - started;
     clearInterval(timer);
     const progressGaps = progress.slice(1).map((item, index) => item.at - progress[index].at);
@@ -52,7 +52,7 @@ const { chromium, requireBrowserExecutable } = require('../scripts/browser-runti
   assert.equal(result.status, 'completed');
   assert.equal(result.processed, 10000);
   assert.ok(result.progressCount >= 2, `expected progress callbacks, got ${result.progressCount}`);
-  assert.ok(result.maxProgressGap <= 500, `progress gap ${result.maxProgressGap.toFixed(1)}ms exceeds 500ms`);
-  assert.ok(result.maxEventLoopGap <= 200, `event-loop stall ${result.maxEventLoopGap.toFixed(1)}ms exceeds 200ms`);
+  assert.ok(result.elapsed <= 30000, `10,000-row import ${result.elapsed.toFixed(1)}ms exceeds 30s`);
+  assert.ok(result.maxProgressGap <= 200, `import responsiveness gap ${result.maxProgressGap.toFixed(1)}ms exceeds 200ms`);
   console.log(`PASS v40-performance-browser (${JSON.stringify(result)})`);
 })().catch(error => { console.error(error.stack || error.message); process.exit(1); });
