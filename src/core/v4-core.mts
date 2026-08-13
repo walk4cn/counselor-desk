@@ -3,7 +3,7 @@
  * the Electron renderer and the single-file web build can use the same rules.
  */
 
-export const V4_SCHEMA_VERSION = 7;
+export const V4_SCHEMA_VERSION = 8;
 
 const STUDENT_FIELDS: Record<string, string[]> = {
   student_number: ['学号', '学生学号', '学籍号', 'student number', 'student_number'],

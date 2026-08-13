@@ -6,7 +6,7 @@
 
 | 你的情况 | 建议 | 说明 |
 | --- | --- | --- |
-| 想先看看界面 | [在线体验](https://7752777.github.io/counselor-desk/) | 当前展示的是公开 v4.0.0；请使用演示数据。 |
+| 想先看看界面 | [在线体验](https://7752777.github.io/counselor-desk/) | Pages 正在等待切换到 v4.4.0；当前旧站只用于体验基本流程，请使用演示数据。 |
 | 不想安装，临时或离线使用 | 网页离线版 | 从 [Release](https://github.com/7752777/counselor-desk/releases) 下载实际存在的 HTML 文件，双击打开。 |
 | 在固定 Windows 电脑上长期使用 | Windows 桌面版 | 从 Release 下载实际存在的 Windows 安装包；安装、升级和数据位置见[桌面端安装](./v4-desktop-installation.md)。 |
 | 在 Mac 上使用 | macOS 桌面版 | 只使用 Release 中实际存在且说明完整的 DMG/ZIP；签名和公证状态以 Release 为准。 |

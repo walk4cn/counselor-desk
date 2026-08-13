@@ -1,11 +1,12 @@
 (function installV4Runtime(global) {
   'use strict';
 
-  const V4_SCHEMA_VERSION = 7;
+  const V4_SCHEMA_VERSION = 8;
   const memoryStores = new Map();
   const indexedDbConnections = new Map();
   const DEFAULT_DB_STORES = Object.freeze([
     'records_students', 'records_tasks', 'records_talks', 'records_stay', 'records_leave', 'records_honor',
+    'records_orgs', 'records_party', 'records_rewards', 'records_activities', 'records_grades', 'records_worklogs',
     'records_pleave', 'records_attend', 'records_node', 'records_warn', 'records_help', 'records_grant',
     'records_focus', 'records_psych', 'records_graduate', 'records_policy', 'records_material', 'records_comp',
     'records_tpl', 'records_learning_materials', 'records_learning_notes', 'records_learning_sessions',
@@ -17,15 +18,6 @@
     if (value == null) return value;
     if (typeof structuredClone === 'function') return structuredClone(value);
     return JSON.parse(JSON.stringify(value));
-  }
-
-  async function gzipText(value) {
-    if (typeof global.CompressionStream !== 'function' || typeof global.Response !== 'function') return null;
-    const stream = new global.CompressionStream('gzip');
-    const writer = stream.writable.getWriter();
-    await writer.write(new TextEncoder().encode(value));
-    await writer.close();
-    return new Uint8Array(await new global.Response(stream.readable).arrayBuffer());
   }
 
   async function getCrypto() {
@@ -136,6 +128,31 @@
     };
   }
 
+  function queueAtomicReplaceBatches(store, values, batchSize, fail) {
+    let index = 0;
+    let failed = false;
+    const enqueue = () => {
+      if (failed || index >= values.length) return;
+      const end = Math.min(values.length, index + batchSize);
+      try {
+        // The next bounded group is queued from a request callback, keeping this
+        // single transaction active without submitting every write in one task.
+        for (; index < end; index += 1) {
+          const request = store.put(values[index]);
+          if (index + 1 === end && end < values.length) request.onsuccess = enqueue;
+          request.onerror = () => {
+            failed = true;
+            try { store.transaction.abort(); } catch (_) {}
+          };
+        }
+      } catch (error) {
+        failed = true;
+        fail(error);
+      }
+    };
+    enqueue();
+  }
+
   function createIndexedDbRepository(name, dbName) {
     const databaseName = dbName || 'counselor_desk_v4';
     const stores = dbName ? [name] : DEFAULT_DB_STORES;
@@ -144,8 +161,9 @@
       if (databasePromise) return databasePromise;
       databasePromise = new Promise((resolve, reject) => {
         const legacySources = [];
-        // v4.0.1 adds the test snapshot repository without abandoning existing v4.0 stores.
-        const request = global.indexedDB.open(databaseName, 3);
+        // Schema v8 adds canonical business collections without abandoning
+        // existing records or legacy custom collections in the same database.
+        const request = global.indexedDB.open(databaseName, 4);
         request.onupgradeneeded = () => {
           const database = request.result;
           stores.forEach(storeName => {
@@ -225,20 +243,14 @@
         const values = records.map(record => { const input = record; const now = new Date().toISOString(); const value = { ...input, schema_version:Number(input && input.schema_version || V4_SCHEMA_VERSION), created_at:input && input.created_at || now, updated_at:input && input.updated_at || now }; if (!value.id) throw new Error('REPOSITORY_ID_REQUIRED'); return value; });
         return (async () => {
           const db = await open();
-          const chunkSize = 250;
-          const chunks = Array.from({ length:Math.ceil(values.length / chunkSize) }, (_, index) => values.slice(index * chunkSize, index * chunkSize + chunkSize));
-          const chunkPayloads = await Promise.all(chunks.map(async chunk => {
-            const json = JSON.stringify(chunk);
-            const compressed = await gzipText(json);
-            return compressed ? { records_gzip:compressed } : { records_json:json };
-          }));
           await new Promise((resolve, reject) => {
             const tx = db.transaction(name, 'readwrite'); const objectStore = tx.objectStore(name);
             try {
-              objectStore.clear();
-              const now = new Date().toISOString();
-              objectStore.put({ id:'__cwb_bulk_students__', schema_version:V4_SCHEMA_VERSION, created_at:now, updated_at:now, chunk_count:chunks.length });
-              chunkPayloads.forEach((payload, index) => objectStore.put({ id:`__cwb_bulk_students__:${index}`, schema_version:V4_SCHEMA_VERSION, created_at:now, updated_at:now, ...payload }));
+              const clear = objectStore.clear();
+              clear.onsuccess = () => queueAtomicReplaceBatches(objectStore, values, 32, error => {
+                try { tx.abort(); } catch (_) {}
+                reject(error);
+              });
             } catch (error) { reject(error); return; }
             tx.oncomplete = resolve; tx.onerror = () => reject(tx.error || new Error('REPOSITORY_TRANSACTION_FAILED'));
           });
