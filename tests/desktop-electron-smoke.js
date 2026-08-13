@@ -5,8 +5,10 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.join(__dirname, '..');
-const electron = path.join(root, 'node_modules', 'electron', 'dist', process.platform === 'win32' ? 'electron.exe' : 'Electron');
-if (!fs.existsSync(electron)) {
+const electronDirectory = path.join(root, 'node_modules', 'electron', 'dist');
+const electronNames = process.platform === 'win32' ? ['electron.exe'] : ['Electron', 'electron'];
+const electron = electronNames.map(name => path.join(electronDirectory, name)).find(fs.existsSync);
+if (!electron) {
   throw new Error('desktop-electron-smoke: required Electron binary is not installed');
 }
 const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cwb-electron-smoke-'));
