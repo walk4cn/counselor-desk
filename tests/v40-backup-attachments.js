@@ -8,6 +8,8 @@ function browserExecutable() {
 }
 
 (async () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(source, /input\.accept = '\.cwbk'/, 'backup restore picker must only advertise encrypted CWBK files');
   const executablePath = browserExecutable();
   if (!executablePath) { console.log('SKIP v40-backup-attachments: Chrome/Edge executable not found'); return; }
   const browser = await chromium.launch({ headless:true, executablePath });

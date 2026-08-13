@@ -37,10 +37,22 @@ jobs:
             --jq 'select(.tagName == "${{ inputs.release_tag }}" and .isDraft == false)'
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Prepare public site artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site/assets site/vendor site/src/core
+          cp index.html site/index.html
+          cp -R assets/. site/assets/
+          cp vendor/xlsx.full.min.js vendor/argon2-bundled.min.js vendor/jszip.min.js vendor/echarts.min.js site/vendor/
+          cp src/core/v4-runtime.js src/core/v8-migration.js src/core/v8-persistence-protocol.js src/core/v8-workspace-runtime.js src/core/v8-backup-codec.js src/core/import-worker.js site/src/core/
+          test -f site/assets/welcome-education-scene-v2.png
+          test -f site/src/core/v8-workspace-runtime.js
+          test -f site/vendor/xlsx.full.min.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4

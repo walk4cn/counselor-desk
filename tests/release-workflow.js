@@ -27,6 +27,10 @@ assert.doesNotMatch(pages, /push:\s*\n\s*branches:/, 'Pages must not deploy on a
 assert.match(pages, /workflow_dispatch:/, 'Pages deployment must require an explicit operator action');
 assert.match(pages, /release_tag:/, 'Pages deployment must be tied to a release tag');
 assert.match(pages, /gh release view/, 'Pages deployment must verify the published release');
+assert.match(pages, /Prepare public site artifact/, 'Pages must stage a product-only site artifact');
+assert.match(pages, /mkdir -p site\/assets site\/vendor site\/src\/core/, 'Pages must explicitly scope the site artifact');
+assert.match(pages, /path: site/, 'Pages must deploy the staged site, never the full repository');
+assert.doesNotMatch(pages, /path: \./, 'Pages must not upload the entire repository');
 assert.match(pages, /actions\/deploy-pages@v4/, 'the Pages deployment action remains explicit');
 
 console.log('PASS release-workflow');

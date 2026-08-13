@@ -32,4 +32,5 @@ assert.match(main, /CWB_DESKTOP_SMOKE/);
 assert.match(main, /app\.setName\(APP_IDENTITY\)/);
 assert.match(preload, /readAttachment/);
 assert.match(preload, /chooseBackupFolder/);
+assert.match(main, /extensions: \['cwbk'\]/, 'desktop backup picker must not present exchange JSON as an encrypted backup');
 console.log('PASS electron-surface');

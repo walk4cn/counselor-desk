@@ -5,7 +5,7 @@
 ## 当前候选
 
 - 发布候选分支：`codex/v4.4-integration`
-- 当前候选提交：`f6690b6`
+- 候选提交：以该分支的 `git rev-parse HEAD` 为准；最终 SHA 只在 `v4.4.0` tag、Release 与 Pages 指向同一提交后固定记录。
 - 唯一可编辑工作树：`D:\CounselorDesk\v4.4-integration`
 - Git 裸仓库/镜像：`D:\CounselorDesk\repository`
 - 验证证据目录：`D:\CounselorDesk\verification\v4.4.0-release-audit`
@@ -33,7 +33,7 @@
 
 ## 本次验证
 
-在 D 盘隔离的 pnpm store、Electron cache 和临时目录中，最终候选 `f6690b6` 已运行：
+在 D 盘隔离的 pnpm store、Electron cache 和临时目录中，候选分支已运行：
 
 ```powershell
 pnpm test

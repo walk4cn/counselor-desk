@@ -32,7 +32,7 @@ try {
   for (let run = 0; run < 2; run += 1) {
     const result = spawnSync(executable, ['--no-sandbox'], {
       cwd:root,
-      env:Object.assign({}, process.env, { CWB_DESKTOP_SMOKE:'1', CWB_DESKTOP_USER_DATA:userData }),
+      env:Object.assign({}, process.env, { CWB_DESKTOP_SMOKE:'1', CWB_DESKTOP_USER_DATA:userData, CWB_DESKTOP_SMOKE_EXPECT_PERSISTENCE:run === 1 ? '1' : '0' }),
       encoding:'utf8', timeout:120000,
     });
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
@@ -40,7 +40,8 @@ try {
     assert.match(output, /"ok":true/);
     assert.match(output, /"schemaVersion":8/);
     assert.match(output, /"attachment":true/);
-    assert.match(output, /"backup":/);
+    assert.match(output, /"persistence":true/);
+    assert.match(output, /"backup":true/);
     assert.match(output, /"sqlite":true/);
     assert.match(output, /"migration":true/);
   }
