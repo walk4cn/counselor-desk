@@ -2,16 +2,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-
-function browserExecutable() {
-  return [process.env.CHROME_BIN, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe']
-    .filter(Boolean).find(file => fs.existsSync(file));
-}
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 (async () => {
-  const executablePath = browserExecutable();
-  assert.ok(executablePath, 'a Chromium browser is required for the portable v8 preservation gate');
+  const executablePath = requireBrowserExecutable('V8_PORTABLE_HISTORY');
   const browser = await chromium.launch({ headless:true, executablePath });
   const page = await browser.newPage();
   let portableDir;

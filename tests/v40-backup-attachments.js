@@ -1,17 +1,12 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-
-function browserExecutable() {
-  return [process.env.CHROME_BIN, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].filter(Boolean).find(file => fs.existsSync(file));
-}
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 (async () => {
   const source = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(source, /input\.accept = '\.cwbk'/, 'backup restore picker must only advertise encrypted CWBK files');
-  const executablePath = browserExecutable();
-  if (!executablePath) { console.log('SKIP v40-backup-attachments: Chrome/Edge executable not found'); return; }
+  const executablePath = requireBrowserExecutable('V40_BACKUP_ATTACHMENTS');
   const browser = await chromium.launch({ headless:true, executablePath });
   const page = await browser.newPage();
   await page.goto(`file://${path.resolve('output/v4-preview.html').replace(/\\/g, '/')}`);

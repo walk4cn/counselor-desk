@@ -10,7 +10,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium, requireBrowserExecutable } = require('./browser-runtime');
 const xlsx = require('xlsx');
 
 const EXTENSIONS = new Set(['.csv', '.xls', '.xlsx']);
@@ -138,8 +138,7 @@ async function main() {
     samples.push({ ...sample, source_group: roots.find(root => file.startsWith(root)) ? digest(roots.find(root => file.startsWith(root))).slice(0, 12) : 'unknown' });
   }
 
-  const executablePath = [process.env.CHROME_BIN, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].filter(Boolean).find(fs.existsSync);
-  if (!executablePath) throw new Error('PILOT_BROWSER_NOT_FOUND');
+  const executablePath = requireBrowserExecutable('PILOT');
   const browser = await chromium.launch({ headless: true, executablePath });
 
   for (const sample of samples.filter(item => item.status === 'ready')) {

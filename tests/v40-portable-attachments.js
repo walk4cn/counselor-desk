@@ -2,11 +2,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 (async () => {
-  const executablePath = process.env.CHROME_BIN && fs.existsSync(process.env.CHROME_BIN) ? process.env.CHROME_BIN : 'C:/Program Files/Google/Chrome/Application/chrome.exe';
-  if (!fs.existsSync(executablePath)) { console.log('SKIP v40-portable-attachments: Chrome not found'); return; }
+  const executablePath = requireBrowserExecutable('V40_PORTABLE_ATTACHMENTS');
   const browser = await chromium.launch({ headless:true, executablePath });
   const page = await browser.newPage();
   await page.goto(`file://${path.resolve('output/v4-preview.html').replace(/\\/g, '/')}`, { waitUntil:'domcontentloaded', timeout:60000 });

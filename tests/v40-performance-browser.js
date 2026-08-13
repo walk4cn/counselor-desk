@@ -1,17 +1,10 @@
 /** Real-browser import performance gate. Measures progress cadence and event-loop stalls. */
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-
-function browserExecutable() {
-  return [process.env.CHROME_BIN, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe']
-    .filter(Boolean).find(file => fs.existsSync(file));
-}
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 (async () => {
-  const executablePath = browserExecutable();
-  if (!executablePath) { console.log('SKIP v40-performance-browser: Chrome/Edge executable not found'); return; }
+  const executablePath = requireBrowserExecutable('V40_PERFORMANCE');
   const browser = await chromium.launch({ headless:true, executablePath });
   const page = await browser.newPage();
   await page.goto(`file://${path.resolve('output/v4-preview.html').replace(/\\/g, '/')}`);

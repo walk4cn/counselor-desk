@@ -10,12 +10,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
-let chromium;
-try {
-  ({ chromium } = require('playwright-core'));
-} catch (_) {
-  ({ chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
-}
+const { chromium, requireBrowserExecutable } = require('./browser-runtime');
 
 const ROOT = path.resolve(__dirname, '..');
 const DESTINATION = path.join(ROOT, 'assets', 'screenshots', 'v4.4.0');
@@ -32,14 +27,6 @@ const TARGET_ID = 'release-demo-student-01';
 const TARGET_NUMBER = 'D440260001';
 const TARGET_NAME = '演示学生01';
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
-
-function browserExecutable() {
-  return [
-    process.env.CHROME_BIN,
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-  ].filter(Boolean).find(file => fs.existsSync(file));
-}
 
 function pad(value) {
   return String(value).padStart(2, '0');
@@ -357,7 +344,7 @@ async function capture(browser, url, fixture, filename, route, prepare) {
 }
 
 async function captureAll() {
-  const executablePath = browserExecutable();
+  const executablePath = requireBrowserExecutable('RELEASE_SCREENSHOTS');
   assert.ok(executablePath, 'A Chromium browser is required to capture release screenshots.');
   assert.ok(fs.existsSync(IMPORT_SAMPLE), `Missing import sample: ${IMPORT_SAMPLE}`);
   fs.mkdirSync(DESTINATION, { recursive:true });

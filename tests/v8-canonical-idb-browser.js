@@ -2,18 +2,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 const ROOT = path.resolve(__dirname, '..');
 const CANONICAL = ['orgs', 'party', 'rewards', 'activities', 'grades', 'worklogs'];
-
-function browserExecutable() {
-  return [
-    process.env.CHROME_BIN,
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-  ].filter(Boolean).find(file => fs.existsSync(file));
-}
 
 function contentType(file) {
   if (file.endsWith('.js')) return 'application/javascript; charset=utf-8';
@@ -38,8 +30,7 @@ function createServer() {
 }
 
 (async () => {
-  const executablePath = browserExecutable();
-  assert.ok(executablePath, 'a Chromium browser is required for the canonical IndexedDB persistence gate');
+  const executablePath = requireBrowserExecutable('V8_CANONICAL_IDB');
   const server = createServer();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const port = server.address().port;
