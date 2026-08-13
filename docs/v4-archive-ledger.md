@@ -5,7 +5,7 @@
 ## 当前候选
 
 - 发布候选分支：`codex/v4.4-integration`
-- 候选提交：以该分支的 `git rev-parse HEAD` 为准；最终 SHA 只在 `v4.4.0` tag、Release 与 Pages 指向同一提交后固定记录。
+- 已验证功能基线：`bd1bdbe7ff5b00a736e82db725d6ae2ac55a6fa9`（`codex/v4.4-integration`，2026-08-14）。最终发布 SHA 只在 `v4.4.0` tag、Release 与 Pages 指向同一提交后作为发布记录固定。
 - 唯一可编辑工作树：`D:\CounselorDesk\v4.4-integration`
 - Git 裸仓库/镜像：`D:\CounselorDesk\repository`
 - 验证证据目录：`D:\CounselorDesk\verification\v4.4.0-release-audit`
@@ -44,7 +44,7 @@ node scripts/check-public-surface.js
 git fsck --full --no-reflogs
 ```
 
-`pnpm test` 已在 2026-08-14 的 v4.4 候选工作树完成统一验证；完整日志位于 `D:\CounselorDesk\verification\v4.4.0-release-audit\logs\pnpm-test-current.txt`。正式 tag 创建前仍须在待发布提交上由 GitHub Actions 重新运行同一门禁。
+`pnpm test` 已在 2026-08-14 的 v4.4 候选工作树、提交 `bd1bdbe7ff5b00a736e82db725d6ae2ac55a6fa9` 完成统一验证，退出码为 0，耗时 466 秒；完整日志位于 `D:\CounselorDesk\verification\v4.4.0-release-audit\logs\pnpm-test-current.txt`。正式 tag 创建前仍须在待发布提交上由 GitHub Actions 重新运行同一门禁。
 
 本机 Windows 取证（仅候选构建，不代表正式发布）已在 2026-08-14 完成：
 
