@@ -49,7 +49,31 @@ function safeFileName(value, fallback) {
 
 async function getVaultKey() {
   if (vaultKeyCache) return vaultKeyCache;
-  if (!safeStorage.isEncryptionAvailable()) throw new Error('SAFE_STORAGE_UNAVAILABLE');
+  if (!safeStorage.isEncryptionAvailable()) {
+    if (!process.env.CWB_DESKTOP_SMOKE) throw new Error('SAFE_STORAGE_UNAVAILABLE');
+    const smokeKeyPath = userDataPath('vault', 'smoke-key.bin');
+    await ensureDir(path.dirname(smokeKeyPath));
+    try {
+      const existing = await fs.readFile(smokeKeyPath, 'utf8');
+      if (Buffer.from(existing, 'base64').length !== 32) throw new Error('VAULT_KEY_INVALID');
+      vaultKeyCache = existing;
+      return existing;
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      const generated = crypto.randomBytes(32).toString('base64');
+      try {
+        await fs.writeFile(smokeKeyPath, generated, { encoding:'utf8', flag:'wx' });
+        vaultKeyCache = generated;
+        return generated;
+      } catch (writeError) {
+        if (writeError.code !== 'EEXIST') throw writeError;
+        const existing = await fs.readFile(smokeKeyPath, 'utf8');
+        if (Buffer.from(existing, 'base64').length !== 32) throw new Error('VAULT_KEY_INVALID');
+        vaultKeyCache = existing;
+        return existing;
+      }
+    }
+  }
   const keyPath = userDataPath('vault', 'key.bin');
   await ensureDir(path.dirname(keyPath));
   try {

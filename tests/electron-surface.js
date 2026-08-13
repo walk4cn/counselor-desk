@@ -29,6 +29,7 @@ assert.match(main, /desktop:write-attachment/);
 assert.match(main, /encryptBuffer/);
 assert.match(main, /migrateLegacyDesktopData/);
 assert.match(main, /CWB_DESKTOP_SMOKE/);
+assert.match(main, /if \(!safeStorage\.isEncryptionAvailable\(\)\) \{\s*if \(!process\.env\.CWB_DESKTOP_SMOKE\) throw new Error\('SAFE_STORAGE_UNAVAILABLE'\)/, 'only the isolated smoke protocol may use a non-system vault key');
 assert.match(main, /app\.setName\(APP_IDENTITY\)/);
 assert.match(preload, /readAttachment/);
 assert.match(preload, /chooseBackupFolder/);
