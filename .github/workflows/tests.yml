@@ -33,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check source and public product surface
+        run: |
+          pnpm run lint
+          pnpm run check:public
+
       - name: Run complete suite
         run: pnpm test
 
