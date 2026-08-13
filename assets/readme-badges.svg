@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="784" height="44" viewBox="0 0 784 44" role="img" aria-label="本地优先、离线可用、数据可带走、MIT 开源、持续迭代">
+  <style>text{font-family:-apple-system,BlinkMacSystemFont,'Microsoft YaHei','PingFang SC',sans-serif;font-size:14px;font-weight:600;letter-spacing:0}</style>
+  <rect x="0" y="4" width="140" height="36" rx="7" fill="#0b6e69"/>
+  <circle cx="20" cy="22" r="5" fill="#d7f4ed"/><text x="35" y="27" fill="#fff">本地优先</text>
+  <rect x="152" y="4" width="140" height="36" rx="7" fill="#1d5fa7"/>
+  <path d="M172 27h16M174 22h12M178 17h4" fill="none" stroke="#dbeeff" stroke-width="2" stroke-linecap="round"/><text x="200" y="27" fill="#fff">离线可用</text>
+  <rect x="304" y="4" width="168" height="36" rx="7" fill="#7c4d99"/>
+  <path d="M324 18h12v10h-12zM327 15v3m6-3v3m-6 10v3m6-3v3" fill="none" stroke="#f1e4fb" stroke-width="1.7" stroke-linecap="round"/><text x="347" y="27" fill="#fff">数据可带走</text>
+  <rect x="484" y="4" width="118" height="36" rx="7" fill="#b95f13"/>
+  <path d="M505 15l7 4v7l-7 4-7-4v-7z" fill="none" stroke="#fff0d7" stroke-width="1.7"/><text x="523" y="27" fill="#fff">MIT 开源</text>
+  <rect x="614" y="4" width="170" height="36" rx="7" fill="#3c6f4b"/>
+  <path d="m634 22 4 4 8-9" fill="none" stroke="#e7f7e9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><text x="652" y="27" fill="#fff">持续迭代</text>
+</svg>
