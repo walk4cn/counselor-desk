@@ -15,6 +15,7 @@ assert.match(release, /--draft --verify-tag/, 'the public release starts as a ve
 assert.match(release, /desktop:build:win/, 'the workflow must build Windows packages');
 assert.match(release, /desktop:build:mac/, 'the workflow must build macOS universal packages');
 assert.match(release, /x64 and arm64 NSIS installers/, 'Windows x64 and ARM64 NSIS packages must both be required');
+assert.match(release, /desktop-windows-architecture\.js/, 'Windows packages must verify PE architectures, not only artifact names');
 assert.match(release, /lipo -archs/, 'macOS packages must prove both architectures');
 assert.match(release, /hdiutil attach/, 'macOS DMG mounting must be verified');
 assert.match(release, /desktop-packaged-smoke\.js/, 'macOS packages must execute the packaged desktop smoke');

@@ -21,7 +21,8 @@ function findExecutable(dir) {
   }
   return null;
 }
-const executable = process.env.CWB_DESKTOP_EXECUTABLE || findExecutable(packagedRoot);
+const preferredWindowsExecutable = path.join(packagedRoot, 'win-unpacked', 'counselor-desk.exe');
+const executable = process.env.CWB_DESKTOP_EXECUTABLE || (process.platform === 'win32' && fs.existsSync(preferredWindowsExecutable) ? preferredWindowsExecutable : findExecutable(packagedRoot));
 if (!executable) {
   if (process.env.CWB_REQUIRE_ARTIFACTS === '1') throw new Error(`desktop-packaged-smoke: no packaged executable in ${packagedRoot}`);
   console.log('SKIP desktop-packaged-smoke: packaged executable is not present');

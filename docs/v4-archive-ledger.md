@@ -44,7 +44,15 @@ node scripts/check-public-surface.js
 git fsck --full --no-reflogs
 ```
 
-`pnpm test` 在 2026-08-14 的最终提交上通过，耗时约 7 分 39 秒。完整日志位于 `D:\CounselorDesk\verification\v4.4.0-release-audit\logs\pnpm-test-final.txt`。
+`pnpm test` 已在 2026-08-14 的 v4.4 候选工作树完成统一验证；完整日志位于 `D:\CounselorDesk\verification\v4.4.0-release-audit\logs\pnpm-test-current.txt`。正式 tag 创建前仍须在待发布提交上由 GitHub Actions 重新运行同一门禁。
+
+本机 Windows 取证（仅候选构建，不代表正式发布）已在 2026-08-14 完成：
+
+- 由 `desktop:build:win` 生成 NSIS x64 与 ARM64 安装器；解包可执行文件的 PE machine 分别为 x64 和 ARM64。
+- x64 解包应用完成两次启动烟测，确认 schema v8、SQLite、附件、加密备份与退出后的持久化均可读回。
+- 本机安装器产物 SHA-256：`counselor-desk-4.4.0-x64.exe` 为 `434E015CB153AAC0F2C870A73CE6BA39A0F5291C5E7E14FA8F27D65AB8CCFE4B`；`counselor-desk-4.4.0-arm64.exe` 为 `E705C37031D9D8E870C84D4E3A4D99F2B5573F82DCFB3AA37251EED3BDD0431B`。
+- 三个本机构建的 Windows `.exe` 均为 `NotSigned`。发布页必须如实标注“未签名”；不得写作已签名或已公证。
+- 本机 `%APPDATA%\Counselor Desk` 存在真实用户资料，因此安装、默认卸载保留数据、`/DELETEUSERDATA=1` 删除数据的流程被安全跳过，未触碰该目录。该流程由 Windows CI 的干净账户强制执行。
 
 ## 仍然阻止公开发布的事项
 

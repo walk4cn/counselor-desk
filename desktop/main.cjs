@@ -324,7 +324,10 @@ ipcMain.handle('desktop:open-external', async (_event, url) => {
 });
 
 app.whenReady().then(async () => {
-  migrateDesktopData();
+  // Smoke runs always use an isolated user-data directory. Importing a real
+  // user's legacy vault into it would both defeat isolation and make the
+  // platform safe-storage key impossible to decrypt in the test profile.
+  if (!process.env.CWB_DESKTOP_SMOKE) migrateDesktopData();
   if (process.env.CWB_DESKTOP_SMOKE) return runDesktopSmoke();
   return createWindow();
 });

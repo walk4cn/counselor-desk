@@ -86,6 +86,7 @@ jobs:
           if (-not $x64 -or -not $arm64) { throw 'Both x64 and arm64 installers are required.' }
           $env:CWB_DESKTOP_ARTIFACT_DIR = (Resolve-Path output/desktop).Path
           $env:CWB_REQUIRE_ARTIFACTS = '1'
+          pnpm exec node tests/desktop-windows-architecture.js
           pnpm exec node tests/desktop-packaged-smoke.js
           pnpm exec node tests/desktop-installer-smoke.js
           @($x64, $arm64) | ForEach-Object { (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash + ' *' + $_.Name } | Set-Content output/desktop/Windows-SHA256.txt -Encoding utf8
