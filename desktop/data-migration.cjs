@@ -25,21 +25,30 @@ function copyMissing(source, target) {
  */
 function migrateLegacyDesktopData({ appDataRoot, userDataRoot }) {
   if (!appDataRoot || !userDataRoot) throw new Error('DESKTOP_MIGRATION_PATH_INVALID');
-  const legacyRoot = path.join(userDataRoot, 'counselor-desk-v4');
-  if (!fs.existsSync(legacyRoot)) return { migrated:false, legacyRoot };
-
   const mappings = [
     ['database.sqlite', 'counselor-v4.sqlite'],
     ['database.sqlite-wal', 'counselor-v4.sqlite-wal'],
     ['database.sqlite-shm', 'counselor-v4.sqlite-shm'],
+    ['counselor-v4.sqlite', 'counselor-v4.sqlite'],
+    ['counselor-v4.sqlite-wal', 'counselor-v4.sqlite-wal'],
+    ['counselor-v4.sqlite-shm', 'counselor-v4.sqlite-shm'],
     ['attachments', path.join('vault', 'attachments')],
     [path.join('vault', 'attachments'), path.join('vault', 'attachments')],
     ['backups', 'backups'],
     [path.join('vault', 'key.bin'), path.join('vault', 'key.bin')],
     [path.join('vault', 'backup-secret.bin'), path.join('vault', 'backup-secret.bin')],
   ];
-  const copied = mappings.filter(([from, to]) => copyMissing(path.join(legacyRoot, from), path.join(userDataRoot, to))).map(([from]) => from);
-  return { migrated:copied.length > 0, copied, legacyRoot, appDataRoot };
+  const legacyRoots = [
+    path.join(userDataRoot, 'counselor-desk-v4'),
+    path.join(appDataRoot, 'counselor-desk'),
+  ].filter((root, index, all) => all.indexOf(root) === index && fs.existsSync(root));
+  const copied = [];
+  for (const legacyRoot of legacyRoots) {
+    for (const [from, to] of mappings) {
+      if (copyMissing(path.join(legacyRoot, from), path.join(userDataRoot, to))) copied.push({ source:legacyRoot, path:from });
+    }
+  }
+  return { migrated:copied.length > 0, copied, legacyRoots, appDataRoot };
 }
 
 module.exports = { migrateLegacyDesktopData };

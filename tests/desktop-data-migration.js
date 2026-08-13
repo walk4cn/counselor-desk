@@ -8,6 +8,7 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'cwb-desktop-migration-'));
 const appDataRoot = path.join(root, 'AppData', 'Roaming');
 const userDataRoot = path.join(appDataRoot, 'Counselor Desk');
 const legacyRoot = path.join(userDataRoot, 'counselor-desk-v4');
+const priorProductRoot = path.join(appDataRoot, 'counselor-desk');
 
 try {
   fs.mkdirSync(path.join(legacyRoot, 'attachments'), { recursive:true });
@@ -34,6 +35,15 @@ try {
   assert.equal(fs.readFileSync(path.join(userDataRoot, 'counselor-v4.sqlite'), 'utf8'), 'current-db');
   assert.equal(fs.readFileSync(path.join(userDataRoot, 'vault', 'attachments', 'current.bin'), 'utf8'), 'current-attachment');
   assert.equal(fs.readFileSync(path.join(legacyRoot, 'database.sqlite'), 'utf8'), 'legacy-db', 'migration must preserve the source directory');
+
+  const secondRoot = path.join(root, 'second-profile');
+  fs.mkdirSync(path.join(priorProductRoot, 'vault', 'attachments'), { recursive:true });
+  fs.writeFileSync(path.join(priorProductRoot, 'counselor-v4.sqlite'), 'prior-product-db');
+  fs.writeFileSync(path.join(priorProductRoot, 'vault', 'attachments', 'prior.bin'), 'prior-product-attachment');
+  const prior = migrateLegacyDesktopData({ appDataRoot, userDataRoot:secondRoot });
+  assert.equal(prior.migrated, true, 'the historical package-name root must migrate too');
+  assert.equal(fs.readFileSync(path.join(secondRoot, 'counselor-v4.sqlite'), 'utf8'), 'prior-product-db');
+  assert.equal(fs.readFileSync(path.join(secondRoot, 'vault', 'attachments', 'prior.bin'), 'utf8'), 'prior-product-attachment');
   console.log('PASS desktop-data-migration');
 } finally {
   fs.rmSync(root, { recursive:true, force:true });
