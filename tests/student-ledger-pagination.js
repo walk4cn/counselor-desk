@@ -97,6 +97,38 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   await wait(35);
   assert.equal(c.db.students.every(student => !student.community), true, 'undo restores the prior values once');
 
+  c.db.students = Array.from({ length:5000 }, (_, index) => c.norm.student({
+    id:`filter-perf-${index}`,
+    student_number:`FP-${String(index).padStart(5, '0')}`,
+    full_name:`Filter Performance ${index}`,
+    class_name:`Class ${index % 8}`,
+    community:index % 2 ? '启明书院' : '致远书院',
+    student_type:index % 3 ? '本科生' : '专科生',
+    enrollment_status:index % 5 ? '在读' : '休学',
+    focus:index % 4 ? [] : ['study'],
+    crisis_level:index % 10 ? '' : '院级',
+    crisis_relieved:false,
+  }));
+  c.save('students');
+  c.go('students');
+  await wait(40);
+  const communityFilter = d.querySelector('[data-filter="students.community"]');
+  const typeFilter = d.querySelector('[data-filter="students.studentType"]');
+  const enrollmentFilter = d.querySelector('[data-filter="students.enrollment"]');
+  const started = w.performance.now();
+  communityFilter.value = '启明书院';
+  communityFilter.dispatchEvent(new w.Event('change', { bubbles:true }));
+  await wait(0);
+  typeFilter.value = '本科生';
+  typeFilter.dispatchEvent(new w.Event('change', { bubbles:true }));
+  await wait(0);
+  enrollmentFilter.value = '在读';
+  enrollmentFilter.dispatchEvent(new w.Event('change', { bubbles:true }));
+  await wait(0);
+  const elapsed = w.performance.now() - started;
+  assert.ok(d.querySelectorAll('[data-student-row]').length > 0, 'the combined filter renders matching ledger rows');
+  assert.ok(elapsed <= 200, `5,000-student combined filtering took ${elapsed.toFixed(1)}ms, exceeding the 200ms release gate`);
+
   assert.deepEqual(errors, []);
   dom.window.close();
   console.log('PASS student-ledger-pagination');
