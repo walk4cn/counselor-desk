@@ -10,8 +10,10 @@ const tests = fs.readFileSync(path.join(root, '.github', 'workflows', 'tests.yml
 assert.match(tests, /timeout-minutes:\s*(?:[2-9]\d|1\d\d)/, 'the complete test workflow must allow the measured full suite to finish');
 assert.match(tests, /pnpm run lint/, 'the PR test gate must check the source surface before tests run');
 assert.match(tests, /pnpm run check:public/, 'the PR test gate must scan the public product surface');
+assert.match(tests, /xvfb-run -a pnpm test/, 'Ubuntu CI must provide a virtual display for the required Electron smoke');
 
 assert.match(release, /name: Tests/, 'the release pipeline must begin with the complete test gate');
+assert.match(release, /xvfb-run -a pnpm test/, 'the release test gate must provide a virtual display for Electron smoke');
 assert.match(release, /tags:\s*\['v4\.4\.0'\]/, 'the v4.4 release workflow must not create releases for arbitrary version tags');
 assert.match(release, /windows:\s*\n[\s\S]*?needs: validate/, 'Windows packaging must wait for tests');
 assert.match(release, /macos:\s*\n[\s\S]*?needs: windows/, 'macOS packaging must wait for Windows');

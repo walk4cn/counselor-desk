@@ -51,7 +51,7 @@ jobs:
           pnpm run lint
           pnpm run check:public
       - name: Run complete v4.4 test gate
-        run: pnpm test
+        run: xvfb-run -a pnpm test
       - name: Verify release configuration
         run: pnpm run test:release
 

@@ -39,7 +39,7 @@ jobs:
           pnpm run check:public
 
       - name: Run complete suite
-        run: pnpm test
+        run: xvfb-run -a pnpm test
 
       - name: Run release checks
         run: pnpm run test:release
