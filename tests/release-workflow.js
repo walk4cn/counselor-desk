@@ -12,6 +12,7 @@ assert.match(tests, /pnpm run lint/, 'the PR test gate must check the source sur
 assert.match(tests, /pnpm run check:public/, 'the PR test gate must scan the public product surface');
 
 assert.match(release, /name: Tests/, 'the release pipeline must begin with the complete test gate');
+assert.match(release, /tags:\s*\['v4\.4\.0'\]/, 'the v4.4 release workflow must not create releases for arbitrary version tags');
 assert.match(release, /windows:\s*\n[\s\S]*?needs: validate/, 'Windows packaging must wait for tests');
 assert.match(release, /macos:\s*\n[\s\S]*?needs: windows/, 'macOS packaging must wait for Windows');
 assert.match(release, /web:\s*\n[\s\S]*?needs: macos/, 'offline web packaging must wait for macOS');
@@ -33,6 +34,7 @@ assert.doesNotMatch(pages, /push:\s*\n\s*branches:/, 'Pages must not deploy on a
 assert.match(pages, /workflow_dispatch:/, 'Pages deployment must require an explicit operator action');
 assert.match(pages, /release_tag:/, 'Pages deployment must be tied to a release tag');
 assert.match(pages, /gh release view/, 'Pages deployment must verify the published release');
+assert.match(pages, /\.isDraft == false and \.isPrerelease == false/, 'Pages must only deploy a final, non-prerelease release');
 assert.match(pages, /Prepare public site artifact/, 'Pages must stage a product-only site artifact');
 assert.match(pages, /mkdir -p site\/assets site\/vendor site\/src\/core/, 'Pages must explicitly scope the site artifact');
 assert.match(pages, /path: site/, 'Pages must deploy the staged site, never the full repository');

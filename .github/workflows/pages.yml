@@ -34,7 +34,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view "${{ inputs.release_tag }}" --repo "${{ github.repository }}" --json tagName,isDraft,isPrerelease \
-            --jq 'select(.tagName == "${{ inputs.release_tag }}" and .isDraft == false)'
+            --jq 'select(.tagName == "${{ inputs.release_tag }}" and .isDraft == false and .isPrerelease == false)'
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Prepare public site artifact
