@@ -11,7 +11,9 @@ jobs:
   test:
     name: Complete test gate
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # The measured v4.4 full suite includes browser, migration, and desktop
+    # source smoke checks; five minutes would terminate a healthy candidate.
+    timeout-minutes: 20
 
     steps:
       - name: Checkout

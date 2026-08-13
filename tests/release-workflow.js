@@ -5,6 +5,9 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const release = fs.readFileSync(path.join(root, '.github', 'workflows', 'desktop-release.yml'), 'utf8');
 const pages = fs.readFileSync(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
+const tests = fs.readFileSync(path.join(root, '.github', 'workflows', 'tests.yml'), 'utf8');
+
+assert.match(tests, /timeout-minutes:\s*(?:[2-9]\d|1\d\d)/, 'the complete test workflow must allow the measured full suite to finish');
 
 assert.match(release, /name: Tests/, 'the release pipeline must begin with the complete test gate');
 assert.match(release, /windows:\s*\n[\s\S]*?needs: validate/, 'Windows packaging must wait for tests');
