@@ -10073,8 +10073,13 @@ function installV4Integration() {
 window.CWB = {
   version: APP_VERSION,
   db: DB, store, storage, schema, importSchemas:IMPORT_SCHEMAS, studentImportSchema:STUDENT_IMPORT_SCHEMA, ui, hooks, bridge, modules, onboarding, welcome:welcomeExperience, theme, security, importer, testData, sync,
-  // Keep JSON backup recovery available if optional workspace runtimes cannot load.
-  importExchangePackage: async (pkg, mode) => bridge.applyPackage(pkg, mode === 'replace' ? 'replace' : 'merge'),
+  // Keep plain legacy JSON recovery available if optional workspace runtimes cannot load.
+  // Attachments and v8 history require the transactional workspace adapter installed below.
+  importExchangePackage: async (pkg, mode) => {
+    const attachments = (pkg && pkg.data && pkg.data.attachments) || (pkg && pkg.attachments) || [];
+    if ((Array.isArray(attachments) && attachments.length) || (pkg && pkg.workspace)) throw new Error('V8_WORKSPACE_REQUIRED');
+    return bridge.applyPackage(pkg, mode === 'replace' ? 'replace' : 'merge');
+  },
   persistence: { autosave: { markDirty:part => typeof window.CWB_V4_SYNC === 'function' ? window.CWB_V4_SYNC(part) : save(part), flush:part => typeof window.CWB_V4_SYNC === 'function' ? Promise.resolve(window.CWB_V4_SYNC(part)) : Promise.resolve(save(part)) } },
   consts: { DUTIES, FOCUS, LEVELS, PRIOS, SOURCES, TALK_WAYS, CRISIS_LEVELS, CRISIS_WAYS, STU_TYPES, HONOR_TYPES, MORAL_LEVELS, POLITICS,
     PLEAVE_TYPES, ATTEND_TYPES, NODE_REPEAT, WARN_TYPES, WARN_LEVELS, HELP_TYPES, GRANT_KINDS,
