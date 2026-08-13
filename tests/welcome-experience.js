@@ -26,6 +26,9 @@ function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
   assert.equal(setup.querySelectorAll('[data-welcome-preset]').length, 5, 'setup should offer five theme presets');
   assert.doesNotMatch(setup.textContent, /GOOD MORNING|以后每次打开|隐私说明/i);
 
+  // Freeze the first-open day before setup persists it. The same clock is then
+  // used to prove that a non-forced same-day refresh remains suppressed.
+  dom.window.__CWB_WELCOME_NOW__ = () => new Date('2026-08-13T08:00:00');
   setup.querySelector('#welcome-name').value = '张三';
   setup.querySelector('#welcome-address').value = '张老师';
   setup.querySelector('#welcome-college').value = '学生工作部';

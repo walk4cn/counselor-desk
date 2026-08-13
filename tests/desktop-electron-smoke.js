@@ -5,10 +5,9 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.join(__dirname, '..');
-const electron = path.join(root, 'desktop', 'node_modules', 'electron', 'dist', process.platform === 'win32' ? 'electron.exe' : 'Electron');
+const electron = path.join(root, 'node_modules', 'electron', 'dist', process.platform === 'win32' ? 'electron.exe' : 'Electron');
 if (!fs.existsSync(electron)) {
-  console.log('SKIP desktop-electron-smoke: Electron binary is not installed');
-  process.exit(0);
+  throw new Error('desktop-electron-smoke: required Electron binary is not installed');
 }
 const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cwb-electron-smoke-'));
 try {
@@ -20,7 +19,7 @@ try {
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const output = `${result.stdout}\n${result.stderr}`;
   assert.match(output, /"ok":true/);
-  assert.match(output, /"schemaVersion":7/);
+  assert.match(output, /"schemaVersion":8/);
   assert.match(output, /"attachment":true/);
   assert.match(output, /"migration":true/);
   assert.match(output, /"backup":/);

@@ -66,8 +66,8 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   cwb.go('report');
   await sleep(30);
   assert.ok(main().querySelector('[data-act="open-local-data"]'), 'work summary should expose the local data folder action');
-  assert.ok(main().querySelector('[data-act="ai-summary-roadmap"]'), 'work summary should explain the reserved AI-writing integration');
-  assert.match(main().textContent, /不调用 AI/, 'summary must state that the current draft is based on local records, not an AI response');
+  assert.match(main().textContent, /本机任务、谈话和重点关注记录自动整理/, 'summary must explain its local-record basis');
+  assert.doesNotMatch(main().textContent, /AI|提示词|模型/, 'the counselor-facing summary must not expose model or prompt language');
 
   for (const view of ['pleave', 'attend', 'node', 'warn']) {
     cwb.go(view);
@@ -91,6 +91,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   assert.equal(window.getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(), '#191b1f', 'dark mode must override a previously selected light preset background');
   assert.match(fs.readFileSync(path.join(root, 'desktop', 'preload.cjs'), 'utf8'), /openDataFolder/, 'desktop bridge should expose the data-folder action');
   assert.match(fs.readFileSync(path.join(root, 'desktop', 'main.cjs'), 'utf8'), /desktop:open-data-folder/, 'desktop main process should implement the data-folder action');
+  assert.doesNotMatch(html, /交给 AI|帮我在这个辅导员工作台里增加一个|提示词/, 'the public application must not contain an AI prompt-style extension entry');
   assert.deepEqual(errors, [], `unexpected browser errors: ${errors.join(' | ')}`);
 
   console.log('PASS ux-operations');

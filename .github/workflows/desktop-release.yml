@@ -85,6 +85,7 @@ jobs:
           $arm64 = $packages | Where-Object { $_.Name -match 'arm64' } | Select-Object -First 1
           if (-not $x64 -or -not $arm64) { throw 'Both x64 and arm64 installers are required.' }
           $env:CWB_DESKTOP_ARTIFACT_DIR = (Resolve-Path output/desktop).Path
+          $env:CWB_REQUIRE_ARTIFACTS = '1'
           pnpm exec node tests/desktop-packaged-smoke.js
           pnpm exec node tests/desktop-installer-smoke.js
           @($x64, $arm64) | ForEach-Object { (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash + ' *' + $_.Name } | Set-Content output/desktop/Windows-SHA256.txt -Encoding utf8
@@ -131,8 +132,13 @@ jobs:
           test -n "$binary"
           lipo -archs "$binary" | grep -q x86_64
           lipo -archs "$binary" | grep -q arm64
+          CWB_DESKTOP_ARTIFACT_DIR="$PWD/mac-app" CWB_REQUIRE_ARTIFACTS=1 pnpm exec node tests/desktop-packaged-smoke.js
           hdiutil attach "$dmg" -nobrowse -mountpoint mounted-dmg
-          test -n "$(find mounted-dmg -maxdepth 2 -name '*.app' -print -quit)"
+          mounted_app="$(find mounted-dmg -maxdepth 2 -name '*.app' -print -quit)"
+          test -n "$mounted_app"
+          mounted_binary="$(find "$mounted_app/Contents/MacOS" -type f -perm -111 -print -quit)"
+          test -n "$mounted_binary"
+          CWB_DESKTOP_EXECUTABLE="$mounted_binary" CWB_REQUIRE_ARTIFACTS=1 pnpm exec node tests/desktop-packaged-smoke.js
           hdiutil detach mounted-dmg
           shasum -a 256 "$dmg" "$zip" > output/desktop/macOS-SHA256.txt
       - uses: actions/upload-artifact@v4

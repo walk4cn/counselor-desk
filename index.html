@@ -5013,7 +5013,7 @@ function viewReport() {
       <button class="btn btn-sm" data-act="print">打印 / 存 PDF</button>
     </div>
     <div class="card-bd">
-      <div class="banner banner-info"><strong>当前生成方式：</strong>按统计区间内的本机任务、谈话和重点关注记录自动整理，不调用 AI，不会补写未录入的事实。</div>
+      <div class="banner banner-info"><strong>当前整理方式：</strong>按统计区间内的本机任务、谈话和重点关注记录自动整理，只呈现已录入的事实。</div>
       <textarea class="inp" id="sum-text" rows="16" style="font-size:13.5px;line-height:1.85">${esc(buildSummary(R))}</textarea>
       <div class="hint">文本可直接编辑后复制到学院要求的模板里；数据来源为本机记录，未上传任何服务器，也不会补写未录入的事实。</div>
     </div>
@@ -5147,23 +5147,6 @@ function viewBridge() {
       <div class="card">
         <div class="card-hd"><h2>字段对照表</h2><span class="sp"></span><span class="tiny">导入导出无需改字段名</span></div>
         <div class="tw"><table><thead><tr><th>字段名</th><th>含义</th><th>与平台关系</th></tr></thead><tbody>${fields}</tbody></table></div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><h2>自己动手改造它</h2></div>
-        <div class="card-bd">
-          <p class="muted" style="margin-top:0">这个工作台是<b>单个 HTML 文件</b>，用记事本就能改。想加模块时，把下面这段话连同 index.html 一起交给 AI 就行：</p>
-          <textarea class="inp" rows="4" readonly style="font-size:12.5px;background:#fafbfc">帮我在这个辅导员工作台里增加一个「XX」模块：字段有 A、B、C。请沿用文件里已有的 CWB.store 存储、ui.form 表单和卡片样式，只新增代码，不要改动原有模块。</textarea>
-          <div style="margin-top:14px">
-            <div class="lab" style="margin-bottom:6px">已开放的扩展接口（在浏览器控制台可直接调用）</div>
-            <div class="tw"><table><tbody>
-              <tr><td><code>CWB.store</code></td><td class="muted">读写本地数据</td></tr>
-              <tr><td><code>CWB.db</code></td><td class="muted">当前全部数据</td></tr>
-              <tr><td><code>CWB.ui.form()</code></td><td class="muted">生成带校验的弹窗表单</td></tr>
-              <tr><td><code>CWB.modules.register()</code></td><td class="muted">注册自定义模块</td></tr>
-              <tr><td><code>CWB.bridge</code></td><td class="muted">交换包生成与导入</td></tr>
-            </tbody></table></div>
-          </div>
-        </div>
       </div>
     </div>
   </details>`;

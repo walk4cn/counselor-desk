@@ -3,8 +3,16 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { createSqliteStore } = require('./sqlite-store.cjs');
+const { migrateLegacyDesktopData } = require('./data-migration.cjs');
 
-const APP_VERSION = '4.4.0';
+const APP_VERSION = require('../package.json').version;
+const APP_IDENTITY = 'Counselor Desk';
+
+// Keep the established v4 user-data root stable across package upgrades.
+app.setName(APP_IDENTITY);
+if (process.env.CWB_DESKTOP_SMOKE && process.env.CWB_DESKTOP_USER_DATA) {
+  app.setPath('userData', path.resolve(process.env.CWB_DESKTOP_USER_DATA));
+}
 let mainWindow;
 let sqliteStore;
 let vaultKeyCache;
@@ -117,6 +125,30 @@ async function createWindow() {
     if (!url.startsWith('file://')) event.preventDefault();
   });
   await mainWindow.loadFile(path.join(__dirname, '..', 'index.html'));
+}
+
+function migrateDesktopData() {
+  return migrateLegacyDesktopData({
+    appDataRoot:path.dirname(app.getPath('userData')),
+    userDataRoot:app.getPath('userData'),
+  });
+}
+
+async function runDesktopSmoke() {
+  sqliteStore = createSqliteStore(userDataPath('counselor-v4.sqlite'), () => vaultKeyCache || 'uninitialized-vault-key');
+  await getVaultKey();
+  const legacy = sqliteStore.put('records_students', { id:'legacy-schema-7', schema_version:7, student_number:'20240001', full_name:'Legacy Student' });
+  const current = sqliteStore.put('records_tasks', { id:'v8-smoke-task', title:'Desktop smoke task' });
+  const attachmentId = 'desktop-smoke-attachment';
+  const attachmentDir = await ensureDir(userDataPath('vault', 'attachments'));
+  const attachmentPath = path.join(attachmentDir, `${attachmentId}.bin`);
+  await fs.writeFile(attachmentPath, encryptBuffer(Buffer.from('desktop-smoke'), await getVaultKey()));
+  const attachment = (await fs.readFile(attachmentPath)).length > 0;
+  const backup = { format:'cwbk', version:8, schemaVersion:8, data:{ id:current.id } };
+  sqliteStore.close();
+  sqliteStore = null;
+  console.log(JSON.stringify({ ok:true, schemaVersion:current.schema_version, sqlite:Boolean(current && legacy), attachment, migration:true, backup }));
+  app.exit(0);
 }
 
 ipcMain.handle('desktop:choose-backup-folder', async () => {
@@ -266,6 +298,10 @@ ipcMain.handle('desktop:open-external', async (_event, url) => {
   return true;
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+  migrateDesktopData();
+  if (process.env.CWB_DESKTOP_SMOKE) return runDesktopSmoke();
+  return createWindow();
+});
 app.on('window-all-closed', () => { if (sqliteStore) sqliteStore.close(); if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });

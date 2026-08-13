@@ -30,6 +30,6 @@ function browserExecutable() {
     return { version:envelope.version, exportedAttachment: listedBefore.some(item => item.id === record.id), removed, restored:!!restored && restored.size === record.size, wrongPassword, corruptedBackup, auditExport:audit.some(item => item.action === 'backup_export'), auditRestore:audit.some(item => item.action === 'backup_restore') };
   });
   await browser.close();
-  assert.deepEqual(result, { version:7, exportedAttachment:true, removed:true, restored:true, wrongPassword:'BACKUP_PASSWORD_INVALID', corruptedBackup:'BACKUP_INTEGRITY_FAILED', auditExport:true, auditRestore:true });
+  assert.deepEqual(result, { version:8, exportedAttachment:true, removed:true, restored:true, wrongPassword:'BACKUP_PASSWORD_INVALID', corruptedBackup:'BACKUP_INTEGRITY_FAILED', auditExport:true, auditRestore:true });
   console.log('PASS v40-backup-attachments');
 })().catch(error => { console.error(error.stack || error.message); process.exit(1); });
