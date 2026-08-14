@@ -19,8 +19,8 @@ assert.match(release, /tags:\s*\['v4\.4\.0'\]/, 'the v4.4 release workflow must 
 assert.match(release, /node -p 'require\("\.\/package\.json"\)\.version'/, 'the release gate must read package.json with Bash-safe quoting');
 assert.doesNotMatch(release, /node -p \\\"require\('\.\/package\.json'\)\.version\\\"/, 'the release gate must not escape JavaScript quotes into an invalid Bash command');
 assert.match(release, /windows:\s*\n[\s\S]*?needs: validate/, 'Windows packaging must wait for tests');
-assert.match(release, /macos:\s*\n[\s\S]*?needs: windows/, 'macOS packaging must wait for Windows');
-assert.match(release, /web:\s*\n[\s\S]*?needs: macos/, 'offline web packaging must wait for macOS');
+assert.match(release, /macos:\s*\n[\s\S]*?needs: \[validate, windows\]/, 'macOS packaging must wait for Windows and retain validate outputs');
+assert.match(release, /web:\s*\n[\s\S]*?needs: \[validate, macos\]/, 'offline web packaging must wait for macOS and retain validate outputs');
 assert.match(release, /release:\s*\n[\s\S]*?needs: \[validate, web\]/, 'a Release may only be drafted after all build gates');
 assert.match(release, /--draft --verify-tag/, 'the public release starts as a verified draft');
 assert.match(release, /desktop:build:win/, 'the workflow must build Windows packages');

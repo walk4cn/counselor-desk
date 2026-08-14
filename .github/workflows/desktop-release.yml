@@ -100,7 +100,7 @@ jobs:
 
   macos:
     name: macOS Universal (DMG and ZIP)
-    needs: windows
+    needs: [validate, windows]
     runs-on: macos-15-intel
     timeout-minutes: 40
     env:
@@ -153,7 +153,7 @@ jobs:
 
   web:
     name: Offline web package
-    needs: macos
+    needs: [validate, macos]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
