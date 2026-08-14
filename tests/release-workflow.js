@@ -28,8 +28,10 @@ assert.match(release, /desktop:build:mac/, 'the workflow must build macOS univer
 assert.match(release, /x64 and arm64 NSIS installers/, 'Windows x64 and ARM64 NSIS packages must both be required');
 assert.match(release, /desktop-windows-architecture\.js/, 'Windows packages must verify PE architectures, not only artifact names');
 assert.match(release, /lipo -archs/, 'macOS packages must prove both architectures');
+assert.match(release, /chmod \+x "\$binary"/, 'the ZIP smoke must restore the packaged macOS binary execute bit before launch');
 assert.match(release, /hdiutil attach/, 'macOS DMG mounting must be verified');
 assert.match(release, /desktop-packaged-smoke\.js/, 'macOS packages must execute the packaged desktop smoke');
+assert.match(release, /CWB_DESKTOP_EXECUTABLE="\$binary" CWB_REQUIRE_ARTIFACTS=1 pnpm exec node tests\/desktop-packaged-smoke\.js/, 'the ZIP smoke must launch the same macOS binary that passed lipo verification');
 assert.match(release, /CWB_REQUIRE_ARTIFACTS=1/, 'CI package smoke must reject missing artifacts');
 assert.match(release, /Windows-SHA256\.txt/, 'Windows checksums must be published');
 assert.match(release, /macOS-SHA256\.txt/, 'macOS checksums must be published');

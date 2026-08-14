@@ -133,7 +133,8 @@ jobs:
           test -n "$binary"
           lipo -archs "$binary" | grep -q x86_64
           lipo -archs "$binary" | grep -q arm64
-          CWB_DESKTOP_ARTIFACT_DIR="$PWD/mac-app" CWB_REQUIRE_ARTIFACTS=1 pnpm exec node tests/desktop-packaged-smoke.js
+          chmod +x "$binary"
+          CWB_DESKTOP_EXECUTABLE="$binary" CWB_REQUIRE_ARTIFACTS=1 pnpm exec node tests/desktop-packaged-smoke.js
           hdiutil attach "$dmg" -nobrowse -mountpoint mounted-dmg
           mounted_app="$(find mounted-dmg -maxdepth 2 -name '*.app' -print -quit)"
           test -n "$mounted_app"
