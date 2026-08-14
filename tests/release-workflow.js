@@ -22,6 +22,7 @@ assert.match(release, /windows:\s*\n[\s\S]*?needs: validate/, 'Windows packaging
 assert.match(release, /macos:\s*\n[\s\S]*?needs: \[validate, windows\]/, 'macOS packaging must wait for Windows and retain validate outputs');
 assert.match(release, /web:\s*\n[\s\S]*?needs: \[validate, macos\]/, 'offline web packaging must wait for macOS and retain validate outputs');
 assert.match(release, /release:\s*\n[\s\S]*?needs: \[validate, web\]/, 'a Release may only be drafted after all build gates');
+assert.match(release, /release:\s*\n[\s\S]*?uses: actions\/checkout@v4[\s\S]*?ref: refs\/tags\/\$\{\{ needs\.validate\.outputs\.tag \}\}[\s\S]*?actions\/download-artifact@v4/, 'the draft Release job must check out the verified tag before gh --verify-tag');
 assert.match(release, /--draft --verify-tag/, 'the public release starts as a verified draft');
 assert.match(release, /desktop:build:win/, 'the workflow must build Windows packages');
 assert.match(release, /desktop:build:mac/, 'the workflow must build macOS universal packages');
