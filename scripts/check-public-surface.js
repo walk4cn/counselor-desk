@@ -55,18 +55,12 @@ for (const file of publicDocs) {
   if (forbiddenTerms.test(content)) throw new Error(`${file} contains internal-process language`);
 }
 
-const legacyPublicVersion = /v(?:3\.8|3\.9)(?:\.\d+)?/i;
-for (const file of [...publicDocs, 'assets/banner.svg', 'samples/import-compat/README.md']) {
-  const content = fs.readFileSync(path.join(root, file), 'utf8');
-  if (legacyPublicVersion.test(content)) throw new Error(`${file} contains an obsolete public version reference`);
-}
-
 const currentReadme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
-if (/v4\.0\.0|Windows-安装版\.msi|macOS-安装版\.dmg/i.test(currentReadme)) {
+if (/Windows-安装版\.msi|macOS-安装版\.dmg/i.test(currentReadme)) {
   throw new Error('README contains obsolete v4.0 download or package claims');
 }
-if (!/v4\.0\*{0,2}\s*\|\s*2026-08-07/.test(currentReadme) || !/v4\.4(?:\.0)?\*{0,2}\s*\|\s*2026-08-13/.test(currentReadme)) {
-  throw new Error('README must retain the factual v4.0 to v4.4 iteration timeline');
+if (!/v3\.8(?:\.0)?\*{0,2}\s*\|\s*2026-08-04/.test(currentReadme) || !/v3\.9(?:\.0)?\*{0,2}\s*\|\s*2026-08-05/.test(currentReadme) || !/v4\.0\*{0,2}\s*\|\s*2026-08-07/.test(currentReadme) || !/v4\.4(?:\.0)?\*{0,2}\s*\|\s*2026-08-13/.test(currentReadme)) {
+  throw new Error('README must retain the factual v3.8 to v4.4 iteration timeline');
 }
 
 function walkPublicText(dir) {

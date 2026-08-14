@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, Menu, safeStorage, shell } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -174,6 +174,13 @@ async function createWindow() {
       webSecurity: true,
     },
   });
+  // The Windows build is a focused local workspace. The default Electron
+  // File/Edit/View menu duplicates no product controls and makes the title
+  // area needlessly busy; macOS keeps its conventional application menu.
+  if (process.platform === 'win32') {
+    Menu.setApplicationMenu(null);
+    mainWindow.setMenuBarVisibility(false);
+  }
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   mainWindow.webContents.on('will-navigate', (event, url) => {
     // The renderer is a local application surface; never let untrusted content

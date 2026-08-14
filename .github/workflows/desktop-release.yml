@@ -2,7 +2,7 @@ name: Validate and prepare v4.4 release
 
 on:
   push:
-    tags: ['v4.4.0']
+    tags: ['v4.4.*']
   workflow_dispatch:
     inputs:
       release_tag:
