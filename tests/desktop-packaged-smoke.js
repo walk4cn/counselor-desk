@@ -36,7 +36,7 @@ try {
       env:Object.assign({}, process.env, { CWB_DESKTOP_SMOKE:'1', CWB_DESKTOP_USER_DATA:userData, CWB_DESKTOP_SMOKE_EXPECT_PERSISTENCE:run === 1 ? '1' : '0' }),
       encoding:'utf8', timeout:120000,
     });
-    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.equal(result.status, 0, `${result.error ? `${result.error.name}: ${result.error.message}\n` : ''}${result.stdout}\n${result.stderr}`);
     const output = `${result.stdout}\n${result.stderr}`;
     assert.match(output, /"ok":true/);
     assert.match(output, /"schemaVersion":8/);
