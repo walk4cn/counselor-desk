@@ -56,8 +56,8 @@
 
 ## 版本兼容
 
-发布版本会在 Release 说明中列出可导入的历史格式、schema、加密备份和桌面数据兼容范围。当前 v4.4.1 延续 schema v8；请只使用 [正式 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1) 的程序或离线 HTML 处理正式数据，不要将开发分支构建用于生产迁移。
+发布版本会在 Release 说明中列出可导入的历史格式、schema、加密备份和桌面数据兼容范围。当前 v4.4.2 延续 schema v8；请只使用 [正式 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 的程序或离线 HTML 处理正式数据，不要将开发分支构建用于生产迁移。
 
 ### v4.4 的迁移原则
 
-v4.4 使用 schema v8 工作区。它的迁移目标是保留内部 ID、附件关联、历史学号、自定义字段和可以读取的历史记录；迁移前会建立恢复点。遇到无法判断的旧字段或冲突记录，系统应提示并保留原始信息供人工判断，而不是静默覆盖。正式兼容范围、加密格式和桌面迁移结果见 [v4.4.1 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1) 与 [发布验收记录](./v4-acceptance-report.md)。
+v4.4 使用 schema v8 工作区。它的迁移目标是保留内部 ID、附件关联、历史学号、自定义字段和可以读取的历史记录；迁移前会建立恢复点。遇到无法判断的旧字段或冲突记录，系统应提示并保留原始信息供人工判断，而不是静默覆盖。正式兼容范围、加密格式和桌面迁移结果见 [v4.4.2 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 与 [发布验收记录](./v4-acceptance-report.md)。

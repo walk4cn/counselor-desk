@@ -23,7 +23,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const failures = [];
   const expect = (label, condition) => { if (!condition) failures.push(label); };
 
-  expect('version is 4.4.1', w.CWB && w.CWB.version === '4.4.1');
+  expect('version is 4.4.2', w.CWB && w.CWB.version === '4.4.2');
   expect('onboarding API exists', !!(w.CWB && w.CWB.onboarding && typeof w.CWB.onboarding.complete === 'function'));
   expect('onboarding card is visible on first-use state', !!d.querySelector('[data-onboarding]'));
   expect('theme API exists', !!(w.CWB && w.CWB.theme && typeof w.CWB.theme.applyPreset === 'function'));

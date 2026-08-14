@@ -2,15 +2,15 @@
 
 <img src="./assets/logo.svg" width="112" alt="辅导员工作台标志" />
 
-# 辅导员工作台 v4.4.1 · Counselor Desk
+# 辅导员工作台 v4.4.2 · Counselor Desk
 
 ### 为高校辅导员、班主任与学生工作团队准备的本地优先工作台
 
 把学生台账、谈心谈话、重点关注、班团组织、党员发展、成绩帮扶、资料归档、导入导出与备份恢复，放进一处可持续维护、可带走、也可回看的工作空间。
 
 <p>
-  <img alt="version v4.4.1" src="https://img.shields.io/badge/version-v4.4.1-0b3a82?style=flat-square&logo=github" />
-  <img alt="release v4.4.1 verified" src="https://img.shields.io/badge/status-v4.4.1%20Released-2da44e?style=flat-square&logo=checkmarx" />
+  <img alt="version v4.4.2" src="https://img.shields.io/badge/version-v4.4.2-0b3a82?style=flat-square&logo=github" />
+  <img alt="release v4.4.2" src="https://img.shields.io/badge/status-v4.4.2%20Release-2da44e?style=flat-square&logo=checkmarx" />
   <a href="./LICENSE"><img alt="license MIT" src="https://img.shields.io/badge/license-MIT-2da44e?style=flat-square" /></a>
   <img alt="platform web" src="https://img.shields.io/badge/platform-Web-0969da?style=flat-square" />
   <img alt="platform desktop" src="https://img.shields.io/badge/platform-Windows%20%2B%20macOS-8250df?style=flat-square" />
@@ -30,7 +30,7 @@
 
 ![辅导员工作台 v4.4 产品横幅：本地优先的学生工作资料、台账和备份](./assets/github-hero-v4.png)
 
-> **当前正式版为 v4.4.1。** 网页、离线 HTML、Windows 安装包与 macOS Universal 包均来自同一发布提交；[Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1) 附带 SHA-256 清单。发布门禁已依次完成 Tests、Windows、macOS、网页产物、Release 与 Pages 部署；macOS 产物当前为**未签名、未公证**，请按学校的软件管理要求决定是否安装。
+> **当前发布版本为 v4.4.2。** 网页、离线 HTML、Windows 安装包与 macOS Universal 包必须来自同一发布提交；请从 [v4.4.2 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 获取附件及 SHA-256 清单。macOS 产物如未签名、未公证，会在 Release 中明确标注；请按学校的软件管理要求决定是否安装。
 
 ---
 
@@ -123,7 +123,7 @@
 
 ## 🚀 从这里开始
 
-1. **先选使用方式。** 想直接体验功能，可打开 [在线体验](https://7752777.github.io/counselor-desk/)；想断网使用或长期维护本机数据，可从 [v4.4.1 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1) 下载离线 HTML、Windows 安装包或 macOS Universal 包，并先核对对应 SHA-256。
+1. **先选使用方式。** 想直接体验功能，可打开 [在线体验](https://7752777.github.io/counselor-desk/)；想断网使用或长期维护本机数据，可从 [v4.4.2 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 下载离线 HTML、Windows 安装包或 macOS Universal 包，并先核对对应 SHA-256。
 2. **先用演示或脱敏数据走一遍。** 按“导入预览 → 确认写入 → 查询 → 建立恢复点 → 导出备份”完成一次练习，再接入正式台账。
 3. **把敏感信息放在受控环境。** 不在 Issue、截图、培训材料或公开演示中提交真实学生数据；重要操作前先建立恢复点或导出备份。
 4. **按你的工作节奏定制。** 在设置中填写称呼、学院与主题色；在学生台账中保存常用筛选和列视图。
@@ -144,8 +144,9 @@
 | 🏫 **v4.3** | 2026-08-13 | 围绕“专项工作能否找得到”：收口班团组织、党员发展、成绩帮扶、危机流程、活动、奖惩、住宿和工作留痕入口。 |
 | 🚀 **v4.4.0** | 2026-08-13 | 围绕“能否安心交付”：统一欢迎体验、迁移恢复、便携隔离、性能回归、跨平台构建门禁、八张产品截图与公开资料；2026-08-14 完成正式 Release 与 Pages 发布。 |
 | 🧰 **v4.4.1** | 2026-08-14 | 面向真实安装与公开使用继续打磨：Windows 桌面端隐藏系统默认菜单，整理下载、安装、迁移、验收与归档说明，所有平台附件仍按同一发布门禁交付。 |
+| 🌿 **v4.4.2** | 2026-08-14 | 把首次打开的教育场景、每日金句背景、窄屏分页排版与离线资源一并收口：网页、离线 HTML 和桌面包不再依赖错误的相对路径，使用体验与公开说明同步更新。 |
 
-详细事实记录见 [CHANGELOG](./CHANGELOG.md)。当前可下载的 v4.4.1 延续“测试 → Windows → macOS → 网页产物 → Release → Pages”的顺序发布；历史版本保留在历程表中，但不冒充当前下载版。
+详细事实记录见 [CHANGELOG](./CHANGELOG.md)。当前下载入口 `v4.4.2` 延续“测试 → Windows → macOS → 网页产物 → Release → Pages”的顺序发布；历史版本保留在历程表中，但不冒充当前下载版。
 
 ### v4.4.0 这次具体带来了什么
 
@@ -187,6 +188,6 @@
 
 ### 🌟 让信息更清楚，让跟进更连续，让每一份用心都有迹可循。
 
-**辅导员工作台 v4.4.1 · Counselor Desk**
+**辅导员工作台 v4.4.2 · Counselor Desk**
 
 </div>

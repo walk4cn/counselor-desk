@@ -2,9 +2,9 @@
 
 本页面向维护者。目标是让网页、离线 HTML、Windows、macOS、README 和 Release 使用同一提交、同一数据格式、同一套事实说明。
 
-## 最近一次正式发布
+## 当前发布线
 
-`v4.4.1` 已于 2026-08-14 发布，提交为 [`87321de9a3e5cea69714220be5d3aa979bb5d154`](https://github.com/7752777/counselor-desk/commit/87321de9a3e5cea69714220be5d3aa979bb5d154)。完整门禁记录见 [Actions #31770583685](https://github.com/7752777/counselor-desk/actions/runs/31770583685)，Pages 部署记录见 [#31771487607](https://github.com/7752777/counselor-desk/actions/runs/31771487607)。`v4.4.0` 仍保留为发布基线；旧 Preview Tags、Releases 和已完成的远程开发分支已清理，Git 提交历史保留。
+`v4.4.2` 是当前发布线：欢迎页图片、每日金句背景、窄屏分页排版、离线资源与公开说明必须一起进入同一标签。只有 Tests、Windows、macOS、网页产物、Draft Release 和人工 Pages 部署全部完成后，才可把该标签写为正式公开版。`v4.4.1`（提交 [`87321de9a3e5cea69714220be5d3aa979bb5d154`](https://github.com/7752777/counselor-desk/commit/87321de9a3e5cea69714220be5d3aa979bb5d154)）保留为上一维护发布；`v4.4.0` 保留为首个完整发布基线。旧 Preview Tags、Releases 和已完成的远程开发分支已清理，Git 提交历史保留。
 
 ## 发布前
 
