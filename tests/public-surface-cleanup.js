@@ -168,6 +168,7 @@ for (const expected of [
   'README.md',
   'CONTRIBUTING.md',
   'THIRD-PARTY-NOTICES.md',
+  'assets/github-hero-v4.png',
   'docs/getting-started.md',
   'docs/development.md',
   'docs/architecture.md',
