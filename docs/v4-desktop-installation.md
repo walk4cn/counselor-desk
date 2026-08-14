@@ -31,7 +31,7 @@
 
 桌面端的数据目录属于用户数据，不应随意删除、同步到公共位置或直接用文本编辑器修改。安装目录和数据目录是两回事：升级或重装前应导出备份，卸载时也应先确认数据保留选项。
 
-v4.4.0 的 Windows x64 / ARM64 安装器及 macOS Universal DMG / ZIP 已在对应 CI 运行器完成构建和包级烟测。下载、SHA-256 与当前签名状态见 [v4.4.0 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.0)；macOS 包为未签名、未公证状态，安装前请遵守本校软件管理要求。
+当前 v4.4.1 的 Windows x64 / ARM64 安装器及 macOS Universal DMG / ZIP 已在对应 CI 运行器完成构建和包级烟测。下载、SHA-256 与当前签名状态见 [v4.4.1 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1)；macOS 包为未签名、未公证状态，安装前请遵守本校软件管理要求。
 
 ### 升级时最重要的事
 

@@ -16,6 +16,7 @@ assert.match(config, /^  include: desktop\/installer\.nsh$/m, 'the root NSIS bui
 assert.doesNotMatch(config, /^    - msi$/m, 'Windows release builds must use one installer contract');
 assert.doesNotMatch(config, /^    - portable$/m, 'Windows release builds must not use the failed portable target');
 assert.match(config, /^  - assets\/welcome-education-scene-v2\.png$/m, 'the welcome illustration must ship inside desktop builds');
+assert.match(config, /^  - assets\/welcome-morning\.png$/m, 'the daily quote reading-scene image must ship inside desktop builds');
 assert.match(installer, /DELETEUSERDATA/, 'NSIS must support an explicit, auditable data-deletion switch');
 assert.match(installer, /!insertmacro un\.GetParameters/, 'the NSIS uninstaller must initialize its own command-line parser');
 assert.match(installer, /!insertmacro un\.GetOptions/, 'the NSIS uninstaller must initialize its own option parser');

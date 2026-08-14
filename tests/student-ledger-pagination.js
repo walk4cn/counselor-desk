@@ -36,6 +36,8 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const pageSize = d.querySelector('[data-student-page-size]');
   assert.ok(pageSize, 'student ledger should expose a page-size selector');
   assert.deepEqual([...pageSize.options].map(option => option.value), ['10', '20', '50', '100']);
+  assert.ok(pageSize.closest('.student-page-size'), 'page-size words and selector should remain one intentional control');
+  assert.ok(d.querySelector('.student-pagination .student-page-size-static'), 'the lower pager should keep the page-size summary on one line');
   pageSize.value = '10';
   pageSize.dispatchEvent(new w.Event('change', { bubbles:true }));
   await wait(20);

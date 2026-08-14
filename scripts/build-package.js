@@ -45,7 +45,7 @@ for (const relative of [
   'docs/v4-privacy.md', 'docs/release-guide.md', 'docs/v4-acceptance-report.md'
 ]) copy(path.join(root, relative), path.join(target, relative));
 
-for (const asset of ['logo.svg', 'app-icon.svg', 'banner.svg', 'github-hero-v4.png', 'counselor-desk-hero.png', 'welcome-education-scene-v2.png']) copy(path.join(root, 'assets', asset), path.join(target, 'assets', asset));
+for (const asset of ['logo.svg', 'app-icon.svg', 'banner.svg', 'github-hero-v4.png', 'counselor-desk-hero.png', 'welcome-education-scene-v2.png', 'welcome-morning.png']) copy(path.join(root, 'assets', asset), path.join(target, 'assets', asset));
 for (const name of screenshots) copy(path.join(root, 'assets', 'screenshots', 'v4.4.0', name), path.join(target, 'assets', 'screenshots', 'v4.4.0', name));
 
 const sampleSource = path.join(root, 'samples', 'import-compat');

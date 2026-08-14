@@ -1,5 +1,7 @@
 # v4.4.0 发布验收记录
 
+> 本页保留 v4.4.0 的首个完整发布证据，便于追溯发布基线；当前用户下载请前往 [v4.4.1 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1)，不要把本页中的历史附件名当作最新下载项。
+
 本页记录已经发生并可复查的发布事实。它不是功能愿望清单，也不以“源码里有”代替可见、可下载、可恢复的产品能力。
 
 ## 发布身份
@@ -15,7 +17,7 @@
 
 ## 交付物与下载
 
-请只从 [v4.4.0 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.0) 下载文件，并核对随附件发布的 SHA-256 清单。
+下载时请只从 [v4.4.1 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1) 获取当前附件，并核对随附件发布的 SHA-256 清单；下表仅说明 v4.4.0 基线当时的产物组成。
 
 | 使用方式 | Release 附件 | 适用说明 |
 | --- | --- | --- |

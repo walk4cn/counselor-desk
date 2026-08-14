@@ -17,6 +17,7 @@ files:
   - src/core/v8-workspace-runtime.js
   - src/core/v8-backup-codec.js
   - assets/welcome-education-scene-v2.png
+  - assets/welcome-morning.png
   - vendor/xlsx.full.min.js
   - vendor/argon2-bundled.min.js
   - vendor/jszip.min.js

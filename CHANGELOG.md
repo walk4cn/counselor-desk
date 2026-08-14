@@ -2,16 +2,14 @@
 
 这里记录的是面向使用者与贡献者的产品演进，而不是开发过程摘录。版本状态以 [GitHub Releases](https://github.com/7752777/counselor-desk/releases) 中实际存在的附件、校验文件和说明为准。
 
-## [Unreleased]
-
-### v4.4.1 维护修订
+## [4.4.1] · 2026-08-14 · 维护发布
 
 - Windows 桌面端移除 Electron 默认的 File / Edit / View 菜单栏，保留产品内的工作入口与 macOS 的系统菜单习惯。
 - 更新仓库首页、下载说明、安装指南、迁移说明、发布验收和归档账本，修正“候选、旧 Pages、未发布”等已经失效的说法。
 - 把 `v3.8 → v3.9 → v4.0 → v4.1 → v4.2 → v4.3 → v4.4.0` 放回同一张产品历程表，保留每一轮解决的真实一线问题。
 - 调整公开面门禁：历史版本可以作为产品演进被介绍，但不能再被误写为当前下载版本或过期安装包。
 
-该维护版本仍须通过同一套 Tests、Windows、macOS、网页产物、Release 和 Pages 门禁后才进入正式下载页；本节不提前承诺附件、签名、平台结果或上线时间。
+`v4.4.1` 已按 Tests、Windows、macOS、网页产物、Release 与 Pages 的同一门禁公开；附件、SHA-256 与未签名/未公证说明以 [v4.4.1 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.1) 为准。
 
 ## [4.4.0] · 2026-08-14 · 正式发布
 
