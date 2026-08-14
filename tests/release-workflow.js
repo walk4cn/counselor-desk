@@ -28,6 +28,8 @@ assert.match(release, /CounselorDesk-v\$version-Offline\.html/, 'the offline HTM
 assert.match(release, /desktop:build:win/, 'the workflow must build Windows packages');
 assert.match(release, /desktop:build:mac/, 'the workflow must build macOS universal packages');
 assert.match(release, /x64 and arm64 NSIS installers/, 'Windows x64 and ARM64 NSIS packages must both be required');
+assert.match(release, /output\/desktop\/counselor-desk-\*-x64\.exe[\s\S]*output\/desktop\/counselor-desk-\*-arm64\.exe/, 'the public Release must upload only the explicitly verified Windows architecture installers');
+assert.doesNotMatch(release, /output\/desktop\/\*\.exe/, 'the public Release must not upload unverified generic Windows executables');
 assert.match(release, /desktop-windows-architecture\.js/, 'Windows packages must verify PE architectures, not only artifact names');
 assert.match(release, /lipo -archs/, 'macOS packages must prove both architectures');
 assert.match(release, /chmod \+x "\$binary"/, 'the ZIP smoke must restore the packaged macOS binary execute bit before launch');
