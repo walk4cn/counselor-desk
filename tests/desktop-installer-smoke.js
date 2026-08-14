@@ -4,6 +4,13 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
+function waitForRemoval(target, timeoutMs = 20000) {
+  const pause = new Int32Array(new SharedArrayBuffer(4));
+  const deadline = Date.now() + timeoutMs;
+  while (fs.existsSync(target) && Date.now() < deadline) Atomics.wait(pause, 0, 0, 100);
+  return !fs.existsSync(target);
+}
+
 if (process.platform !== 'win32') {
   console.log('SKIP desktop-installer-smoke: Windows installer test only runs on Windows');
   process.exit(0);
@@ -53,7 +60,7 @@ try {
   assert.ok(deleteUninstaller, 'reinstalled NSIS package should contain an uninstaller');
   const uninstallDelete = spawnSync(deleteUninstaller, ['/S', '/DELETEUSERDATA=1'], { env:smokeEnv, encoding:'utf8', timeout:180000 });
   assert.equal(uninstallDelete.status, 0, `${uninstallDelete.stdout}\n${uninstallDelete.stderr}`);
-  assert.ok(!fs.existsSync(userData), 'explicit /DELETEUSERDATA uninstall must remove data and attachments');
+  assert.ok(waitForRemoval(userData), 'explicit /DELETEUSERDATA uninstall must remove data and attachments within the smoke timeout');
   console.log('PASS desktop-installer-smoke');
 } finally {
   try { fs.rmSync(installDir, { recursive:true, force:true, maxRetries:10, retryDelay:500 }); }
