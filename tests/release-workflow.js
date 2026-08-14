@@ -15,7 +15,7 @@ assert.match(tests, /xvfb-run -a pnpm test/, 'Ubuntu CI must provide a virtual d
 
 assert.match(release, /name: Tests/, 'the release pipeline must begin with the complete test gate');
 assert.match(release, /xvfb-run -a pnpm test/, 'the release test gate must provide a virtual display for Electron smoke');
-assert.match(release, /tags:\s*\['v4\.4\.0'\]/, 'the v4.4 release workflow must not create releases for arbitrary version tags');
+assert.match(release, /tags:\s*\['v4\.4\.\*'\]/, 'the v4.4 release workflow must accept only v4.4 patch tags, including post-release fixes');
 assert.match(release, /node -p 'require\("\.\/package\.json"\)\.version'/, 'the release gate must read package.json with Bash-safe quoting');
 assert.doesNotMatch(release, /node -p \\\"require\('\.\/package\.json'\)\.version\\\"/, 'the release gate must not escape JavaScript quotes into an invalid Bash command');
 assert.match(release, /windows:\s*\n[\s\S]*?needs: validate/, 'Windows packaging must wait for tests');

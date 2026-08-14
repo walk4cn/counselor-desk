@@ -31,6 +31,8 @@ assert.match(main, /migrateLegacyDesktopData/);
 assert.match(main, /CWB_DESKTOP_SMOKE/);
 assert.match(main, /if \(!safeStorage\.isEncryptionAvailable\(\)\) \{\s*if \(!process\.env\.CWB_DESKTOP_SMOKE\) throw new Error\('SAFE_STORAGE_UNAVAILABLE'\)/, 'only the isolated smoke protocol may use a non-system vault key');
 assert.match(main, /app\.setName\(APP_IDENTITY\)/);
+assert.match(main, /const \{[^}]*\bMenu\b[^}]*\} = require\('electron'\)/, 'desktop main process must load Electron Menu to control the Windows application menu');
+assert.match(main, /if \(process\.platform === 'win32'\) \{\s*Menu\.setApplicationMenu\(null\);\s*mainWindow\.setMenuBarVisibility\(false\);\s*\}/, 'Windows desktop must hide the built-in File/Edit/View menu rather than expose an unused top menu bar');
 assert.match(preload, /readAttachment/);
 assert.match(preload, /chooseBackupFolder/);
 assert.match(main, /extensions: \['cwbk'\]/, 'desktop backup picker must not present exchange JSON as an encrypted backup');

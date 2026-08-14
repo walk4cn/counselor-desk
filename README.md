@@ -10,16 +10,17 @@
 
 <p>
   <img alt="version v4.4.0" src="https://img.shields.io/badge/version-v4.4.0-0b3a82?style=flat-square&logo=github" />
-  <img alt="release candidate" src="https://img.shields.io/badge/status-Release%20Candidate-b54708?style=flat-square" />
+  <img alt="release v4.4.0 verified" src="https://img.shields.io/badge/status-v4.4.0%20Released-2da44e?style=flat-square&logo=checkmarx" />
   <a href="./LICENSE"><img alt="license MIT" src="https://img.shields.io/badge/license-MIT-2da44e?style=flat-square" /></a>
   <img alt="platform web" src="https://img.shields.io/badge/platform-Web-0969da?style=flat-square" />
-  <img alt="platform desktop" src="https://img.shields.io/badge/platform-Desktop-8250df?style=flat-square" />
+  <img alt="platform desktop" src="https://img.shields.io/badge/platform-Windows%20%2B%20macOS-8250df?style=flat-square" />
 </p>
 <p>
   <img alt="workflow local first" src="https://img.shields.io/badge/workflow-Local--first-b54708?style=flat-square" />
   <img alt="mode offline ready" src="https://img.shields.io/badge/mode-Offline--ready-0b6e69?style=flat-square" />
   <img alt="data schema v8" src="https://img.shields.io/badge/data-Schema%20v8-7c4d99?style=flat-square" />
   <img alt="stack HTML CSS JavaScript" src="https://img.shields.io/badge/stack-HTML%20%2B%20CSS%20%2B%20JavaScript-1f6feb?style=flat-square" />
+  <img alt="release gate passed" src="https://img.shields.io/badge/release%20gate-Tests%20%2B%20Desktop%20Passed-1f6feb?style=flat-square" />
   <img alt="privacy user held" src="https://img.shields.io/badge/privacy-User--held-bf3989?style=flat-square" />
 </p>
 
@@ -29,7 +30,7 @@
 
 ![辅导员工作台 v4.4 产品横幅：本地优先的学生工作资料、台账和备份](./assets/github-hero-v4.png)
 
-> **v4.4.0 正在进行最终发布验证。** 本分支已经包含 v4.4 的产品代码、数据格式、截图与文档；公开 Pages 和 Release 在同一提交完成测试、Windows/macOS 包级验证后才会切换。当前在线体验仍是已发布的旧版，请以本仓库代码、后续 `v4.4.0` Release 附件和校验文件为准。
+> **v4.4.0 已正式发布。** 网页、离线 HTML、Windows 安装包与 macOS Universal 包均来自同一发布提交；[Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.0) 附带 SHA-256 清单。发布门禁已依次完成 Tests、Windows、macOS、网页产物、Release 与 Pages 部署；macOS 产物当前为**未签名、未公证**，请按学校的软件管理要求决定是否安装。
 
 ---
 
@@ -122,26 +123,28 @@
 
 ## 🚀 从这里开始
 
-1. **先选使用方式。** 需要看公开旧版，可打开[在线体验](https://7752777.github.io/counselor-desk/)；需要离线或桌面端，以 [Releases](https://github.com/7752777/counselor-desk/releases) 中实际存在的文件和 SHA-256 校验为准。
+1. **先选使用方式。** 想直接体验功能，可打开 [在线体验](https://7752777.github.io/counselor-desk/)；想断网使用或长期维护本机数据，可从 [v4.4.0 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.0) 下载离线 HTML、Windows 安装包或 macOS Universal 包，并先核对对应 SHA-256。
 2. **先用演示或脱敏数据走一遍。** 按“导入预览 → 确认写入 → 查询 → 建立恢复点 → 导出备份”完成一次练习，再接入正式台账。
 3. **把敏感信息放在受控环境。** 不在 Issue、截图、培训材料或公开演示中提交真实学生数据；重要操作前先建立恢复点或导出备份。
 4. **按你的工作节奏定制。** 在设置中填写称呼、学院与主题色；在学生台账中保存常用筛选和列视图。
 
 第一次使用请阅读 [三分钟快速上手](./docs/quick-start.md)，按场景处理工作请查阅 [用户手册](./docs/user-guide.md)。
 
-## 🪜 一次次把工作做细：v4 系列历程
+## 🪜 一次次把工作做细：完整版本历程
 
 这不是为了堆版本号的时间线。每一轮升级都从一线反复出现的麻烦出发：少翻一张表、少漏一次跟进、少在交接时断掉一段脉络。
 
 | 版本 | 时间 | 这一轮带来的改变 |
 | --- | --- | --- |
+| 🧱 **v3.8.0** | 2026-08-04 | 从可靠导入起步：支持 xls / xlsx / CSV 名单、常见表头识别、校验与未知字段保留，让不同来源的名单先能安全进来。 |
+| 🌿 **v3.9.0** | 2026-08-05 | 加入首次使用引导、主题设置、导入预览、导入快照与手机工作包，为“本地工作流”铺好基础。 |
 | 🌱 **v4.0** | 2026-08-07 | 建立网页与 Electron 桌面端的共同基础：动态字段、附件、资料库、导入导出、备份恢复与本地数据层。 |
 | 🛟 **v4.1** | 2026-08-12 | 围绕“保存后能否放心”：补齐 schema v8、写入队列、保存状态、版本历史、恢复点、失败重试与诊断边界。 |
 | 📋 **v4.2** | 2026-08-13 | 围绕“台账能否反复用”：重做真实分页、批量处理、保存筛选、个人列视图、重复提示、历史学号与统一时间线。 |
 | 🏫 **v4.3** | 2026-08-13 | 围绕“专项工作能否找得到”：收口班团组织、党员发展、成绩帮扶、危机流程、活动、奖惩、住宿和工作留痕入口。 |
-| 🚀 **v4.4.0** | 2026-08-13 | 围绕“能否安心交付”：统一欢迎体验、迁移恢复、便携隔离、性能回归、跨平台构建门禁、八张产品截图与公开资料。 |
+| 🚀 **v4.4.0** | 2026-08-13 | 围绕“能否安心交付”：统一欢迎体验、迁移恢复、便携隔离、性能回归、跨平台构建门禁、八张产品截图与公开资料；2026-08-14 完成正式 Release 与 Pages 发布。 |
 
-详细事实记录见 [CHANGELOG](./CHANGELOG.md)。v4.4.0 的公开发布仍遵守“测试 → Windows → macOS → 网页产物 → Release → Pages”的顺序，不用未完成的构建冒充已发布版本。
+详细事实记录见 [CHANGELOG](./CHANGELOG.md)。v4.4.0 已按“测试 → Windows → macOS → 网页产物 → Release → Pages”的顺序完成公开发布；后续维护继续使用同一门禁，不用未完成的构建冒充正式版本。
 
 ### v4.4.0 这次具体带来了什么
 

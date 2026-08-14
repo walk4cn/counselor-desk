@@ -99,14 +99,27 @@ for (const heading of [
   '## 🚀 从这里开始',
   '## 🔐 本地优先，也把边界说清楚',
   '## 🖼️ v4.4 界面一览',
-  '## 🪜 一次次把工作做细：v4 系列历程'
+  '## 🪜 一次次把工作做细：完整版本历程'
 ]) {
   assert.match(readme, new RegExp(heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 }
 assert.doesNotMatch(readme, /提示词|AI\s*复现|生成过程|生成模型|设计令牌|素材路径|工程对话|内部验收/i);
 assert.doesNotMatch(readme, /Windows-安装版\.msi|macOS-安装版\.dmg/);
+assert.match(readme, /status-v4\.4\.0%20Released/, 'README must identify the verified v4.4.0 release rather than a pre-release candidate');
+assert.doesNotMatch(readme, /Release Candidate|正在进行最终发布验证|当前在线体验仍是已发布的旧版/, 'README must not retain candidate-era release messaging after publication');
+assert.match(readme, /v3\.8(?:\.0)?\*{0,2}\s*\|\s*2026-08-04/, 'README must retain the earlier v3.8 milestone alongside the v4 timeline');
+assert.match(readme, /v3\.9(?:\.0)?\*{0,2}\s*\|\s*2026-08-05/, 'README must retain the earlier v3.9 milestone alongside the v4 timeline');
 assert.match(readme, /v4\.0\*{0,2}\s*\|\s*2026-08-07/, 'README must keep the factual v4.0 milestone');
 assert.match(readme, /v4\.4\.0\*{0,2}\s*\|\s*2026-08-13/, 'README must distinguish the v4.4.0 integration milestone');
+
+const changelog = read('CHANGELOG.md');
+assert.match(changelog, /## \[4\.4\.0\].*正式发布/, 'CHANGELOG must contain a factual v4.4.0 release entry');
+assert.doesNotMatch(changelog, /v4\.4\.0 还没有创建公开 Tag|现有在线体验仍是等待替换的旧站/, 'CHANGELOG must not retain pre-release claims after publication');
+
+const acceptance = read('docs/v4-acceptance-report.md');
+assert.match(acceptance, /ed362d73a1c95bded26bdfba811a10eb73b5b2a2/, 'acceptance report must identify the released source commit');
+assert.match(acceptance, /31768117637/, 'acceptance report must link the verified release gate run');
+assert.match(acceptance, /31768796087/, 'acceptance report must link the published Pages deployment');
 
 const banner = read('assets/banner.svg');
 assert.doesNotMatch(banner, /v4\.0\.0|v3\.9|v3\.8/);
