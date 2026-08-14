@@ -247,7 +247,9 @@
             const tx = db.transaction(name, 'readwrite'); const objectStore = tx.objectStore(name);
             try {
               const clear = objectStore.clear();
-              clear.onsuccess = () => queueAtomicReplaceBatches(objectStore, values, 32, error => {
+              // Keep the transaction alive through request callbacks, but cap
+              // each synchronous submission burst for slower browser runners.
+              clear.onsuccess = () => queueAtomicReplaceBatches(objectStore, values, 16, error => {
                 try { tx.abort(); } catch (_) {}
                 reject(error);
               });

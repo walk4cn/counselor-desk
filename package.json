@@ -1,6 +1,6 @@
 {
   "name": "counselor-desk",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "private": true,
   "main": "desktop/main.cjs",
   "description": "A local-first counselor workspace with Windows and macOS desktop apps plus a single-file web app for higher education.",
@@ -40,7 +40,7 @@
     "desktop:build": "electron-builder --config electron-builder.yml",
     "desktop:build:mac": "electron-builder --config electron-builder.yml --mac --universal --publish never",
     "desktop:build:win": "electron-builder --config electron-builder.yml --win --x64 --arm64 --publish never",
-    "build:v4": "node scripts/build-package.js output/counselor-desk-v4.4.1"
+    "build:v4": "node scripts/build-package.js output/counselor-desk-v4.4.2"
   },
   "devDependencies": {
     "electron": "^38.0.0",
