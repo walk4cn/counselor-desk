@@ -12,6 +12,7 @@ assert.match(config, /^win:\r?\n  icon: assets\/app-icon\.ico$/m, 'Windows build
 assert.ok(fs.existsSync(path.resolve(__dirname, '..', 'assets', 'app-icon.ico')), 'the Windows ICO asset must be present for reproducible packaging');
 assert.match(config, /^  shortcutName: 辅导员工作台$/m, 'The desktop shortcut must remain Chinese for ordinary users');
 assert.match(config, /^    - nsis$/m, 'Windows release builds must use the requested NSIS installer target');
+assert.match(config, /^  include: desktop\/installer\.nsh$/m, 'the root NSIS build must load the custom uninstall contract');
 assert.doesNotMatch(config, /^    - msi$/m, 'Windows release builds must use one installer contract');
 assert.doesNotMatch(config, /^    - portable$/m, 'Windows release builds must not use the failed portable target');
 assert.match(config, /^  - assets\/welcome-education-scene-v2\.png$/m, 'the welcome illustration must ship inside desktop builds');
