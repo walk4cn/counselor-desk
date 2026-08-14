@@ -82,7 +82,7 @@
   <!-- 副标题 -->
   <g transform="translate(60, 240)">
     <text x="0" y="0" font-family="Inter, 'PingFang SC', sans-serif" font-size="18" font-weight="500" fill="#e3f7f9">为一线辅导员而生 · 让重复的事变简单</text>
-  <text x="0" y="28" font-family="Inter, 'PingFang SC', sans-serif" font-size="14" font-weight="400" fill="#8aa8c4" letter-spacing="0.5">单文件 HTML · IndexedDB · Electron · v4.0.0</text>
+  <text x="0" y="28" font-family="Inter, 'PingFang SC', sans-serif" font-size="14" font-weight="400" fill="#8aa8c4" letter-spacing="0.5">单文件 HTML · IndexedDB · Electron · v4.4.0</text>
   </g>
 
   <!-- 标签胶囊：低空学院·工程版 -->

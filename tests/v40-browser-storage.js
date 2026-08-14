@@ -2,23 +2,10 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-
-function browserExecutable() {
-  const candidates = [
-    process.env.CHROME_BIN,
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-  ].filter(Boolean);
-  return candidates.find(file => fs.existsSync(file));
-}
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 (async () => {
-  const executablePath = browserExecutable();
-  if (!executablePath) {
-    console.log('SKIP v40-browser-storage: Chrome/Edge executable not found');
-    return;
-  }
+  const executablePath = requireBrowserExecutable('V40_BROWSER_STORAGE');
   const browser = await chromium.launch({ headless: true, executablePath });
   const page = await browser.newPage();
   await page.goto(`file://${path.resolve('output/v4-preview.html').replace(/\\/g, '/')}`);
@@ -73,6 +60,6 @@ function browserExecutable() {
   }
   assert.deepEqual(result.attachmentMethods, ['batchImport', 'createThumbnail', 'findDuplicate', 'download', 'delete', 'list', 'get']);
   assert.deepEqual(result.attachmentChecks, { deduped:true, thumbnailId:true, thumbnail:true, found:true, downloaded:true });
-  assert.deepEqual(result.backup, { ok: true, version: 7 });
+  assert.deepEqual(result.backup, { ok: true, version: 8 });
   console.log('PASS v40-browser-storage');
 })().catch(error => { console.error(error.stack || error.message); process.exit(1); });

@@ -13,7 +13,7 @@ async function loadCore() {
     photo_ids: ['photo-1'],
     custom_fields: { scholarship: '国家奖学金' },
   });
-  assert.equal(student.schema_version, 7);
+  assert.equal(student.schema_version, 8);
   assert.equal(student.student_number, '20240001');
   assert.deepEqual(student.photo_ids, ['photo-1']);
   assert.equal(student.custom_fields.scholarship, '国家奖学金');
@@ -27,6 +27,7 @@ async function loadCore() {
 
   const job = core.createImportJob({ fileHash: 'sha256:test', totalRows: 1201, chunkSize: 500 });
   assert.equal(job.status, 'pending');
+  assert.equal(core.createImportJob({ fileHash: 'sha256:default', totalRows: 1 }).chunkSize, 128);
   const checkpoint = core.advanceImportJob(job, 500);
   assert.equal(checkpoint.lastRow, 500);
   assert.equal(checkpoint.status, 'running');
@@ -43,7 +44,7 @@ async function loadCore() {
   await assert.rejects(() => core.decryptBackup(envelope, 'wrong password'), /BACKUP_PASSWORD_INVALID/);
 
   const party = core.normalizePartyCase({ student_number: '20240001', stage: 'party_applicant' });
-  assert.equal(party.schema_version, 7);
+  assert.equal(party.schema_version, 8);
   assert.equal(party.stage, 'party_applicant');
   assert.ok(Array.isArray(party.steps));
   assert.ok(party.steps.some(step => step.key === 'initial_talk'));

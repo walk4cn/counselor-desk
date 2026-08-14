@@ -2,13 +2,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-
-function browserExecutable() { return [process.env.CHROME_BIN, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].filter(Boolean).find(file => fs.existsSync(file)); }
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 (async () => {
-  const executablePath = browserExecutable();
-  if (!executablePath) { console.log('SKIP v40-idb-migration-browser: Chrome/Edge executable not found'); return; }
+  const executablePath = requireBrowserExecutable('V40_IDB_MIGRATION');
   const html = fs.readFileSync(path.resolve('output/v4-preview.html'));
   const server = http.createServer((req, res) => { res.writeHead(200, { 'content-type':'text/html; charset=utf-8' }); res.end(req.url === '/seed' ? '<!doctype html><title>seed</title>' : html); });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

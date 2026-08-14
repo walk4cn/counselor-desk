@@ -12,6 +12,11 @@ files:
   - index.html
   - src/core/v4-runtime.js
   - src/core/import-worker.js
+  - src/core/v8-migration.js
+  - src/core/v8-persistence-protocol.js
+  - src/core/v8-workspace-runtime.js
+  - src/core/v8-backup-codec.js
+  - assets/welcome-education-scene-v2.png
   - vendor/xlsx.full.min.js
   - vendor/argon2-bundled.min.js
   - vendor/jszip.min.js
@@ -20,9 +25,9 @@ files:
 win:
   icon: assets/app-icon.ico
   target:
-    - msi
+    - nsis
   requestedExecutionLevel: asInvoker
-msi:
+nsis:
   oneClick: true
   perMachine: false
   createDesktopShortcut: true

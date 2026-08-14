@@ -18,7 +18,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   w.CWB.openImportPreview(w.CWB.importer.previewCSV('title,category,content\nPreviewTest,Notice,Body', 'material'));
   await sleep(20);
-  const modal = d.querySelector('#modal-root .modal');
+  const modal = [...d.querySelectorAll('#modal-root .modal')].find(node => /导入预览/.test(node.textContent));
   assert.ok(modal, 'preview must open a modal before writing');
   assert.ok(modal.querySelector('[data-import-confirm]'), 'preview must expose confirm control');
   assert.equal(w.CWB.db.material.length, before, 'opening preview must not write data');
@@ -39,7 +39,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   w.CWB.openImportPreview(w.CWB.importer.previewCSV('student_number,full_name,id_card\n0999,Sensitive,110101200001010011', 'students'));
   await sleep(20);
-  const sensitiveModal = d.querySelector('#modal-root .modal');
+  const sensitiveModal = [...d.querySelectorAll('#modal-root .modal')].find(node => /导入预览/.test(node.textContent));
   const confirm = sensitiveModal.querySelector('[data-import-confirm]');
   assert.equal(confirm.disabled, false, 'sensitive preview keeps confirm clickable so the user can receive guidance');
   assert.equal(confirm.getAttribute('aria-disabled'), 'true', 'sensitive preview must visually communicate the acknowledgement requirement');

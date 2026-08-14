@@ -25,6 +25,7 @@ const compactHeader = html.match(/@media \(max-width:480px\)\s*\{([\s\S]*?)\n\}/
 assert.ok(compactHeader, 'Expected a compact mobile header media query');
 assert.match(compactHeader[1], /\.topbar-search-wrap\{display:none\}/);
 assert.match(compactHeader[1], /\.topbar\{padding:0 12px/);
-for (const token of ['docs/v4.0-全面验收报告.md', 'v4.0-全面验收报告.md', '品牌与素材说明.md', 'assetsSource', "'installer.nsh'"]) assert.ok(packageBuilder.includes(token), `release package is missing: ${token}`);
+for (const token of ['docs/v4-acceptance-report.md', 'docs/release-guide.md', 'banner.svg', 'counselor-desk-hero.png', 'welcome-education-scene-v2.png', 'screenshots']) assert.ok(packageBuilder.includes(token), `release package is missing: ${token}`);
+for (const stale of ['docs/v4.0-全面验收报告.md', '品牌与素材说明.md', 'assetsSource']) assert.ok(!packageBuilder.includes(stale), `release package still references stale material: ${stale}`);
 
 console.log('PASS release-checks');

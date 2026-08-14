@@ -1,15 +1,12 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { chromium } = require('C:/Users/wby/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-
-function browserExecutable() {
-  return [process.env.CHROME_BIN, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].filter(Boolean).find(file => fs.existsSync(file));
-}
+const { chromium, requireBrowserExecutable } = require('../scripts/browser-runtime');
 
 (async () => {
-  const executablePath = browserExecutable();
-  if (!executablePath) { console.log('SKIP v40-backup-attachments: Chrome/Edge executable not found'); return; }
+  const source = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(source, /input\.accept = '\.cwbk'/, 'backup restore picker must only advertise encrypted CWBK files');
+  const executablePath = requireBrowserExecutable('V40_BACKUP_ATTACHMENTS');
   const browser = await chromium.launch({ headless:true, executablePath });
   const page = await browser.newPage();
   await page.goto(`file://${path.resolve('output/v4-preview.html').replace(/\\/g, '/')}`);
@@ -30,6 +27,6 @@ function browserExecutable() {
     return { version:envelope.version, exportedAttachment: listedBefore.some(item => item.id === record.id), removed, restored:!!restored && restored.size === record.size, wrongPassword, corruptedBackup, auditExport:audit.some(item => item.action === 'backup_export'), auditRestore:audit.some(item => item.action === 'backup_restore') };
   });
   await browser.close();
-  assert.deepEqual(result, { version:7, exportedAttachment:true, removed:true, restored:true, wrongPassword:'BACKUP_PASSWORD_INVALID', corruptedBackup:'BACKUP_INTEGRITY_FAILED', auditExport:true, auditRestore:true });
+  assert.deepEqual(result, { version:8, exportedAttachment:true, removed:true, restored:true, wrongPassword:'BACKUP_PASSWORD_INVALID', corruptedBackup:'BACKUP_INTEGRITY_FAILED', auditExport:true, auditRestore:true });
   console.log('PASS v40-backup-attachments');
 })().catch(error => { console.error(error.stack || error.message); process.exit(1); });

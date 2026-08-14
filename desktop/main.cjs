@@ -3,8 +3,16 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { createSqliteStore } = require('./sqlite-store.cjs');
+const { migrateLegacyDesktopData } = require('./data-migration.cjs');
 
-const APP_VERSION = '4.0.0';
+const APP_VERSION = require('../package.json').version;
+const APP_IDENTITY = 'Counselor Desk';
+
+// Keep the established v4 user-data root stable across package upgrades.
+app.setName(APP_IDENTITY);
+if (process.env.CWB_DESKTOP_SMOKE && process.env.CWB_DESKTOP_USER_DATA) {
+  app.setPath('userData', path.resolve(process.env.CWB_DESKTOP_USER_DATA));
+}
 let mainWindow;
 let sqliteStore;
 let vaultKeyCache;
@@ -17,6 +25,8 @@ const ALLOWED_COLLECTIONS = new Set([
   'records_learning_materials', 'records_learning_notes', 'records_learning_sessions',
   'records_custom_v4_positions', 'records_custom_v4_party_cases', 'records_custom_v4_files',
   'records_custom_v4_employment_resources', 'attachments', 'import_jobs', 'audit_log', 'meta',
+  'records_custom_v4_test_snapshots', 'records_orgs', 'records_party', 'records_rewards',
+  'records_activities', 'records_grades', 'records_worklogs', 'records_crisis_cases',
 ]);
 function validateCollection(collection) {
   const value = String(collection || '');
@@ -39,7 +49,31 @@ function safeFileName(value, fallback) {
 
 async function getVaultKey() {
   if (vaultKeyCache) return vaultKeyCache;
-  if (!safeStorage.isEncryptionAvailable()) throw new Error('SAFE_STORAGE_UNAVAILABLE');
+  if (!safeStorage.isEncryptionAvailable()) {
+    if (!process.env.CWB_DESKTOP_SMOKE) throw new Error('SAFE_STORAGE_UNAVAILABLE');
+    const smokeKeyPath = userDataPath('vault', 'smoke-key.bin');
+    await ensureDir(path.dirname(smokeKeyPath));
+    try {
+      const existing = await fs.readFile(smokeKeyPath, 'utf8');
+      if (Buffer.from(existing, 'base64').length !== 32) throw new Error('VAULT_KEY_INVALID');
+      vaultKeyCache = existing;
+      return existing;
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      const generated = crypto.randomBytes(32).toString('base64');
+      try {
+        await fs.writeFile(smokeKeyPath, generated, { encoding:'utf8', flag:'wx' });
+        vaultKeyCache = generated;
+        return generated;
+      } catch (writeError) {
+        if (writeError.code !== 'EEXIST') throw writeError;
+        const existing = await fs.readFile(smokeKeyPath, 'utf8');
+        if (Buffer.from(existing, 'base64').length !== 32) throw new Error('VAULT_KEY_INVALID');
+        vaultKeyCache = existing;
+        return existing;
+      }
+    }
+  }
   const keyPath = userDataPath('vault', 'key.bin');
   await ensureDir(path.dirname(keyPath));
   try {
@@ -70,7 +104,7 @@ async function getVaultKey() {
 }
 async function writeMainAudit(action, details) {
   if (!sqliteStore) return;
-  try { await getVaultKey(); sqliteStore.put('audit_log', { id:`audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`, action, details:details || {}, operator:'desktop-main', operated_at:new Date().toISOString(), schema_version:7 }); } catch (_) {}
+  try { await getVaultKey(); sqliteStore.put('audit_log', { id:`audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`, action, details:details || {}, operator:'desktop-main', operated_at:new Date().toISOString(), schema_version:8 }); } catch (_) {}
 }
 
 function encryptBuffer(buffer, keyText) {
@@ -90,6 +124,38 @@ function decryptBuffer(buffer, keyText) {
   const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+}
+
+function validateBackupEnvelope(envelope) {
+  if (!envelope || envelope.format !== 'cwbk' || ![7, 8].includes(Number(envelope.version)) || typeof envelope.ciphertext !== 'string' || typeof envelope.integrity !== 'string') throw new Error('BACKUP_ENVELOPE_INVALID');
+  return envelope;
+}
+
+async function saveBackupEnvelope(envelope, folder) {
+  validateBackupEnvelope(envelope);
+  const resolved = path.resolve(folder);
+  await ensureDir(resolved);
+  const filename = safeFileName(`辅导员工作台-v${APP_VERSION}-${new Date().toISOString().replace(/[:.]/g, '-')}.cwbk`, 'backup.cwbk');
+  const temp = path.join(resolved, `.${filename}.tmp`);
+  const target = path.join(resolved, filename);
+  const serialized = JSON.stringify(envelope);
+  if (Buffer.byteLength(serialized, 'utf8') > 1024 * 1024 * 1024) throw new Error('BACKUP_FILE_TOO_LARGE');
+  await fs.writeFile(temp, serialized, { encoding: 'utf8', flag: 'wx' });
+  const handle = await fs.open(temp, 'r+');
+  try { await handle.sync(); } finally { await handle.close(); }
+  await fs.rename(temp, target);
+  await writeMainAudit('backup_saved', { path:target });
+  return { saved:true, path:target };
+}
+
+async function readBackupEnvelope(filePath) {
+  const stat = await fs.stat(filePath);
+  if (!stat.isFile() || stat.size > 1024 * 1024 * 1024) throw new Error('BACKUP_FILE_TOO_LARGE');
+  let text;
+  try { text = await fs.readFile(filePath, 'utf8'); } catch (_) { throw new Error('BACKUP_FILE_READ_FAILED'); }
+  let envelope;
+  try { envelope = JSON.parse(text); } catch (_) { throw new Error('BACKUP_FILE_INVALID'); }
+  return validateBackupEnvelope(envelope);
 }
 
 async function createWindow() {
@@ -117,39 +183,56 @@ async function createWindow() {
   await mainWindow.loadFile(path.join(__dirname, '..', 'index.html'));
 }
 
+function migrateDesktopData() {
+  return migrateLegacyDesktopData({
+    appDataRoot:path.dirname(app.getPath('userData')),
+    userDataRoot:app.getPath('userData'),
+  });
+}
+
+async function runDesktopSmoke() {
+  sqliteStore = createSqliteStore(userDataPath('counselor-v4.sqlite'), () => vaultKeyCache || 'uninitialized-vault-key');
+  await getVaultKey();
+  const persistedTask = sqliteStore.get('records_tasks', 'v8-smoke-task');
+  const legacy = sqliteStore.put('records_students', { id:'legacy-schema-7', schema_version:7, student_number:'20240001', full_name:'Legacy Student' });
+  const current = sqliteStore.put('records_tasks', { id:'v8-smoke-task', title:'Desktop smoke task' });
+  const attachmentId = 'desktop-smoke-attachment';
+  const attachmentDir = await ensureDir(userDataPath('vault', 'attachments'));
+  const attachmentPath = path.join(attachmentDir, `${attachmentId}.bin`);
+  const attachmentBytes = Buffer.from('desktop-smoke');
+  const vaultKey = await getVaultKey();
+  let persistedAttachment = false;
+  try { persistedAttachment = decryptBuffer(await fs.readFile(attachmentPath), vaultKey).equals(attachmentBytes); } catch (_) {}
+  await fs.writeFile(attachmentPath, encryptBuffer(attachmentBytes, vaultKey));
+  const attachment = decryptBuffer(await fs.readFile(attachmentPath), vaultKey).equals(attachmentBytes);
+  const requiresPersistence = process.env.CWB_DESKTOP_SMOKE_EXPECT_PERSISTENCE === '1';
+  const persistence = !requiresPersistence || (persistedTask && persistedTask.title === 'Desktop smoke task' && persistedAttachment);
+  const backupFolder = await ensureDir(userDataPath('backups'));
+  const backupEnvelope = { format:'cwbk', version:8, schemaVersion:8, ciphertext:'desktop-smoke', integrity:'desktop-smoke-integrity' };
+  const savedBackup = await saveBackupEnvelope(backupEnvelope, backupFolder);
+  const restoredBackup = await readBackupEnvelope(savedBackup.path);
+  const backup = savedBackup.saved && restoredBackup.version === 8 && restoredBackup.ciphertext === backupEnvelope.ciphertext;
+  sqliteStore.close();
+  sqliteStore = null;
+  console.log(JSON.stringify({ ok:true, schemaVersion:current.schema_version, sqlite:Boolean(current && legacy), attachment, persistence, migration:true, backup }));
+  app.exit(0);
+}
+
 ipcMain.handle('desktop:choose-backup-folder', async () => {
   const result = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory', 'createDirectory'] });
   return result.canceled ? null : result.filePaths[0];
 });
 
 ipcMain.handle('desktop:save-backup', async (_event, envelope, requestedFolder) => {
-  if (!envelope || envelope.format !== 'cwbk' || Number(envelope.version) !== 7 || typeof envelope.ciphertext !== 'string' || typeof envelope.integrity !== 'string') throw new Error('BACKUP_ENVELOPE_INVALID');
   const folder = requestedFolder || (await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory', 'createDirectory'] })).filePaths[0];
   if (!folder) return { saved: false, reason: 'cancelled' };
-  const resolved = path.resolve(folder);
-  await ensureDir(resolved);
-  const filename = safeFileName(`辅导员工作台-v${APP_VERSION}-${new Date().toISOString().replace(/[:.]/g, '-')}.cwbk`, 'backup.cwbk');
-  const temp = path.join(resolved, `.${filename}.tmp`);
-  const target = path.join(resolved, filename);
-  const serialized = JSON.stringify(envelope);
-  if (Buffer.byteLength(serialized, 'utf8') > 1024 * 1024 * 1024) throw new Error('BACKUP_FILE_TOO_LARGE');
-  await fs.writeFile(temp, serialized, { encoding: 'utf8', flag: 'wx' });
-  const handle = await fs.open(temp, 'r+');
-  try { await handle.sync(); } finally { await handle.close(); }
-  await fs.rename(temp, target);
-  await writeMainAudit('backup_saved', { path:target });
-  return { saved: true, path: target };
+  return saveBackupEnvelope(envelope, folder);
 });
 
 ipcMain.handle('desktop:open-backup', async () => {
-  const result = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'], filters: [{ name: 'CWB encrypted backup', extensions: ['cwbk', 'json'] }] });
+  const result = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'], filters: [{ name: 'CWB encrypted backup', extensions: ['cwbk'] }] });
   if (result.canceled) return null;
-  const filePath = result.filePaths[0];
-  const stat = await fs.stat(filePath);
-  if (!stat.isFile() || stat.size > 1024 * 1024 * 1024) throw new Error('BACKUP_FILE_TOO_LARGE');
-  let text;
-  try { text = await fs.readFile(filePath, 'utf8'); } catch (_) { throw new Error('BACKUP_FILE_READ_FAILED'); }
-  try { return JSON.parse(text); } catch (_) { throw new Error('BACKUP_FILE_INVALID'); }
+  return readBackupEnvelope(result.filePaths[0]);
 });
 
 ipcMain.handle('desktop:open-data-folder', async () => {
@@ -264,6 +347,13 @@ ipcMain.handle('desktop:open-external', async (_event, url) => {
   return true;
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+  // Smoke runs always use an isolated user-data directory. Importing a real
+  // user's legacy vault into it would both defeat isolation and make the
+  // platform safe-storage key impossible to decrypt in the test profile.
+  if (!process.env.CWB_DESKTOP_SMOKE) migrateDesktopData();
+  if (process.env.CWB_DESKTOP_SMOKE) return runDesktopSmoke();
+  return createWindow();
+});
 app.on('window-all-closed', () => { if (sqliteStore) sqliteStore.close(); if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
