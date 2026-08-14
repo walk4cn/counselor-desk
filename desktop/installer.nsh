@@ -1,4 +1,6 @@
 !include "FileFunc.nsh"
+!insertmacro un.GetParameters
+!insertmacro un.GetOptions
 
 ; Assisted uninstalls explicitly choose whether user data is retained.
 ; Silent uninstalls retain data unless an administrator deliberately passes
@@ -14,8 +16,14 @@
   Goto cwbUninstallChoiceDone
 
   cwbRemoveUserData:
-  ; Electron uses the product name and package name in different release
-  ; generations, so remove both known user-data locations only on consent.
+  ; Automated deployments can provide the exact Electron user-data directory.
+  ; Otherwise retain the current-user locations used by released builds.
+  ReadEnvStr $R2 "CWB_DESKTOP_USER_DATA"
+  StrCmp $R2 "" cwbRemoveDefaultUserData
+  RMDir /r "$R2"
+  Goto cwbUninstallChoiceDone
+
+  cwbRemoveDefaultUserData:
   SetShellVarContext current
   RMDir /r "$APPDATA\Counselor Desk"
   RMDir /r "$APPDATA\counselor-desk"
