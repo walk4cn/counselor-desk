@@ -4,6 +4,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const release = fs.readFileSync(path.join(root, '.github', 'workflows', 'desktop-release.yml'), 'utf8');
+const macos = fs.readFileSync(path.join(root, '.github', 'workflows', 'desktop-macos.yml'), 'utf8');
 const pages = fs.readFileSync(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
 const tests = fs.readFileSync(path.join(root, '.github', 'workflows', 'tests.yml'), 'utf8');
 
@@ -31,6 +32,10 @@ assert.match(release, /CWB_REQUIRE_ARTIFACTS=1/, 'CI package smoke must reject m
 assert.match(release, /Windows-SHA256\.txt/, 'Windows checksums must be published');
 assert.match(release, /macOS-SHA256\.txt/, 'macOS checksums must be published');
 assert.match(release, /Web-SHA256\.txt/, 'offline web checksums must be published');
+
+assert.match(macos, /CFBundleExecutable/, 'the macOS push gate must read the executable name from the packaged app metadata');
+assert.match(macos, /plutil -extract CFBundleExecutable raw/, 'the macOS push gate must not hard-code a localized binary file name');
+assert.doesNotMatch(macos, /Contents\/MacOS\/辅导员工作台/, 'the macOS push gate must not require a binary name that differs from executableName');
 
 assert.doesNotMatch(pages, /push:\s*\n\s*branches:/, 'Pages must not deploy on arbitrary master pushes');
 assert.match(pages, /workflow_dispatch:/, 'Pages deployment must require an explicit operator action');
