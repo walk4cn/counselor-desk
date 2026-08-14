@@ -116,8 +116,11 @@ if (found.length) throw new Error(`Sensitive backup-like files found: ${found.jo
 const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
 const appHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const welcomeIllustration = path.join('assets', 'welcome-education-scene-v2.png');
-if (!appHtml.includes("function welcomeSceneSource()") || !appHtml.includes("'assets/welcome-education-scene-v2.png'") || !appHtml.includes("'../assets/welcome-education-scene-v2.png'")) throw new Error('Welcome setup must resolve the approved illustration for web and desktop packaging');
+const welcomeQuoteIllustration = path.join('assets', 'welcome-morning.png');
+if (!appHtml.includes("function welcomeSceneSource()") || !appHtml.includes("embedded[file] || `assets/${file}`")) throw new Error('Welcome setup must resolve the approved illustration from the packaged app root');
 if (!fs.existsSync(path.join(root, welcomeIllustration))) throw new Error(`Missing welcome illustration: ${welcomeIllustration}`);
+if (!appHtml.includes("function welcomeQuoteSceneSource()") || !appHtml.includes("'welcome-morning.png'")) throw new Error('Daily quote must resolve the bundled reading-scene image');
+if (!fs.existsSync(path.join(root, welcomeQuoteIllustration))) throw new Error(`Missing daily quote illustration: ${welcomeQuoteIllustration}`);
 for (const heading of ['🎯 这是给一线工作留出来的一张工作台', '✨ v4.4 的核心体验', '🚀 从这里开始', '🔐 本地优先，也把边界说清楚', '🖼️ v4.4 界面一览']) {
   if (!readme.includes(`## ${heading}`)) throw new Error(`README is missing product section: ${heading}`);
 }

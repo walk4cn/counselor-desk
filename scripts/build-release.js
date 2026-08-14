@@ -13,6 +13,8 @@ const v8WorkspaceRuntimeSource = path.join(root, 'src', 'core', 'v8-workspace-ru
 const v8PersistenceProtocolSource = path.join(root, 'src', 'core', 'v8-persistence-protocol.js');
 const v8BackupCodecSource = path.join(root, 'src', 'core', 'v8-backup-codec.js');
 const importWorkerSource = path.join(root, 'src', 'core', 'import-worker.js');
+const welcomeEducationSceneSource = path.join(root, 'assets', 'welcome-education-scene-v2.png');
+const welcomeMorningSceneSource = path.join(root, 'assets', 'welcome-morning.png');
 const target = process.argv[2]
   ? path.resolve(process.argv[2])
   : path.join(root, 'output', '辅导员工作台.html');
@@ -29,6 +31,10 @@ const v8WorkspaceRuntime = fs.readFileSync(v8WorkspaceRuntimeSource, 'utf8');
 const v8PersistenceProtocol = fs.readFileSync(v8PersistenceProtocolSource, 'utf8');
 const v8BackupCodec = fs.readFileSync(v8BackupCodecSource, 'utf8');
 const importWorker = fs.readFileSync(importWorkerSource, 'utf8').replace('/*__XLSX_SOURCE__*/', xlsx);
+const portableWelcomeAssets = {
+  'welcome-education-scene-v2.png': `data:image/png;base64,${fs.readFileSync(welcomeEducationSceneSource).toString('base64')}`,
+  'welcome-morning.png': `data:image/png;base64,${fs.readFileSync(welcomeMorningSceneSource).toString('base64')}`
+};
 const portable = html.replace(/<script defer src="vendor\/xlsx\.full\.min\.js" data-offline-xlsx><\/script>/,
   () => `<script data-offline-xlsx>\n${xlsx}\n</script>`)
   .replace(/<script defer src="vendor\/argon2-bundled\.min\.js" data-offline-argon2><\/script>/,
@@ -48,7 +54,8 @@ const portable = html.replace(/<script defer src="vendor\/xlsx\.full\.min\.js" d
   .replace(/<script defer src="src\/core\/v8-backup-codec\.js" data-v8-backup-codec><\/script>/,
     () => `<script data-v8-backup-codec>\n${v8BackupCodec}\n</script>`)
   .replace(/<script type="text\/plain" id="cwb-import-worker-source" data-cwb-import-worker><\/script>/,
-    () => `<script type="text/plain" id="cwb-import-worker-source" data-cwb-import-worker>${importWorker.replace(/<\//g, '<\\/')}</script>`);
+    () => `<script type="text/plain" id="cwb-import-worker-source" data-cwb-import-worker>${importWorker.replace(/<\//g, '<\\/')}</script>`)
+  .replace('</head>', () => `<script>window.__CWB_PORTABLE_ASSETS__=${JSON.stringify(portableWelcomeAssets).replace(/<\//g, '<\\/')}</script></head>`);
 if (portable === html) throw new Error('Offline Excel placeholder was not found in index.html');
 if (portable.includes('src/core/v4-runtime.js')) throw new Error('v4 runtime was not inlined');
 if (portable.includes('src/core/v8-migration.js')) throw new Error('v8 migration runtime was not inlined');

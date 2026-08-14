@@ -33,11 +33,13 @@ function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
   setup.querySelector('#welcome-address').value = '张老师';
   setup.querySelector('#welcome-college').value = '学生工作部';
   setup.querySelector('[data-welcome-save]').click();
-  await wait(260);
+  await wait(520);
   const daily = dom.window.document.querySelector('#modal-root .modal');
   assert.match(daily.textContent, /张老师/);
   assert.doesNotMatch(daily.textContent, /Chinese Text Project|UNESCO|https?:\/\//i);
   assert.equal(daily.querySelector('a'), null, 'daily quote must not render a source hyperlink');
+  assert.ok(daily.querySelector('img.welcome-quote-scene[src*="welcome-morning.png"]'), 'daily quote should use the bundled warm reading-scene image');
+  assert.ok(daily.querySelector('.welcome-quote-copy'), 'daily quote should keep its text above the image treatment');
   assert.equal(cwb.db.settings.counselor_name, '张三');
   assert.equal(cwb.db.settings.welcome_experience.addressed_as, '张老师');
 

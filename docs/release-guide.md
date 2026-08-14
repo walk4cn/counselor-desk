@@ -4,7 +4,7 @@
 
 ## 最近一次正式发布
 
-`v4.4.0` 已于 2026-08-14 发布，提交为 [`ed362d73a1c95bded26bdfba811a10eb73b5b2a2`](https://github.com/7752777/counselor-desk/commit/ed362d73a1c95bded26bdfba811a10eb73b5b2a2)。完整门禁记录见 [Actions #31768117637](https://github.com/7752777/counselor-desk/actions/runs/31768117637)，Pages 部署记录见 [#31768796087](https://github.com/7752777/counselor-desk/actions/runs/31768796087)。发布后旧 Preview Tags、Releases 和已完成的远程开发分支已清理，Git 提交历史保留。
+`v4.4.1` 已于 2026-08-14 发布，提交为 [`87321de9a3e5cea69714220be5d3aa979bb5d154`](https://github.com/7752777/counselor-desk/commit/87321de9a3e5cea69714220be5d3aa979bb5d154)。完整门禁记录见 [Actions #31770583685](https://github.com/7752777/counselor-desk/actions/runs/31770583685)，Pages 部署记录见 [#31771487607](https://github.com/7752777/counselor-desk/actions/runs/31771487607)。`v4.4.0` 仍保留为发布基线；旧 Preview Tags、Releases 和已完成的远程开发分支已清理，Git 提交历史保留。
 
 ## 发布前
 
