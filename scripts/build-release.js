@@ -21,7 +21,11 @@ const target = process.argv[2]
 
 fs.mkdirSync(path.dirname(target), { recursive:true });
 const html = fs.readFileSync(source, 'utf8');
-const xlsx = fs.readFileSync(xlsxSource, 'utf8');
+// SheetJS carries legacy code-page tables as raw bytes. A base64 data script
+// retains those bytes exactly and keeps the HTML parser out of the source.
+const xlsxBytes = fs.readFileSync(xlsxSource);
+const xlsx = xlsxBytes.toString('utf8');
+const xlsxDataUrl = `data:application/javascript;base64,${xlsxBytes.toString('base64')}`;
 const argon2 = fs.readFileSync(argon2Source, 'utf8');
 const jszip = fs.readFileSync(jszipSource, 'utf8');
 const echarts = fs.readFileSync(echartsSource, 'utf8');
@@ -36,7 +40,7 @@ const portableWelcomeAssets = {
   'welcome-morning.png': `data:image/png;base64,${fs.readFileSync(welcomeMorningSceneSource).toString('base64')}`
 };
 const portable = html.replace(/<script defer src="vendor\/xlsx\.full\.min\.js" data-offline-xlsx><\/script>/,
-  () => `<script data-offline-xlsx>\n${xlsx}\n</script>`)
+  () => `<script data-offline-xlsx src="${xlsxDataUrl}"></script>`)
   .replace(/<script defer src="vendor\/argon2-bundled\.min\.js" data-offline-argon2><\/script>/,
     () => `<script data-offline-argon2>\n${argon2}\n</script>`)
   .replace(/<script defer src="vendor\/jszip\.min\.js" data-offline-jszip><\/script>/,

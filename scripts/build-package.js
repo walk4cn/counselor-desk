@@ -47,6 +47,7 @@ for (const relative of [
 
 for (const asset of ['logo.svg', 'app-icon.svg', 'banner.svg', 'github-hero-v4.png', 'counselor-desk-hero.png', 'welcome-education-scene-v2.png', 'welcome-morning.png']) copy(path.join(root, 'assets', asset), path.join(target, 'assets', asset));
 for (const name of screenshots) copy(path.join(root, 'assets', 'screenshots', 'v4.4.0', name), path.join(target, 'assets', 'screenshots', 'v4.4.0', name));
+for (const runtime of ['xlsx.full.min.js', 'argon2-bundled.min.js', 'jszip.min.js', 'echarts.min.js', 'xlsx.LICENSE']) copy(path.join(root, 'vendor', runtime), path.join(target, 'vendor', runtime));
 
 const sampleSource = path.join(root, 'samples', 'import-compat');
 for (const entry of fs.readdirSync(sampleSource, { withFileTypes:true })) {

@@ -22,13 +22,15 @@ assert.equal(publicSurface.status, 0, publicSurface.stderr || publicSurface.stdo
 assert.match(publicSurface.stdout, /Public surface check passed/);
 
 const html = require('node:fs').readFileSync(path.join(root, 'index.html'), 'utf8');
-const packageBuilder = require('node:fs').readFileSync(path.join(root, 'scripts', 'build-package.js'), 'utf8');
+  const packageBuilder = require('node:fs').readFileSync(path.join(root, 'scripts', 'build-package.js'), 'utf8');
+  const releaseBuilder = require('node:fs').readFileSync(path.join(root, 'scripts', 'build-release.js'), 'utf8');
 const compactHeader = html.match(/@media \(max-width:480px\)\s*\{([\s\S]*?)\n\}/);
 assert.ok(compactHeader, 'Expected a compact mobile header media query');
 assert.match(compactHeader[1], /\.topbar-search-wrap\{display:none\}/);
 assert.match(compactHeader[1], /\.topbar\{padding:0 12px/);
-for (const token of ['docs/v4-acceptance-report.md', 'docs/release-guide.md', 'banner.svg', 'counselor-desk-hero.png', 'welcome-education-scene-v2.png', 'welcome-morning.png', 'screenshots']) assert.ok(packageBuilder.includes(token), `release package is missing: ${token}`);
-for (const stale of ['docs/v4.0-全面验收报告.md', '品牌与素材说明.md', 'assetsSource']) assert.ok(!packageBuilder.includes(stale), `release package still references stale material: ${stale}`);
+  for (const token of ['docs/v4-acceptance-report.md', 'docs/release-guide.md', 'banner.svg', 'counselor-desk-hero.png', 'welcome-education-scene-v2.png', 'welcome-morning.png', 'screenshots', 'xlsx.full.min.js', 'argon2-bundled.min.js', 'jszip.min.js', 'echarts.min.js']) assert.ok(packageBuilder.includes(token), `release package is missing: ${token}`);
+  for (const stale of ['docs/v4.0-全面验收报告.md', '品牌与素材说明.md', 'assetsSource']) assert.ok(!packageBuilder.includes(stale), `release package still references stale material: ${stale}`);
+  assert.match(releaseBuilder, /data:application\/javascript;base64/, 'standalone release must load the binary-safe SheetJS runtime');
 
 const portableFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cwb-release-check-')), 'CounselorDesk.html');
 const portableBuild = spawnSync(process.execPath, [path.join(root, 'scripts', 'build-release.js'), portableFile], { cwd:root, encoding:'utf8' });

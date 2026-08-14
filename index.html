@@ -2201,7 +2201,7 @@ function normLearningSession(x) {
   };
 }
 
-const APP_VERSION = '4.4.2';
+const APP_VERSION = '4.4.3';
 
 /* ===================== 9. 示例数据（首次打开可见效果） ===================== */
 function seedDemo() {
@@ -6321,6 +6321,39 @@ function isValidISODate(value) {
   const date = new Date(Date.UTC(year, month - 1, day));
   return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
+const IMPORT_DATE_FIELDS = new Set(['date', 'due', 'start', 'end', 'leave_date', 'return_date', 'follow_date', 'assess_date', 'graduation_date', 'created_at']);
+function importISODate(year, month, day) {
+  const normalized = `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return isValidISODate(normalized) ? normalized : '';
+}
+function importDateYear(value) {
+  const text = String(value == null ? '' : value).trim();
+  const chinese = /^(\d{4})\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*(?:日|号)?$/.exec(text);
+  if (chinese) return Number(chinese[1]);
+  const delimited = /^\d{1,2}\s*[/.\-]\s*\d{1,2}\s*[/.\-]\s*(\d{2,4})$/.exec(text);
+  if (!delimited) return 0;
+  const year = Number(delimited[1]);
+  return delimited[1].length === 2 ? 2000 + year : year;
+}
+function normalizeImportDate(value, fallbackYear) {
+  const text = String(value == null ? '' : value).trim();
+  if (!text || isValidISODate(text)) return text;
+  let match = /^(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*(?:日|号)?$/.exec(text);
+  if (match) return importISODate(match[1], match[2], match[3]) || text;
+  match = /^(\d{1,2})\s*[/.\-]\s*(\d{1,2})\s*[/.\-]\s*(\d{2,4})$/.exec(text);
+  if (match) {
+    const year = match[3].length === 2 ? 2000 + Number(match[3]) : Number(match[3]);
+    return importISODate(year, match[1], match[2]) || text;
+  }
+  match = /^(\d{1,2})\s*月\s*(\d{1,2})\s*(?:日|号)?$/.exec(text) || /^(\d{1,2})\s*[/.\-]\s*(\d{1,2})$/.exec(text);
+  if (!match) return text;
+  return importISODate(fallbackYear || new Date().getFullYear(), match[1], match[2]) || text;
+}
+function normalizeImportDateFields(value) {
+  const fields = Array.from(IMPORT_DATE_FIELDS).filter(field => Object.prototype.hasOwnProperty.call(value, field));
+  const fallbackYear = fields.map(field => importDateYear(value[field])).find(Boolean) || new Date().getFullYear();
+  fields.forEach(field => { value[field] = normalizeImportDate(value[field], fallbackYear); });
+}
 function importValidation(field, value) {
   const v = String(value == null ? '' : value).trim();
   if (!v) return '';
@@ -6349,7 +6382,7 @@ function moduleImportValidation(cfg, field, value) {
   if (cast && enumOk[cast] && !enumOk[cast]()) return '枚举值无法识别';
   if ((cfg.bool || []).includes(field) && !/^(是|否|已销假|未销假|已解决|未解决|已完成|未完成|已收藏|未收藏|true|false|0|1|y|n|yes|no)$/i.test(v)) return '布尔值请填写是/否';
   if ((cfg.num || []).includes(field) && !Number.isFinite(Number(v.replace(/,/g, '')))) return '数字格式不正确';
-  if (/^(date|due|start|end|leave_date|return_date|follow_date|assess_date|graduation_date|created_at)$/.test(field)) {
+  if (IMPORT_DATE_FIELDS.has(field)) {
     if (!isValidISODate(v)) return '日期请使用有效的 YYYY-MM-DD';
   }
   return importValidation(field, v);
@@ -6359,6 +6392,40 @@ function genericImportHeaderToField(raw, cfg) {
   const key = genericHeaderKey(clean);
   if (key === 'recordid' || key === '记录编号' || /\(record_id\)\s*$/i.test(clean)) return 'record_id';
   return genericHeaderToField(clean, cfg);
+}
+const GRADE_IMPORT_FIELD_ALIASES = new Map([
+  ['课程名称', 'course'], ['课程名', 'course'], ['课程全称', 'course'],
+  ['总成绩', 'score'], ['课程成绩', 'score'], ['最终成绩', 'score'],
+  ['开课学期', 'term'], ['学年学期', 'term'], ['班级名称', 'class_name'],
+]);
+const GRADE_IMPORT_AUXILIARY_HEADERS = new Set(['课程编号', '成绩标志', '课程性质', '课程属性', '补重学期', '学时', '学分', '开课单位', '录入人', '考试性质'].map(genericHeaderKey));
+const GRADE_TEXT_SCORES = new Map([
+  ['优', { score:'90', failed:'否' }], ['优秀', { score:'90', failed:'否' }],
+  ['良', { score:'80', failed:'否' }], ['良好', { score:'80', failed:'否' }],
+  ['中', { score:'70', failed:'否' }], ['中等', { score:'70', failed:'否' }],
+  ['及格', { score:'60', failed:'否' }], ['合格', { score:'60', failed:'否' }],
+  ['不及格', { score:'0', failed:'是' }], ['不合格', { score:'0', failed:'是' }],
+]);
+function gradeImportHeaderToField(raw) {
+  const key = genericHeaderKey(raw);
+  if (GRADE_IMPORT_FIELD_ALIASES.has(String(raw == null ? '' : raw).trim())) return GRADE_IMPORT_FIELD_ALIASES.get(String(raw).trim());
+  if (GRADE_IMPORT_AUXILIARY_HEADERS.has(key)) return '';
+  return genericImportHeaderToField(raw, IMP.grades);
+}
+function normalizeGradeImportValues(value) {
+  const raw = String(value.score == null ? '' : value.score).trim();
+  if (!raw) return;
+  const textScore = GRADE_TEXT_SCORES.get(raw);
+  if (textScore) {
+    value.score = textScore.score;
+    if (!value.failed) value.failed = textScore.failed;
+    return;
+  }
+  if (/^\d{3}$/.test(raw)) {
+    const scaled = Number(raw) / 10;
+    if (scaled >= 0 && scaled <= 100) value.score = String(scaled);
+  }
+  if (!value.failed && /^-?\d+(?:\.\d+)?$/.test(String(value.score))) value.failed = Number(value.score) < 60 ? '是' : '否';
 }
 function importTarget(headers, requested) {
   if (requested === 'students') return 'students';
@@ -6376,7 +6443,9 @@ function importMappedRows(text, collection, options) {
   let mapped = headers.map((h, index) => {
     if (Array.isArray(opts.mappingByIndex) && index < opts.mappingByIndex.length) return opts.mappingByIndex[index] || '';
     if (Object.prototype.hasOwnProperty.call(manual, h)) return manual[h] || '';
-    return target === 'students' ? stuHeaderToField(h) : genericImportHeaderToField(h, IMP[target]);
+    if (target === 'students') return stuHeaderToField(h);
+    if (target === 'grades') return gradeImportHeaderToField(h);
+    return genericImportHeaderToField(h, IMP[target]);
   });
   const known = target === 'students' ? STUDENT_IMPORT_SCHEMA.fields : IMPORT_SCHEMAS[target].fields;
   const customFields = {};
@@ -6408,6 +6477,8 @@ function importMappedRows(text, collection, options) {
   const rows = parsed.slice(1).map((source, index) => {
     const value = {};
     mapped.forEach((field, i) => { if (field && (known[field] || (target === 'students' && customFields[field])) && !(field in value)) value[field] = String(source[i] == null ? '' : source[i]).trim(); });
+    if (target !== 'students') normalizeImportDateFields(value);
+    if (target === 'grades') normalizeGradeImportValues(value);
     if (target === 'students' && Object.keys(customFields).length) value.custom_field_meta = cloneData(customFields);
     return { rowNumber:index + 2, value, status:'ready', errors:[], action:'add' };
   });
@@ -6671,19 +6742,25 @@ const importer = {
     });
     if (!added && !updated) return { ok:false, runId:'', error:'没有可写入的记录' };
     const run = { id:uid(), coll:preview.coll, before:compactCollection(before), at:new Date().toISOString(), summary:cloneData(preview.summary) };
-    const oldHistory = store.read('import_history', []) || [];
-    const nextHistory = oldHistory.concat(run).slice(-3);
-    if (!storage.canWriteLarge(store.estimateBytes(preview.coll, next) + JSON.stringify(run).length * 2)) return { ok:false, runId:'', error:'本地存储空间不足，请先导出备份' };
-    if (!store.write('import_history', nextHistory)) return { ok:false, runId:'', error:'无法保存导入前快照' };
-    if (!store.write(preview.coll, next)) {
-      store.write('import_history', oldHistory);
-      return { ok:false, runId:'', error:'写入失败，原数据未改变' };
+    const durableRepositoryActive = !!(window.CWB_V4_IDB_ACTIVE || (window.cwbDesktop && !CWB_PORTABLE_MODE));
+    if (!durableRepositoryActive) {
+      const oldHistory = store.read('import_history', []) || [];
+      const nextHistory = oldHistory.concat(run).slice(-3);
+      if (!storage.canWriteLarge(store.estimateBytes(preview.coll, next) + JSON.stringify(run).length * 2)) return { ok:false, runId:'', error:'本地存储空间不足，请先导出备份' };
+      if (!store.write('import_history', nextHistory)) return { ok:false, runId:'', error:'无法保存导入前快照' };
+      if (!store.write(preview.coll, next)) {
+        store.write('import_history', oldHistory);
+        return { ok:false, runId:'', error:'写入失败，原数据未改变' };
+      }
     }
     DB[preview.coll] = next;
+    if (durableRepositoryActive) save(preview.coll);
     if (preview.coll === 'grades') syncAcademicHelp();
     this._previews.delete(previewId);
     render();
-    return { ok:true, runId:run.id, added, updated, skipped:preview.total - added - updated };
+    // The async v8 importer persists this snapshot in its metadata repository.
+    // Keep it on the result so durable storage never depends on localStorage.
+    return { ok:true, runId:run.id, added, updated, skipped:preview.total - added - updated, historyRun:run };
   },
   undo(runId) {
     const history = store.read('import_history', []) || [];
@@ -9524,8 +9601,17 @@ function installV4Integration() {
       if (preview.coll !== 'students') {
         const result = this.commitPreview(previewId, opts);
         if (result && result.ok) {
-          const history = store.read('import_history', []) || [];
-          try { await replaceImportHistory(history); app.v4 = Object.assign({}, app.v4 || {}, { importHistory:history }); } catch (_) {}
+          const existing = await listImportHistory();
+          const run = result.historyRun;
+          const history = run
+            ? existing.filter(item => item && item.id !== run.id).concat(run).slice(-3)
+            : existing;
+          try {
+            await replaceImportHistory(history);
+            app.v4 = Object.assign({}, app.v4 || {}, { importHistory:history });
+          } catch (error) {
+            return Object.assign({}, result, { ok:false, error:'导入完成，但无法保存撤销快照' });
+          }
         }
         return result;
       }

@@ -94,6 +94,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   assert.doesNotMatch(html, /交给 AI|帮我在这个辅导员工作台里增加一个|提示词/, 'the public application must not contain an AI prompt-style extension entry');
   assert.deepEqual(errors, [], `unexpected browser errors: ${errors.join(' | ')}`);
 
+  dom.window.close();
   console.log('PASS ux-operations');
 })().catch(error => {
   console.error(error);

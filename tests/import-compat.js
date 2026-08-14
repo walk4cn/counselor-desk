@@ -54,6 +54,33 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   assert.equal(filePreview.source.encoding, 'gb18030');
   assert.equal(filePreview.rows[0].value.student_number, '001');
 
+  const campusLeavePreview = importer.previewCSV([
+    '\u59d3\u540d,\u5b66\u53f7,\u73ed\u7ea7,\u79bb\u6821\u65f6\u95f4,\u8fd4\u6821\u65f6\u95f4',
+    '\u6d4b\u8bd5\u7532,202400000001,24\u673a\u5668\u4eba01,7/25/26,8/30/26',
+    '\u6d4b\u8bd5\u4e59,202400000002,24\u673a\u5668\u4eba01,7\u670827\u53f7,8/31/26',
+    '\u6d4b\u8bd5\u4e19,202400000003,24\u673a\u5668\u4eba01,2026\u5e747\u670828\u65e5,2026\u5e748\u670831\u65e5',
+  ].join('\n'), 'leave');
+  assert.equal(campusLeavePreview.summary.ready, 3, 'campus leave dates must remain importable');
+  assert.equal(JSON.stringify(campusLeavePreview.rows.map(row => [row.value.leave_date, row.value.return_date])), JSON.stringify([
+    ['2026-07-25', '2026-08-30'],
+    ['2026-07-27', '2026-08-31'],
+    ['2026-07-28', '2026-08-31'],
+  ]), 'campus leave date variants must normalize to ISO before validation');
+
+  const detailedGradesPreview = importer.previewCSV([
+    '学号,姓名,开课学期,班级名称,课程编号,课程名称,总成绩,成绩标志,课程性质,课程属性,补重学期,备注',
+    '测试01,202400000001,2025-2026-1,24机器人01,COURSE-001,大学英语,437,,必修,专业基础,,',
+    '测试02,202400000002,2025-2026-1,24机器人01,COURSE-002,教育心理学,优,,选修,通识,,',
+    '测试03,202400000003,2025-2026-1,24机器人01,COURSE-003,编程基础,不及格,,必修,专业基础,,',
+  ].join('\n'), 'grades');
+  assert.equal(detailedGradesPreview.summary.ready, 3, 'standard detailed grade exports must not be blocked by auxiliary columns');
+  assert.deepEqual(Array.from(detailedGradesPreview.duplicateColumns), [], 'course codes and attributes must not duplicate grade fields');
+  assert.equal(JSON.stringify(detailedGradesPreview.rows.map(row => [row.value.course, row.value.score, row.value.failed])), JSON.stringify([
+    ['大学英语', 43.7, true],
+    ['教育心理学', 90, false],
+    ['编程基础', 0, true],
+  ]), 'grade scores must normalize before numeric validation');
+
   w.XLSX = XLSX;
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['说明页']]), '说明');
