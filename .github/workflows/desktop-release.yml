@@ -204,4 +204,7 @@ jobs:
           web_html="$(find release-assets/web-v4.4 -maxdepth 1 -type f -name '*.html' -print -quit)"
           test -n "$web_html"
           mv "$web_html" "release-assets/web-v4.4/CounselorDesk-v$version-Offline.html"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release delete "$tag" --yes
+          fi
           gh release create "$tag" --draft --verify-tag --title "辅导员工作台 v$version" --notes "v$version 已完成自动化发布门禁，等待人工确认后公开。未配置代码签名或公证时，发布页会明确标注未签名。" release-assets/**/*
