@@ -94,7 +94,8 @@ jobs:
         with:
           name: windows-v4.4
           path: |
-            output/desktop/*.exe
+            output/desktop/counselor-desk-*-x64.exe
+            output/desktop/counselor-desk-*-arm64.exe
             output/desktop/Windows-SHA256.txt
           if-no-files-found: error
 
