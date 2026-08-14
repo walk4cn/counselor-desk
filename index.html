@@ -475,8 +475,11 @@ select.inp{cursor:pointer;appearance:none;
 .student-table-wrap .student-select-col{left:0;min-width:46px;width:46px;text-align:center}
 .student-table-wrap .student-action-col{left:46px;min-width:148px;width:148px;box-shadow:2px 0 0 var(--line)}
 .student-ledger-controls,.student-pagination,.student-bulk-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.student-ledger-header{display:grid;grid-template-columns:minmax(180px,auto) minmax(0,1fr);gap:10px 14px;align-items:center}
+.student-ledger-title{min-width:0}.student-ledger-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;min-width:0}.student-ledger-paging{grid-column:1 / -1;display:flex;justify-content:flex-end;padding-top:10px;border-top:1px solid var(--line-2);min-width:0}.student-ledger-paging .student-ledger-controls{margin-left:0}.student-ledger-toolbar{align-items:flex-start;row-gap:10px}
 .student-ledger-controls{margin-left:10px;flex-wrap:nowrap;min-width:max-content}.student-page-size{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex:0 0 auto}.student-page-size .inp{width:72px;min-width:72px;flex:0 0 72px}.student-page-size-static{font-weight:600}.student-page-summary{white-space:nowrap;flex:0 0 auto}.student-pagination{justify-content:flex-end;margin:12px 0}.student-bulk-bar{padding:9px 12px;background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:7px;margin:0 0 10px}.student-scroll-proxy{height:15px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:7px;background:var(--card-2);margin:8px 0}.student-scroll-proxy > i{display:block;height:1px}.student-scroll-proxy[hidden]{display:none}
 .student-pagination{display:flex;align-items:center;justify-content:flex-start;gap:12px;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 0 4px;margin:14px 0 2px}.student-pagination .student-ledger-controls{margin-left:0}.student-pagination .inp{width:auto;min-height:30px;padding:3px 26px 3px 7px}
+@media (max-width:700px){.student-ledger-header{grid-template-columns:1fr}.student-ledger-actions,.student-ledger-paging{justify-content:flex-start}.student-ledger-paging{padding-top:8px}.student-ledger-actions .btn{flex:0 0 auto}}
 .student-dimension-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.student-dimension-stats>div{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px;border:1px solid var(--line);border-radius:7px;background:var(--card-2)}.student-dimension-stats .tiny{width:100%;font-weight:700}.student-column-manager{display:grid;gap:8px}.student-column-row{display:grid;grid-template-columns:minmax(160px,1fr) minmax(130px,.6fr) 100px 34px 34px;gap:7px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--card-2)}.student-column-row .chk{min-width:0}.student-column-row .inp{width:100%}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-weight:600;color:var(--ink-3);font-size:11.5px;padding:11px 14px;background:#f8f9fa;
@@ -507,6 +510,7 @@ tbody tr:last-child td{border-bottom:none}
 .mcard-acts{display:flex;gap:7px;flex-wrap:wrap}
 /* Phase 4 参考类模块：卡片列表在桌面端也展示 */
 .mcards.in{display:block}
+#main [data-student-layout="cards"].mcards{display:block}
 .mcard-abs{font-size:13px;line-height:1.65;color:var(--ink-2);margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
 .mcard-note{font-size:12px;color:var(--ink-4);margin-bottom:10px;background:var(--line-2);padding:7px 10px;border-radius:8px}
 .mcard-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
@@ -3614,10 +3618,9 @@ function studentScrollProxy(position, width) {
 function mountStudentLedgerControls() {
   if (app.view !== 'students' || app.filters.students.tab === 'photos' || app.filters.students.tab === 'analysis') return;
   const card = $('#main .card');
-  const head = card && $('.card-hd', card);
-  const toolbar = card && $('.toolbar', card);
+  const paging = card && $('[data-student-ledger-paging]', card);
   const tableWrap = card && $('.student-dynamic-table', card);
-  if (!card || !head || !toolbar || !tableWrap) return;
+  if (!card || !paging || !tableWrap) return;
   const savedFilterButton = $('[data-act="student-save-filter"]', card);
   if (savedFilterButton) {
     const prefs = studentLedgerPreferences();
@@ -3628,7 +3631,7 @@ function mountStudentLedgerControls() {
   }
   const state = studentPageState(filterStudents());
   $$('[data-student-ledger-controls], .student-pagination, [data-student-scroll-proxy]', card).forEach(node => node.remove());
-  head.insertAdjacentHTML('beforeend', studentLedgerControls(state));
+  paging.insertAdjacentHTML('beforeend', studentLedgerControls(state));
   tableWrap.classList.add('student-table-wrap');
   tableWrap.dataset.windowed = String(filterStudents().length > 100);
   tableWrap.querySelectorAll('tbody > tr').forEach((row, index) => {
@@ -3655,10 +3658,6 @@ function mountStudentLedgerControls() {
     tableWrap.addEventListener('scroll', () => sync(tableWrap));
     proxies.forEach(proxy => proxy.addEventListener('scroll', () => sync(proxy)));
   }
-  const pager = document.createElement('div');
-  pager.className = 'student-pagination';
-  pager.innerHTML = studentLedgerControls(state, true);
-  tableWrap.insertAdjacentElement('afterend', pager);
 }
 function viewStudents() {
   const f = app.filters.students, list = filterStudents();
@@ -3675,15 +3674,16 @@ function viewStudents() {
   const studentSortSelect = [{ key:'focus', label:'关注等级' }].concat(studentFields.filter(item => item.key !== 'focus')).map(item => `<option value="${esc(item.key)}"${(f.sort || 'focus') === item.key ? ' selected' : ''}>按${esc(item.label)}</option>`).join('');
   return `
   ${studentWorkspaceTabs('ledger')}<div class="card">
-    <div class="card-hd"><h2><svg class="ic" style="color:var(--accent)"><use href="#i-users"/></svg>学生台账</h2>
-      <span class="sp"></span>
+    <div class="card-hd student-ledger-header"><div class="student-ledger-title"><h2><svg class="ic" style="color:var(--accent)"><use href="#i-users"/></svg>学生台账</h2></div>
+      <div class="student-ledger-actions" data-student-ledger-actions>
       <button class="btn btn-sm" data-act="student-import"><svg class="ic ic-sm"><use href="#i-up"/></svg>导入 CSV</button>
       <button class="btn btn-sm" data-act="v4-import-jobs">待处理导入</button>
       <button class="btn btn-sm" data-act="student-export"><svg class="ic ic-sm"><use href="#i-down"/></svg>导出 CSV</button>
       <button class="btn btn-sm" data-act="student-export-sensitive"><svg class="ic ic-sm"><use href="#i-lock"/></svg>敏感导出</button>
       <button class="btn btn-primary btn-sm" data-act="student-new"><svg class="ic ic-sm"><use href="#i-plus"/></svg>新增学生</button>
+      </div><div class="student-ledger-paging" data-student-ledger-paging></div>
     </div>
-    <div class="toolbar">
+    <div class="toolbar student-ledger-toolbar">
       <div class="search"><svg class="ic ic-sm"><use href="#i-search"/></svg>
         <input class="inp" placeholder="搜索姓名、学号、宿舍、备注" data-filter="students.q" value="${esc(f.q)}"></div>
       <select class="inp" style="width:auto;min-width:140px" data-filter="students.cls">
@@ -6398,6 +6398,18 @@ const GRADE_IMPORT_FIELD_ALIASES = new Map([
   ['总成绩', 'score'], ['课程成绩', 'score'], ['最终成绩', 'score'],
   ['开课学期', 'term'], ['学年学期', 'term'], ['班级名称', 'class_name'],
 ]);
+const GRADE_GPA_SUMMARY_ALIASES = new Map([
+  ['上课院系', 'import_college_name'], ['年级', 'import_grade'], ['专业', 'import_major_name'],
+  ['原始成绩平均学分绩点', 'score'], ['原始成绩课程绩点', 'gpa'],
+  ['最高成绩平均学分绩点', 'best_average_score'], ['最高成绩课程绩点', 'best_course_gpa'],
+  ['奖学金平均学分绩点', 'scholarship_average_score'], ['奖学金课程绩点', 'scholarship_course_gpa'],
+]);
+const GRADE_GPA_SUMMARY_FIELDS = Object.freeze({
+  import_college_name:{ label:'上课院系', type:'text' }, import_grade:{ label:'年级', type:'text' }, import_major_name:{ label:'专业', type:'text' },
+  best_average_score:{ label:'最高成绩平均学分绩点', type:'number' }, best_course_gpa:{ label:'最高成绩课程绩点', type:'number' },
+  scholarship_average_score:{ label:'奖学金平均学分绩点', type:'number' }, scholarship_course_gpa:{ label:'奖学金课程绩点', type:'number' },
+  source_average_score:{ label:'原始成绩平均学分绩点原文', type:'text' }, source_course_gpa:{ label:'原始成绩课程绩点原文', type:'text' },
+});
 const GRADE_IMPORT_AUXILIARY_HEADERS = new Set(['课程编号', '成绩标志', '课程性质', '课程属性', '补重学期', '学时', '学分', '开课单位', '录入人', '考试性质'].map(genericHeaderKey));
 const GRADE_TEXT_SCORES = new Map([
   ['优', { score:'90', failed:'否' }], ['优秀', { score:'90', failed:'否' }],
@@ -6406,23 +6418,42 @@ const GRADE_TEXT_SCORES = new Map([
   ['及格', { score:'60', failed:'否' }], ['合格', { score:'60', failed:'否' }],
   ['不及格', { score:'0', failed:'是' }], ['不合格', { score:'0', failed:'是' }],
 ]);
+Object.assign(IMPORT_SCHEMAS.grades.fields, GRADE_GPA_SUMMARY_FIELDS);
+IMP.grades.num = (IMP.grades.num || []).concat(['best_average_score','best_course_gpa','scholarship_average_score','scholarship_course_gpa']);
 function gradeImportHeaderToField(raw) {
+  if (GRADE_GPA_SUMMARY_ALIASES.has(String(raw == null ? '' : raw).trim())) return GRADE_GPA_SUMMARY_ALIASES.get(String(raw).trim());
   const key = genericHeaderKey(raw);
   if (GRADE_IMPORT_FIELD_ALIASES.has(String(raw == null ? '' : raw).trim())) return GRADE_IMPORT_FIELD_ALIASES.get(String(raw).trim());
   if (GRADE_IMPORT_AUXILIARY_HEADERS.has(key)) return '';
   return genericImportHeaderToField(raw, IMP.grades);
 }
 function normalizeGradeImportValues(value) {
+  const isGpaSummary = ['best_average_score','best_course_gpa','scholarship_average_score','scholarship_course_gpa'].some(field => value[field] !== undefined);
   const raw = String(value.score == null ? '' : value.score).trim();
-  if (!raw) return;
+  const rawGpa = String(value.gpa == null ? '' : value.gpa).trim();
   const textScore = GRADE_TEXT_SCORES.get(raw);
+  if (isGpaSummary) {
+    if (raw && !textScore && !/^-?\d+(?:\.\d+)?$/.test(raw)) { value.source_average_score = raw; value.score = ''; }
+    if (rawGpa && !/^-?\d+(?:\.\d+)?$/.test(rawGpa)) { value.source_course_gpa = rawGpa; value.gpa = ''; }
+    value.course = value.course || '学业成绩汇总';
+    const fragments = [];
+    if (value.source_average_score) fragments.push(`原始成绩平均学分绩点：${value.source_average_score}`);
+    if (value.source_course_gpa) fragments.push(`原始成绩课程绩点：${value.source_course_gpa}`);
+    if (value.best_average_score !== undefined && value.best_average_score !== '') fragments.push(`最高成绩平均学分绩点：${value.best_average_score}`);
+    if (value.best_course_gpa !== undefined && value.best_course_gpa !== '') fragments.push(`最高成绩课程绩点：${value.best_course_gpa}`);
+    if (value.scholarship_average_score !== undefined && value.scholarship_average_score !== '') fragments.push(`奖学金平均学分绩点：${value.scholarship_average_score}`);
+    if (value.scholarship_course_gpa !== undefined && value.scholarship_course_gpa !== '') fragments.push(`奖学金课程绩点：${value.scholarship_course_gpa}`);
+    value.summary = [value.summary, ...fragments].filter(Boolean).join('；');
+  }
+  const normalizedRaw = String(value.score == null ? '' : value.score).trim();
+  if (!normalizedRaw) return;
   if (textScore) {
     value.score = textScore.score;
     if (!value.failed) value.failed = textScore.failed;
     return;
   }
-  if (/^\d{3}$/.test(raw)) {
-    const scaled = Number(raw) / 10;
+  if (/^\d{3}$/.test(normalizedRaw)) {
+    const scaled = Number(normalizedRaw) / 10;
     if (scaled >= 0 && scaled <= 100) value.score = String(scaled);
   }
   if (!value.failed && /^-?\d+(?:\.\d+)?$/.test(String(value.score))) value.failed = Number(value.score) < 60 ? '是' : '否';
@@ -6617,7 +6648,7 @@ const importer = {
     const target = coll || 'students';
     let best = { headerRow:1, score:0 };
     (rows || []).slice(0, 20).forEach((row, index) => {
-      const fields = (row || []).map(cell => target === 'students' ? stuHeaderToField(cell) : genericHeaderToField(cell, IMP[target])).filter(Boolean);
+      const fields = (row || []).map(cell => target === 'students' ? stuHeaderToField(cell) : (target === 'grades' ? gradeImportHeaderToField(cell) : genericHeaderToField(cell, IMP[target]))).filter(Boolean);
       const known = target === 'students' ? STUDENT_IMPORT_SCHEMA.fields : IMPORT_SCHEMAS[target].fields;
       const score = new Set(fields.filter(field => known[field])).size;
       if (score > best.score) best = { headerRow:index + 1, score };
@@ -6645,7 +6676,8 @@ const importer = {
     if (workerResult && Array.isArray(workerResult.rows)) {
       const sheetName = workerResult.sheetName || opts.sheetName || '';
       const detected = opts.headerRow ? { headerRow:opts.headerRow, score:0 } : this.detectHeaderRow(workerResult.rows, coll);
-      const preview = previewWithSavedPreset(rowsToCSV(workerResult.rows, false), coll, Object.assign({}, opts, { kind:'excel', name, fileHash, sheet:sheetName, headerRow:detected.headerRow, encoding:'worker' }));
+      const preview = previewWithSavedPreset(rowsToCSV(workerResult.rows.slice(Math.max(0, detected.headerRow - 1)), false), coll, Object.assign({}, opts, { kind:'excel', name, fileHash, sheet:sheetName, headerRow:1, encoding:'worker' }));
+      preview.source.headerRow = detected.headerRow;
       preview.sheets = Array.isArray(workerResult.sheetNames) ? workerResult.sheetNames.slice() : [];
       this._previews.set(preview.id, preview); return preview;
     }
@@ -6670,7 +6702,8 @@ const importer = {
       aoa = bestSheet ? bestSheet.rows : [];
       detected = opts.headerRow ? { headerRow:opts.headerRow, score:0 } : (bestSheet ? bestSheet.detected : { headerRow:1, score:0 });
     }
-    const preview = previewWithSavedPreset(rowsToCSV(aoa, false), coll, Object.assign({}, opts, { kind:'excel', name, fileHash, sheet:sheetName, headerRow:detected.headerRow, encoding:'binary' }));
+    const preview = previewWithSavedPreset(rowsToCSV(aoa.slice(Math.max(0, detected.headerRow - 1)), false), coll, Object.assign({}, opts, { kind:'excel', name, fileHash, sheet:sheetName, headerRow:1, encoding:'binary' }));
+    preview.source.headerRow = detected.headerRow;
     preview.sheets = workbook.SheetNames.slice();
     this._previews.set(preview.id, preview); return preview;
   },

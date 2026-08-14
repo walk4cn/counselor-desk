@@ -35,9 +35,11 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   const pageSize = d.querySelector('[data-student-page-size]');
   assert.ok(pageSize, 'student ledger should expose a page-size selector');
+  assert.ok(d.querySelector('[data-student-ledger-actions]'), 'primary ledger actions have their own aligned group');
+  assert.ok(d.querySelector('[data-student-ledger-paging] [data-student-ledger-controls]'), 'pagination controls have their own aligned row');
   assert.deepEqual([...pageSize.options].map(option => option.value), ['10', '20', '50', '100']);
   assert.ok(pageSize.closest('.student-page-size'), 'page-size words and selector should remain one intentional control');
-  assert.ok(d.querySelector('.student-pagination .student-page-size-static'), 'the lower pager should keep the page-size summary on one line');
+  assert.equal(d.querySelectorAll('[data-student-ledger-controls]').length, 1, 'the ledger should render one deliberate pagination control row instead of duplicating it below the filters');
   pageSize.value = '10';
   pageSize.dispatchEvent(new w.Event('change', { bubbles:true }));
   await wait(20);

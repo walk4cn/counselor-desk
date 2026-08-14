@@ -102,6 +102,14 @@ async function openApp() {
     await wait(20);
     d.querySelector('[data-student-tab="ledger"]').click();
     await wait(20);
+    d.querySelector('[data-filter-set="students.mode"][data-v="cards"]').click();
+    await wait(20);
+    const studentCards = d.querySelector('[data-student-layout="cards"]');
+    assert.ok(studentCards, 'student ledger renders a dedicated card container');
+    assert.notEqual(w.getComputedStyle(studentCards).display, 'none', 'card mode must be visible on desktop');
+    assert.equal(studentCards.querySelectorAll('.mcard').length, 3, 'card mode retains the filtered student records');
+    d.querySelector('[data-filter-set="students.mode"][data-v="table"]').click();
+    await wait(20);
     assert.ok(d.querySelector('[data-student-column-view]'), 'ledger exposes personal column views');
     assert.ok(d.querySelector('[data-act="student-manage-columns"]'), 'ledger exposes column order, width, and group controls');
     assert.ok(d.querySelector('[data-act="student-save-filter"]'), 'ledger can save the current combination filter');
