@@ -24,6 +24,7 @@ assert.match(release, /web:\s*\n[\s\S]*?needs: \[validate, macos\]/, 'offline we
 assert.match(release, /release:\s*\n[\s\S]*?needs: \[validate, web\]/, 'a Release may only be drafted after all build gates');
 assert.match(release, /release:\s*\n[\s\S]*?uses: actions\/checkout@v4[\s\S]*?ref: refs\/tags\/\$\{\{ needs\.validate\.outputs\.tag \}\}[\s\S]*?actions\/download-artifact@v4/, 'the draft Release job must check out the verified tag before gh --verify-tag');
 assert.match(release, /--draft --verify-tag/, 'the public release starts as a verified draft');
+assert.match(release, /CounselorDesk-v\$version-Offline\.html/, 'the offline HTML asset must have a recognizable product download name');
 assert.match(release, /desktop:build:win/, 'the workflow must build Windows packages');
 assert.match(release, /desktop:build:mac/, 'the workflow must build macOS universal packages');
 assert.match(release, /x64 and arm64 NSIS installers/, 'Windows x64 and ARM64 NSIS packages must both be required');
