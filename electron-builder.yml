@@ -28,6 +28,7 @@ win:
     - nsis
   requestedExecutionLevel: asInvoker
 nsis:
+  include: desktop/installer.nsh
   oneClick: true
   perMachine: false
   createDesktopShortcut: true
