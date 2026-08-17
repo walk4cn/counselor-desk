@@ -40,7 +40,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   assert.equal(typeof cwb.backup.configureSchedule, 'function');
   assert.equal(typeof cwb.backup.runDueJobs, 'function');
   assert.equal(cwb.bridge.PACKAGE_VERSION, 8);
-  assert.equal(cwb.version, '4.4.3');
+  assert.equal(cwb.version, '4.4.4');
   assert.ok(cwb.welcome && typeof cwb.welcome.showSetup === 'function' && typeof cwb.welcome.showDaily === 'function', 'welcome experience should be public');
   assert.match(html, /welcome_experience/, 'welcome preferences should persist in settings');
   assert.match(html, /EDUCATION_QUOTES/, 'daily education quote library should be bundled');

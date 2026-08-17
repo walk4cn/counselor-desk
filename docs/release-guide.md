@@ -4,7 +4,7 @@
 
 ## 当前发布线
 
-`v4.4.3` 是当前发布候选：真实校园表格兼容、离线 Excel 运行库和大批量导入撤销必须一起进入同一标签。只有 Tests、Windows、macOS、网页产物、Draft Release 和人工 Pages 部署全部完成后，才可把该标签写为正式公开版。`v4.4.2`（提交 [`9a0fe04982a21eda9be59e7d75caee4c1f47809c`](https://github.com/7752777/counselor-desk/commit/9a0fe04982a21eda9be59e7d75caee4c1f47809c)）保留为上一正式发布；`v4.4.0` 保留为首个完整发布基线。旧 Preview Tags、Releases 和已完成的远程开发分支仅在新 Release 与 Pages 验证后再清理，Git 提交历史保留。
+`v4.4.4` 的开发批次已完成本地功能、专项测试、发布 HTML 和 Windows x64 / ARM64 安装包构建；完整证据见[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。它仍是发布候选，只有同一提交上的 Tests、Windows、macOS、网页产物、Draft Release 和人工 Pages 部署全部完成后，才可写为正式公开版。`v4.4.2`（提交 [`9a0fe04982a21eda9be59e7d75caee4c1f47809c`](https://github.com/7752777/counselor-desk/commit/9a0fe04982a21eda9be59e7d75caee4c1f47809c)）保留为当前已验证正式发布；`v4.4.3` Tag 保留为历史版本，不被本批重新指向；`v4.4.0` 保留为首个完整发布基线。
 
 ## 发布前
 
@@ -13,6 +13,7 @@
 3. 产出离线 HTML、Windows 和 macOS 包，记录真实文件名、体积、SHA-256、签名与公证状态。
 4. 在目标平台完成安装、启动、附件、备份恢复和退出保存验证。
 5. 生成并核验 README 展示的产品截图；只展示当次发布真实可见的能力。
+6. 核对本次新增设置类功能的 v8 重启恢复，确认不会被个人视图、导入任务或其他设置写入覆盖。
 
 ## 版本事实检查
 

@@ -17,7 +17,7 @@ const inline = run('scripts/check-inline-js.js');
 assert.equal(inline.status, 0, inline.stderr || inline.stdout);
 assert.match(inline.stdout, /Inline JavaScript syntax OK/);
 
-const publicSurface = run('scripts/check-public-surface.js');
+const publicSurface = run('scripts/check-public-surface-staged.js');
 assert.equal(publicSurface.status, 0, publicSurface.stderr || publicSurface.stdout);
 assert.match(publicSurface.stdout, /Public surface check passed/);
 

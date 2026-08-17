@@ -114,6 +114,7 @@ function assertCallable(api, names, label) {
     assert.equal(cwb.workspace.schemaVersion, 8, 'CWB.workspace must publish schema v8');
     assertCallable(cwb.diagnostics, ['create', 'health', 'export'], 'CWB.diagnostics');
     assertCallable(cwb.views, ['create', 'get'], 'CWB.views');
+    assertCallable(cwb.leadershipViews, ['metrics', 'create', 'update', 'remove', 'select', 'selected'], 'CWB.leadershipViews');
     assertCallable(cwb.imports, ['createTask', 'pause', 'resume', 'cancel', 'retry'], 'CWB.imports');
     assertCallable(cwb.exports, ['saveTemplate', 'preview'], 'CWB.exports');
     assert.ok(document.querySelector('[data-save-status]'), 'a visible workspace save state is required');
@@ -121,6 +122,9 @@ function assertCallable(api, names, label) {
 
     const view = cwb.views.create({ name:'contract view', fields:['full_name'] });
     assert.equal(cwb.views.get(view.id).name, 'contract view', 'views must round-trip through the public API');
+    const leadershipView = cwb.leadershipViews.create({ name:'contract leadership view', metricKeys:['student_total', 'open_tasks'] });
+    cwb.leadershipViews.select(leadershipView.id);
+    assert.equal(cwb.leadershipViews.selected().id, leadershipView.id, 'leadership views must select through the public API');
     const importTask = cwb.imports.createTask({ fileName:'contract.xlsx' });
     assert.equal(cwb.imports.pause(importTask.id).status, 'paused', 'import task controls must update task state');
     await cwb.workspace.flush();
@@ -129,6 +133,11 @@ function assertCallable(api, names, label) {
       importTaskEnvelope.data.settings.import_tasks.some(task => task.id === importTask.id && task.status === 'paused'),
       'public import task state must be persisted in the workspace',
     );
+    assert.ok(
+      importTaskEnvelope.data.settings.leadership_views.some(item => item.id === leadershipView.id && item.metricKeys.join(',') === 'student_total,open_tasks'),
+      'leadership views must persist in the workspace settings',
+    );
+    assert.equal(importTaskEnvelope.data.settings.leadership_view_id, leadershipView.id, 'the selected leadership view must persist in workspace settings');
     const exportTemplate = cwb.exports.saveTemplate({ name:'masked export', fields:['full_name', 'phone'], sensitiveFields:['phone'], redactSensitive:true });
     assert.equal(cwb.exports.preview(exportTemplate.id, [{ full_name:'Contract user', phone:'13800000000' }]).rows[0].phone, '***', 'export previews must apply their template masking policy');
 
@@ -168,6 +177,7 @@ function assertCallable(api, names, label) {
     assert.equal(cwb.db.tasks.find(record => record.id === 'v8-contract-batch-one').title, 'Batch one', 'the UI database must hydrate from the persisted workspace');
     assert.equal((await cwb.repositories.tasks.get('v8-contract-batch-one')).title, 'Batch one', 'repositories must hydrate from the persisted workspace');
     assert.equal(cwb.imports.get(importTask.id).status, 'paused', 'persisted public import tasks must hydrate after restart');
+    assert.equal(cwb.leadershipViews.selected().name, 'contract leadership view', 'the selected leadership view must hydrate after restart');
 
     bridge.failV8Writes();
     await assert.rejects(

@@ -11,6 +11,27 @@
 <meta property="og:description" content="把学生台账、风险跟进、谈心谈话与工作留痕收进一张可靠的本地工作桌面。">
 <meta property="og:image" content="assets/counselor-desk-hero.png">
 <link rel="icon" type="image/svg+xml" href="assets/app-icon.svg">
+<script data-cwb-collections>
+/* Shared collection manifest. The release builder refreshes this block from src/core/cwb-collections.js. */
+(function installCwbCollections(root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = { CWBCollections: api };
+  if (root) root.CWBCollections = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function createCwbCollections() {
+  'use strict';
+  const canonical = Object.freeze(['students', 'tasks', 'talks', 'stay', 'leave', 'honor', 'orgs', 'party', 'rewards', 'activities', 'grades', 'worklogs', 'pleave', 'attend', 'node', 'warn', 'help', 'grant', 'focus', 'psych', 'graduate', 'policy', 'material', 'comp', 'tpl', 'learning_materials', 'learning_notes', 'learning_sessions']);
+  const custom = Object.freeze(['v4_positions', 'v4_party_cases', 'v4_files', 'v4_employment_resources', 'v4_employment_intents', 'v4_employment_contacts', 'v4_ai_providers', 'v4_ai_audit', 'v4_assessments', 'v4_academic_terms', 'v4_disciplines', 'v4_aid_records', 'v4_ai_drafts', 'v4_test_snapshots']);
+  const logical = Object.freeze([...canonical, ...custom]);
+  const phoneSync = Object.freeze([...canonical, ...custom]);
+  const auxiliaryDesktop = Object.freeze(['attachments', 'import_jobs', 'audit_log', 'meta', 'records_crisis_cases']);
+  const customSet = new Set(custom);
+  function isCustom(key) { return customSet.has(String(key || '')); }
+  function logicalPath(key) { return isCustom(key) ? `custom.${key}` : String(key || ''); }
+  function desktopName(key) { const value = String(key || ''); return isCustom(value) ? `records_custom_${value}` : `records_${value}`; }
+  function storagePaths() { return Object.freeze(Object.fromEntries(logical.map(key => [desktopName(key), logicalPath(key)]))); }
+  return Object.freeze({ schemaVersion:8, canonical, custom, logical, workspace:logical, backup:logical, sync:phoneSync, phoneSync, auxiliaryDesktop, desktopCollections:Object.freeze([...logical.map(desktopName), ...auxiliaryDesktop]), isCustom, logicalPath, desktopName, storagePaths });
+});
+</script>
 <script defer src="vendor/xlsx.full.min.js" data-offline-xlsx></script>
 <script defer src="vendor/argon2-bundled.min.js" data-offline-argon2></script>
 <script defer src="vendor/jszip.min.js" data-offline-jszip></script>
@@ -20,6 +41,11 @@
 <script defer src="src/core/v8-persistence-protocol.js" data-v8-persistence></script>
 <script defer src="src/core/v8-workspace-runtime.js" data-v8-runtime></script>
 <script defer src="src/core/v8-backup-codec.js" data-v8-backup-codec></script>
+<script defer src="src/core/cwb-ai.js" data-cwb-ai></script>
+<script defer src="src/core/cwb-ai-workflow.js" data-cwb-ai-workflow></script>
+<script defer src="src/core/cwb-employment.js" data-cwb-employment></script>
+<script defer src="src/core/cwb-employment-resources.js" data-cwb-employment-resources></script>
+<script defer src="src/core/cwb-business.js" data-cwb-business></script>
 <script type="text/plain" id="cwb-import-worker-source" data-cwb-import-worker></script>
 <title>辅导员工作台</title>
 <style>
@@ -669,14 +695,16 @@ tbody tr:last-child td{border-bottom:none}
 @media (max-width:480px){
   .topbar{padding:0 12px}
   .topbar-search-wrap{display:none}
+  .topbar-acts{gap:4px;flex:0 0 auto}
+  .topbar-acts .btn{padding:0 6px;min-width:32px}
+  .topbar-acts #btn-export,.topbar-acts #btn-import{display:none}
+  .save-status{max-width:52px;padding:0 4px;overflow:hidden;text-overflow:ellipsis}
+  .save-retry{display:none}
 }
 @media (max-width:360px){
   .topbar{padding:0 8px;gap:6px;min-width:0}
   .brand{min-width:0;max-width:150px;gap:6px;font-size:14px;overflow:hidden}
   .brand>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .topbar-acts{gap:4px;flex:0 0 auto}
-  .topbar-acts .btn{padding:0 6px;min-width:32px}
-  .topbar-acts #btn-export,.topbar-acts #btn-import{display:none}
 }
  @media (max-width:400px){ .kpis{grid-template-columns:1fr} }
 
@@ -942,6 +970,7 @@ tbody tr:last-child td{border-bottom:none}
     <button class="nav-item" data-view="help"><svg class="ic"><use href="#i-heart"/></svg>学业帮扶</button>
     <button class="nav-item" data-view="grades"><svg class="ic"><use href="#i-chart"/></svg>成绩管理</button>
     <button class="nav-item" data-view="grant"><svg class="ic"><use href="#i-shield"/></svg>奖助勤补</button>
+    <button class="nav-item" data-view="business"><svg class="ic"><use href="#i-folder"/></svg>业务档案</button>
     <div class="nav-group" data-group="重点关怀与就业">重点关怀与就业<svg class="nav-fold-ic" data-fold="重点关怀与就业"><use href="#i-chev"/></svg></div>
     <button class="nav-item" data-view="focus"><svg class="ic"><use href="#i-lock"/></svg>重点学生档案</button>
     <button class="nav-item" data-view="psych"><svg class="ic"><use href="#i-mind"/></svg>心理摸排</button>
@@ -952,6 +981,7 @@ tbody tr:last-child td{border-bottom:none}
     <button class="nav-item" data-view="comp"><svg class="ic"><use href="#i-trophy"/></svg>科创竞赛</button>
     <button class="nav-item" data-view="tpl"><svg class="ic"><use href="#i-copy"/></svg>模板库</button>
     <button class="nav-item" data-view="learning"><svg class="ic"><use href="#i-book"/></svg>学习助手</button>
+    <button class="nav-item" data-view="ai"><svg class="ic"><use href="#i-mind"/></svg>AI 智能工作台</button>
     <div class="nav-group" data-group="数据">数据<svg class="nav-fold-ic" data-fold="数据"><use href="#i-chev"/></svg></div>
     <button class="nav-item" data-view="bridge"><svg class="ic"><use href="#i-link"/></svg>平台联动</button>
     </div>
@@ -1186,7 +1216,13 @@ function compactRecord(record) {
   return out;
 }
 function compactCollection(records) { return (records || []).map(compactRecord); }
-const V4_RECORD_COLLECTIONS = ['students','tasks','talks','stay','leave','honor','orgs','party','rewards','activities','grades','worklogs','pleave','attend','node','warn','help','grant','focus','psych','graduate','policy','material','comp','tpl','learning_materials','learning_notes','learning_sessions'];
+// Browser builds load the shared manifest before this script. The fallback keeps
+// isolated HTML test harnesses usable when external scripts are intentionally unavailable.
+const CWB_COLLECTIONS = window.CWBCollections || Object.freeze({
+  canonical: Object.freeze(['students','tasks','talks','stay','leave','honor','orgs','party','rewards','activities','grades','worklogs','pleave','attend','node','warn','help','grant','focus','psych','graduate','policy','material','comp','tpl','learning_materials','learning_notes','learning_sessions']),
+  custom: Object.freeze(['v4_positions','v4_party_cases','v4_files','v4_employment_resources','v4_employment_intents','v4_employment_contacts','v4_ai_providers','v4_ai_audit','v4_assessments','v4_academic_terms','v4_disciplines','v4_aid_records','v4_ai_drafts','v4_test_snapshots']),
+});
+const V4_RECORD_COLLECTIONS = CWB_COLLECTIONS.canonical;
 function stampV4Metadata(part) {
   const now = new Date().toISOString();
   if (!part || part === 'settings') { DB.settings = DB.settings || {}; DB.settings.schema_version = 8; DB.settings.updated_at = now; DB.settings.id = DB.settings.id || 'settings'; }
@@ -1265,8 +1301,9 @@ const DB = {
   policy: [], material: [], comp: [], tpl: [],
   learning_materials: [], learning_notes: [], learning_sessions: [],
 };
-const DEMO_COLLECTIONS = ['students', 'tasks', 'talks', 'stay', 'leave', 'honor', 'orgs', 'party', 'rewards', 'activities', 'grades', 'worklogs', 'pleave', 'attend', 'node', 'warn', 'help', 'grant', 'focus', 'psych', 'graduate', 'policy', 'material', 'comp', 'tpl', 'learning_materials', 'learning_notes', 'learning_sessions'];
+const DEMO_COLLECTIONS = CWB_COLLECTIONS.canonical;
 function save(part) {
+  if (!part || part === 'students') invalidateStudentDerived();
   stampV4Metadata(part);
   const desktopBusiness = typeof window !== 'undefined' && !!window.cwbDesktop && !CWB_PORTABLE_MODE;
   const write = (key, value) => { const large = V4_RECORD_COLLECTIONS.includes(key) || key === 'custom' || key === 'import_history'; if (desktopBusiness && key !== 'settings') { hooks.emit('store:write', { key, val:value, compatibilityOnly:true, desktopRepository:true }); return true; } if (window.CWB_V4_IDB_ACTIVE && large) { hooks.emit('store:write', { key, val:value, compatibilityOnly:true }); return true; } return store.write(key, value); };
@@ -1302,7 +1339,7 @@ function save(part) {
   if (!part || part === 'learning_sessions') write('learning_sessions', DB.learning_sessions);
   if (!part || part === 'custom')   write('custom', DB.custom);
   if (part === 'custom' && window.CWB && window.CWB.audit && typeof window.CWB.audit.log === 'function') {
-    Promise.resolve(window.CWB.audit.log('custom_collection_save', { collections:['v4_positions','v4_party_cases','v4_files','v4_employment_resources'], at:new Date().toISOString() })).catch(() => {});
+    Promise.resolve(window.CWB.audit.log('custom_collection_save', { collections:CWB_COLLECTIONS.custom.filter(key => key !== 'v4_test_snapshots'), at:new Date().toISOString() })).catch(() => {});
   }
   if (typeof window !== 'undefined' && typeof window.CWB_V4_SYNC === 'function') {
     window.CWB_V4_SYNC(part);
@@ -2205,7 +2242,7 @@ function normLearningSession(x) {
   };
 }
 
-const APP_VERSION = '4.4.3';
+const APP_VERSION = '4.4.4';
 
 /* ===================== 9. 示例数据（首次打开可见效果） ===================== */
 function seedDemo() {
@@ -2484,7 +2521,7 @@ function seedDemo() {
   DB.learning_notes = [normLearningNote({ _demo:true, material_id: DB.learning_materials[0].id, title:'我的入门笔记', content:'先用示例数据熟悉页面，再清理示例数据录入真实记录。', tags:'入门' })];
   DB.learning_sessions = [];
 
-  DB.custom = {};
+        DB.custom = {};
   save();
 }
 function cloneData(value) {
@@ -3100,6 +3137,107 @@ function learningNoteForm(materialId) {
     { key:'content', label:'笔记内容', type:'textarea', rows:7, span:2 },
   ], onSave(v) { DB.learning_notes.push(normLearningNote(Object.assign(v, { material_id:materialId }))); save('learning_notes'); render(); ui.toast('笔记已保存', 'ok'); }});
 }
+const LEADERSHIP_METRIC_DEFINITIONS = [
+  { key:'student_total', label:'学生总数', value:() => DB.students.length },
+  { key:'focus_students', label:'重点关注学生', value:() => DB.students.filter(student => !!student.focus_level).length },
+  { key:'active_crisis', label:'未解除心理危机', value:() => DB.students.filter(student => student.crisis_level && !student.crisis_relieved).length },
+  { key:'open_tasks', label:'在办任务', value:() => DB.tasks.filter(task => task.status !== 'done').length },
+  { key:'overdue_tasks', label:'逾期事项', value:() => buildTodo().filter(item => item.level === 'd').length },
+  { key:'month_talks', label:'本月谈话', value:() => DB.talks.filter(talk => monthOf(talk.date) === thisMonth()).length },
+  { key:'open_warnings', label:'未解除学业预警', value:() => DB.warn.filter(item => !item.resolved).length },
+  { key:'employment_intents', label:'就业意向记录', value:() => v4Collection('v4_employment_intents').length },
+];
+const LEADERSHIP_DEFAULT_METRICS = ['student_total', 'focus_students', 'active_crisis', 'open_tasks', 'overdue_tasks', 'month_talks'];
+function leadershipMetrics() {
+  return LEADERSHIP_METRIC_DEFINITIONS.map(metric => ({ key:metric.key, label:metric.label, value:Math.max(0, Number(metric.value()) || 0) }));
+}
+function leadershipViewMetricKeys(input) {
+  const allowed = new Set(LEADERSHIP_METRIC_DEFINITIONS.map(metric => metric.key));
+  const keys = Array.isArray(input) ? input.map(String).filter(key => allowed.has(key)) : [];
+  return [...new Set(keys)];
+}
+function leadershipViewNormalize(input, existing) {
+  const source = input && typeof input === 'object' ? input : {};
+  const view = Object.assign({}, existing || {}, source);
+  view.id = String(existing && existing.id || source.id || `leadership_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  view.name = String(source.name == null ? (existing && existing.name || '未命名统计视图') : source.name).trim().slice(0, 40) || '未命名统计视图';
+  view.kind = 'leadership';
+  view.metricKeys = leadershipViewMetricKeys(source.metricKeys == null ? (existing && existing.metricKeys) : source.metricKeys);
+  if (!view.metricKeys.length) view.metricKeys = LEADERSHIP_DEFAULT_METRICS.slice();
+  return view;
+}
+function leadershipViewRecords() {
+  if (!Array.isArray(DB.settings.leadership_views)) {
+    const legacy = Array.isArray(DB.settings.personal_views) ? DB.settings.personal_views.filter(view => view && view.kind === 'leadership') : [];
+    DB.settings.leadership_views = legacy.map(view => leadershipViewNormalize(view));
+  }
+  DB.settings.leadership_views = DB.settings.leadership_views.filter(view => view && typeof view === 'object').map(view => leadershipViewNormalize(view));
+  return DB.settings.leadership_views;
+}
+function leadershipViewSaveSettings() {
+  save('settings');
+  const workspace = window.CWB && window.CWB.workspace;
+  if (!workspace || typeof workspace.mutate !== 'function') return;
+  const settings = Object.assign({}, workspace.getState && workspace.getState().settings || {}, {
+    leadership_views:cloneData(leadershipViewRecords()),
+    leadership_view_id:String(DB.settings.leadership_view_id || ''),
+  });
+  workspace.mutate({ type:'leadership_views.save', collection:'settings', operation:'replace', singleton:true, data:settings, actor:'local-user' }).catch(() => {});
+}
+function leadershipViewList() { return leadershipViewRecords().map(cloneData); }
+function leadershipViewGet(id) { return leadershipViewList().find(view => String(view.id) === String(id)) || null; }
+function leadershipViewCreate(input) {
+  const view = leadershipViewNormalize(input);
+  leadershipViewRecords().push(view); leadershipViewSaveSettings(); return cloneData(view);
+}
+function leadershipViewUpdate(id, patch) {
+  const existing = leadershipViewGet(id); if (!existing) return null;
+  const view = leadershipViewNormalize(patch, existing);
+  const records = leadershipViewRecords();
+  const index = records.findIndex(item => String(item && item.id) === existing.id);
+  if (index < 0) return null;
+  records[index] = view; leadershipViewSaveSettings(); return cloneData(view);
+}
+function leadershipViewRemove(id) {
+  const records = leadershipViewRecords();
+  const index = records.findIndex(item => String(item && item.id) === String(id));
+  if (index < 0) return false;
+  records.splice(index, 1);
+  if (String(DB.settings.leadership_view_id || '') === String(id)) DB.settings.leadership_view_id = '';
+  leadershipViewSaveSettings(); return true;
+}
+function leadershipViewCurrent() {
+  return leadershipViewGet(DB.settings.leadership_view_id) || null;
+}
+function leadershipViewSelect(id) {
+  DB.settings.leadership_view_id = leadershipViewGet(id) ? String(id) : '';
+  leadershipViewSaveSettings();
+}
+const leadershipViewsApi = {
+  metrics:leadershipMetrics,
+  list:leadershipViewList,
+  get:leadershipViewGet,
+  create:leadershipViewCreate,
+  update:leadershipViewUpdate,
+  remove:leadershipViewRemove,
+  select:leadershipViewSelect,
+  selected:leadershipViewCurrent,
+};
+function leadershipDashboard() {
+  const savedViews = leadershipViewList();
+  const current = leadershipViewCurrent();
+  const metricKeys = current ? current.metricKeys : LEADERSHIP_DEFAULT_METRICS;
+  const values = new Map(leadershipMetrics().map(metric => [metric.key, metric]));
+  const metrics = metricKeys.map(key => values.get(key)).filter(Boolean);
+  const options = [`<option value=""${current ? '' : ' selected'}>默认概览</option>`].concat(savedViews.map(view => `<option value="${esc(view.id)}"${current && current.id === view.id ? ' selected' : ''}>${esc(view.name)}</option>`)).join('');
+  return `<div class="card">
+    <div class="card-hd"><h2><svg class="ic" style="color:var(--accent)"><use href="#i-chart"/></svg>领导统计视图</h2>
+      <span class="sp"></span><select class="inp" data-leadership-view-select aria-label="选择领导统计视图" style="width:auto;max-width:180px">${options}</select>
+      <button class="btn btn-sm" data-act="leadership-view-edit" title="编辑统计视图"><svg class="ic ic-sm"><use href="#i-edit"/></svg>编辑</button>
+      <button class="btn btn-sm" data-act="leadership-view-export" title="导出当前统计"><svg class="ic ic-sm"><use href="#i-down"/></svg>导出</button></div>
+    <div class="card-bd"><div class="v4-stat-row">${metrics.map(metric => `<div class="v4-stat"><span class="tiny">${esc(metric.label)}</span><b>${metric.value}</b></div>`).join('')}</div></div>
+  </div>`;
+}
 function viewHome() {
   const todo = buildTodo();
   const overdue = todo.filter(t => t.level === 'd').length;
@@ -3176,6 +3314,8 @@ function viewHome() {
     <div class="kpi ok"><div class="kpi-l"><svg class="ic ic-sm"><use href="#i-talk"/></svg>本月谈话</div>
       <div class="kpi-v" data-num="${monthTalks}">${monthTalks}</div><div class="kpi-s">累计 ${DB.talks.length} 次 ${deltaHtml(talksThisM, talksLastM)}</div></div>
   </div>
+
+  ${leadershipDashboard()}
 
   <div class="card">
     <div class="card-hd"><h2><svg class="ic" style="color:var(--accent)"><use href="#i-plus"/></svg>快速记录</h2>
@@ -3422,14 +3562,49 @@ function viewTasks() {
 }
 
 /* ---------- 11.5 学生台账 ---------- */
+const STUDENT_COLLATOR = new Intl.Collator('zh-CN', { numeric:true, sensitivity:'base' });
+const studentDerived = {
+  version:0,
+  searchText:new WeakMap(),
+  filterCache:new Map(),
+  fieldOptions:null,
+  tableColumns:null,
+  facets:null,
+};
+function invalidateStudentDerived() {
+  studentDerived.version += 1;
+  studentDerived.searchText = new WeakMap();
+  studentDerived.filterCache.clear();
+  studentDerived.fieldOptions = null;
+  studentDerived.tableColumns = null;
+  studentDerived.facets = null;
+}
+function cacheStudentFilter(key, value) {
+  if (studentDerived.filterCache.size >= 16) studentDerived.filterCache.delete(studentDerived.filterCache.keys().next().value);
+  studentDerived.filterCache.set(key, value);
+  return value;
+}
+function studentFacets() {
+  if (studentDerived.facets) return studentDerived.facets;
+  const facets = { class_name:new Set(), community:new Set(), student_type:new Set(), enrollment_status:new Set(), crisis_level:new Set(), focus:new Set() };
+  (DB.students || []).forEach(student => {
+    ['class_name','community','student_type','enrollment_status','crisis_level'].forEach(key => {
+      const value = String(student[key] || '').trim(); if (value) facets[key].add(value);
+    });
+    (Array.isArray(student.focus) ? student.focus : []).forEach(value => { if (value) facets.focus.add(value); });
+  });
+  studentDerived.facets = facets;
+  return facets;
+}
 function classList() {
-  return Array.from(new Set(DB.students.map(s => s.class_name).filter(Boolean))).sort();
+  return Array.from(studentFacets().class_name).sort(STUDENT_COLLATOR.compare);
 }
 function studentDimensionValues(field) {
-  return Array.from(new Set((DB.students || []).map(student => String(student[field] || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'zh-CN', { numeric:true }));
+  const values = studentFacets()[field];
+  return values ? Array.from(values).sort(STUDENT_COLLATOR.compare) : [];
 }
 function studentFocusValues() {
-  return Array.from(new Set((DB.students || []).flatMap(student => Array.isArray(student.focus) ? student.focus : []))).sort();
+  return Array.from(studentFacets().focus).sort(STUDENT_COLLATOR.compare);
 }
 function studentDimensionStats() {
   const students = DB.students || [];
@@ -3492,6 +3667,7 @@ function studentFieldValue(student, field) {
   return '';
 }
 function studentFieldOptions() {
+  if (studentDerived.fieldOptions) return studentDerived.fieldOptions;
   const standard = [{ key:'origin', label:'生源地' }, { key:'score', label:'成绩' }].concat(Object.entries(schema.student).map(([key, meta]) => ({ key, label:meta.label })));
   const seen = new Set(standard.map(item => item.key));
   const custom = [];
@@ -3500,19 +3676,28 @@ function studentFieldOptions() {
     seen.add(key);
     custom.push({ key, label:(student.custom_field_meta && student.custom_field_meta[key] && student.custom_field_meta[key].label) || key, custom:true });
   }));
-  return standard.concat(custom.sort((a, b) => a.label.localeCompare(b.label, 'zh-CN')));
+  studentDerived.fieldOptions = standard.concat(custom.sort((a, b) => STUDENT_COLLATOR.compare(a.label, b.label)));
+  return studentDerived.fieldOptions;
 }
-function studentTableColumns(students) {
-  const rows = students || DB.students || [];
+function studentTableColumns() {
+  if (studentDerived.tableColumns) return studentDerived.tableColumns;
+  const rows = DB.students || [];
   const core = ['full_name','student_number','student_level','gender','class_name','major_name','grade','college_name','origin','dorm','dorm_building','dorm_room','academic_score','focus_level','crisis_level'];
   const columns = [];
   const seen = new Set();
   const add = (key, label, custom) => { if (!key || seen.has(key)) return; seen.add(key); columns.push({ key, label:label || key, custom:!!custom }); };
   core.forEach(key => add(key, schema.student[key] && schema.student[key].label));
-  Object.entries(schema.student).forEach(([key, meta]) => { if (rows.some(row => studentFieldValue(row, key) !== '')) add(key, meta.label); });
-  rows.forEach(row => Object.keys(row.custom_fields || {}).forEach(key => {
-    if (rows.some(item => studentFieldValue(item, key) !== '')) add(key, (row.custom_field_meta && row.custom_field_meta[key] && row.custom_field_meta[key].label) || key, true);
-  }));
+  const presentStandard = new Set();
+  const customLabels = new Map();
+  rows.forEach(row => {
+    Object.keys(schema.student).forEach(key => { if (studentFieldValue(row, key) !== '') presentStandard.add(key); });
+    Object.keys(row.custom_fields || {}).forEach(key => {
+      if (studentFieldValue(row, key) !== '') customLabels.set(key, (row.custom_field_meta && row.custom_field_meta[key] && row.custom_field_meta[key].label) || key);
+    });
+  });
+  Object.entries(schema.student).forEach(([key, meta]) => { if (presentStandard.has(key)) add(key, meta.label); });
+  customLabels.forEach((label, key) => add(key, label, true));
+  studentDerived.tableColumns = columns;
   return columns;
 }
 function studentDisplayValue(student, key) {
@@ -3524,7 +3709,16 @@ function studentDisplayValue(student, key) {
 }
 function filterStudents() {
   const f = app.filters.students;
-  return DB.students.filter(s => {
+  const signature = JSON.stringify({
+    version:studentDerived.version, cls:f.cls, level:f.level, community:f.community, studentType:f.studentType,
+    enrollment:f.enrollment, focus:f.focus, focusType:f.focusType, crisis:f.crisis, relieved:f.relieved,
+    q:f.q, field:f.field, value:f.value, sort:f.sort, sortDir:f.sortDir,
+  });
+  const cached = studentDerived.filterCache.get(signature);
+  if (cached) return cached;
+  const query = String(f.q || '').trim().toLowerCase();
+  const fieldValue = String(f.value || '').trim().toLowerCase();
+  const list = DB.students.filter(s => {
     if (f.cls && s.class_name !== f.cls) return false;
     if (f.level && normalizeStudentLevel(s.student_level) !== f.level) return false;
     if (f.community && s.community !== f.community) return false;
@@ -3538,23 +3732,27 @@ function filterStudents() {
     if (f.crisis === 'released' && !(s.crisis_level && s.crisis_relieved)) return false;
     if (f.relieved === 'unreleased' && !(s.crisis_level && !s.crisis_relieved)) return false;
     if (f.relieved === 'released' && !(s.crisis_level && s.crisis_relieved)) return false;
-    if (f.q) {
-      const custom = Object.values(s.custom_fields || {}).join(' ');
-      const t = [s.full_name, s.student_number, s.class_name, s.dorm, s.note, s.phone, s.politics, s.hometown, s.origin, custom].join(' ').toLowerCase();
-      if (!t.includes(f.q.toLowerCase())) return false;
+    if (query) {
+      let text = studentDerived.searchText.get(s);
+      if (!text) {
+        text = [s.full_name, s.student_number, s.class_name, s.dorm, s.note, s.phone, s.politics, s.hometown, s.origin, ...Object.values(s.custom_fields || {})].join(' ').toLowerCase();
+        studentDerived.searchText.set(s, text);
+      }
+      if (!text.includes(query)) return false;
     }
     if (f.field && f.value) {
       const value = String(studentFieldValue(s, f.field)).toLowerCase();
-      if (!value.includes(String(f.value).trim().toLowerCase())) return false;
+      if (!value.includes(fieldValue)) return false;
     }
     return true;
   }).sort((a, b) => {
     const key = f.sort || 'focus';
     const av = studentFieldValue(a, key); const bv = studentFieldValue(b, key);
     const numeric = key === 'score' || ['academic_score', 'credits', 'class_rank', 'edu_years'].includes(key);
-    const result = numeric ? Number(av || 0) - Number(bv || 0) : String(av || (key === 'focus' ? 'Z' : '')).localeCompare(String(bv || (key === 'focus' ? 'Z' : '')), 'zh-CN', { numeric:true, sensitivity:'base' });
+    const result = numeric ? Number(av || 0) - Number(bv || 0) : STUDENT_COLLATOR.compare(String(av || (key === 'focus' ? 'Z' : '')), String(bv || (key === 'focus' ? 'Z' : '')));
     return f.sortDir === 'desc' ? -result : result;
   });
+  return cacheStudentFilter(signature, list);
 }
 function studentPageSize(value) {
   const size = Number(value);
@@ -3629,11 +3827,13 @@ function mountStudentLedgerControls() {
     picker.innerHTML = `<span>筛选方案</span><select class="inp" data-student-saved-filter><option value="">选择方案</option>${prefs.saved_filters.map(item => `<option value="${esc(item.id)}">${esc(item.name)}</option>`).join('')}</select>`;
     savedFilterButton.insertAdjacentElement('beforebegin', picker);
   }
-  const state = studentPageState(filterStudents());
+  const renderState = app.studentLedgerRenderState;
+  const list = renderState && Array.isArray(renderState.list) ? renderState.list : filterStudents();
+  const state = renderState && renderState.pageState ? renderState.pageState : studentPageState(list);
   $$('[data-student-ledger-controls], .student-pagination, [data-student-scroll-proxy]', card).forEach(node => node.remove());
   paging.insertAdjacentHTML('beforeend', studentLedgerControls(state));
   tableWrap.classList.add('student-table-wrap');
-  tableWrap.dataset.windowed = String(filterStudents().length > 100);
+  tableWrap.dataset.windowed = String(list.length > 100);
   tableWrap.querySelectorAll('tbody > tr').forEach((row, index) => {
     const student = state.rows[index];
     if (!student) return;
@@ -3666,6 +3866,7 @@ function viewStudents() {
   if (studentTab === 'analysis') return viewStudentsAnalysis();
   const studentMode = ['table', 'cards', 'photo'].includes(f.mode) ? f.mode : 'table';
   const pageState = studentPageState(list);
+  app.studentLedgerRenderState = { list, pageState };
   const renderList = pageState.rows;
   const studentBulk = studentBulkState();
   const studentFields = studentFieldOptions();
@@ -4675,7 +4876,9 @@ function filterGraduate() {
   });
 }
 function viewGraduate() {
-  if ((app.graduateTab || 'records') === 'employment') return workspaceTabs('graduate', 'employment', [{ key:'records', label:'就业台账' }, { key:'employment', label:'就业资源' }]) + viewEmployment();
+  if ((app.graduateTab || 'records') === 'employment') return viewEmployment();
+  if ((app.graduateTab || 'records') === 'intent') return viewEmploymentIntent();
+  if ((app.graduateTab || 'records') === 'contacts') return viewEmploymentContacts();
   const f = app.filters.graduate, list = filterGraduate();
   const total = list.length;
   const employed = list.filter(s => s.employment_status !== '待就业' && s.employment_status !== '暂不就业').length;
@@ -4683,7 +4886,7 @@ function viewGraduate() {
   const upCount = list.filter(s => s.employment_status === '升学（国内）' || s.employment_status === '出国出境').length;
   const civilCount = list.filter(s => s.employment_status === '公务员（录用）').length;
   const statusItems = EMPLOY_STATUS.map((s, i) => ({ label: s, value: list.filter(x => x.employment_status === s).length, color: ['#16a34a', '#0ea5e9', '#0891b2', '#1e3a5f', '#7c3aed', '#f59e0b', '#ef4444', '#94a3b8'][i] }));
-  return `${workspaceTabs('graduate', 'records', [{ key:'records', label:'就业台账' }, { key:'employment', label:'就业资源' }])}
+  return `${workspaceTabs('graduate', 'records', [{ key:'records', label:'就业台账' }, { key:'intent', label:'就业意向' }, { key:'contacts', label:'联系记录' }, { key:'employment', label:'就业资源' }])}
   <div class="card">
     <div class="card-hd"><h2><svg class="ic" style="color:var(--accent)"><use href="#i-grad"/></svg>毕业生档案与就业统计</h2>
       <span class="sp"></span>
@@ -5016,6 +5219,8 @@ function viewReport() {
       <button class="btn btn-sm" data-act="sum-week">下载本周小结</button>
       <button class="btn btn-sm" data-act="sum-month">下载本月小结</button>
       <button class="btn btn-sm" data-act="sum-copy"><svg class="ic ic-sm"><use href="#i-copy"/></svg>复制全文</button>
+      <button class="btn btn-sm btn-primary" data-act="ai-report-draft">AI 生成区间草稿</button>
+      <button class="btn btn-sm" data-act="ai-notice-rewrite">通知改写</button>
       <button class="btn btn-sm" data-act="sum-download">下载 TXT</button>
       <button class="btn btn-sm" data-act="print">打印 / 存 PDF</button>
     </div>
@@ -5664,7 +5869,12 @@ function honorForm(t) {
   });
 }
 function studentTimeline(s) {
-  const sameStudent = row => row && ((row.student_number && row.student_number === s.student_number) || (row.student_name && row.student_name === s.full_name) || (row.name && row.name === s.full_name));
+  const sameStudent = row => {
+    if (!row) return false;
+    const recordStudentId = String(row.student_id || '').trim();
+    if (recordStudentId && s.id) return recordStudentId === String(s.id);
+    return (row.student_number && row.student_number === s.student_number) || (row.student_name && row.student_name === s.full_name) || (row.name && row.name === s.full_name);
+  };
   const events = [];
   const add = (rows, type, date, title, detail, predicate) => (rows || []).filter(row => (predicate || sameStudent)(row)).forEach(row => events.push({ date:date(row), type, title:title(row), detail:detail(row) }));
   add(DB.talks, '谈心谈话', row => row.date, row => row.way || '谈话', row => row.summary || row.action || '');
@@ -5676,10 +5886,16 @@ function studentTimeline(s) {
   add(DB.activities, '活动开展', row => row.date, row => row.title || '活动记录', row => row.summary || row.participants || '', row => sameStudent(row) || (!!s.class_name && row.class_name === s.class_name));
   add(DB.stay, '住宿情况', row => row.start || row.date, row => row.housing_status || '住宿记录', row => row.reason || row.note || '');
   add(DB.honor, '评优记录', row => row.updated_at || row.created_at, row => row.apply_type || '评优申报', row => row.others || row.social || '');
+  const business = businessProfileSources();
+  add(business.assessments, '综合测评', row => row.term, row => row.level || '综合测评', row => row.score === '' ? row.note : `分数 ${row.score} · 排名 ${row.rank || '—'}`);
+  add(business.academicTerms, '学期学业', row => row.term, row => `${row.warning_level || '无'}预警`, row => `不及格 ${row.failed_count || 0} 门 · 平均分 ${row.average_score === '' ? '—' : row.average_score}`);
+  add(business.disciplines, '处分档案', row => row.decision_date, row => row.category || '处分记录', row => `${row.level || '未分级'} · ${row.status || '生效中'}${row.document_name ? ` · ${row.document_name}` : ''}`);
+  add(business.aids, '资助记录', row => row.issued_at || row.term, row => row.aid_type || '资助记录', row => `${row.amount || 0} 元 · ${row.status || '待落实'}`);
   return events.filter(item => item.date || item.title).sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
 }
 function openStudent(s) {
   const timeline = studentTimeline(s);
+  const businessProfile = window.CWBBusiness ? window.CWBBusiness.buildStudentProfile(s, businessProfileSources()) : null;
   const L = LEVEL_MAP[s.focus_level];
   ui.modal({
     title: `学生档案 · ${s.full_name}`, size:'wide',
@@ -5706,6 +5922,7 @@ function openStudent(s) {
       ${(s.focus || []).length ? `<div style="margin-bottom:12px"><div class="tiny" style="margin-bottom:5px">关注类型</div>${focusTags(s)}</div>` : ''}
       ${s.note ? `<div style="margin-bottom:14px"><div class="tiny" style="margin-bottom:4px">情况备注</div>
         <div style="background:var(--line-2);padding:10px 12px;border-radius:8px;font-size:13.3px;line-height:1.7;white-space:pre-wrap">${esc(s.note)}</div></div>` : ''}
+      ${businessProfile ? `<div class="grid3" style="gap:9px;margin-bottom:14px"><div><div class="tiny">综测记录</div><strong>${businessProfile.assessment_count}</strong></div><div><div class="tiny">学期学业</div><strong>${businessProfile.academic_term_count}</strong></div><div><div class="tiny">处分未解除</div><strong>${businessProfile.active_discipline_count}</strong></div><div><div class="tiny">资助记录</div><strong>${businessProfile.aid_count}</strong></div><div><div class="tiny">就业联系</div><strong>${businessProfile.employment_contact_count}</strong></div><div><div class="tiny">就业意向</div><strong>${businessProfile.employment_intent_count}</strong></div></div>` : ''}
       <div class="lab" style="margin-bottom:9px">学生档案时间线（${timeline.length} 条）</div>
       ${timeline.length ? `<div class="tl" data-student-timeline>${timeline.map(item => `
         <div class="tl-item"><div class="tl-d">${esc(item.date || '未标日期')} · <span class="tag tag-line">${esc(item.type)}</span> ${esc(item.title)}</div>
@@ -7263,6 +7480,7 @@ function viewFiles() {
 }
 function viewEmployment() {
   const resources = v4Collection('v4_employment_resources');
+  const curated = window.CWBEmploymentResources ? window.CWBEmploymentResources.seedResources() : [];
   const defaults = [
     { id:'career-ncss', title:'国家大学生就业服务平台', region:'全国', industry:'综合就业服务', organizer:'教育部', url:'https://www.ncss.cn/', verified_at:today(), status:'有效' },
     { id:'career-24365', title:'24365校园招聘服务', region:'全国', industry:'校园招聘', organizer:'教育部', url:'https://24365.smartedu.cn/', verified_at:today(), status:'有效' },
@@ -7271,14 +7489,309 @@ function viewEmployment() {
     { id:'career-iguopin', title:'国聘招聘平台', region:'全国', industry:'国企与综合招聘', organizer:'国聘', url:'https://www.iguopin.com/', verified_at:today(), status:'有效' },
     { id:'career-newjobs', title:'中国国家人才网', region:'全国', industry:'人才服务', organizer:'中国国家人才网', url:'https://www.newjobs.com.cn/', verified_at:today(), status:'有效' },
   ];
-  const missing = defaults.filter(item => !resources.some(resource => resource.id === item.id));
+  const seed = curated.length ? curated : defaults;
+  const missing = seed.filter(item => !resources.some(resource => resource.id === item.id));
   if (missing.length) { resources.push(...missing); save('custom'); }
-  const state = app.v4 || (app.v4 = {}); const q = String(state.employmentQ || '').toLowerCase();
-  const region = state.employmentRegion || ''; const industry = state.employmentIndustry || '';
-  const filtered = resources.filter(r => (!q || [r.title, r.organizer, r.url].join(' ').toLowerCase().includes(q)) && (!region || r.region === region) && (!industry || r.industry === industry));
-  const rows = filtered.map(r => { const index = resources.indexOf(r); return `<article class="employment-resource-card" data-employment-resource><div class="employment-resource-top"><span class="employment-resource-icon"><svg class="ic"><use href="#i-link"></use></svg></span><span class="tag tag-green">${esc(r.status || '有效')}</span></div><h3>${esc(r.title)}</h3><p>${esc(r.organizer || '未记录主办单位')} · ${esc(r.industry || '综合')}</p><div class="employment-resource-meta"><span>${esc(r.region || '全国')}</span><span>核验 ${esc(r.verified_at || '未记录')}</span></div><div class="employment-resource-actions"><a class="btn btn-sm btn-primary" href="${esc(r.url)}" target="_blank" rel="noreferrer">打开官网</a><button class="btn btn-sm btn-danger" data-act="v4-employment-delete" data-index="${index}">删除</button></div></article>`; }).join('');
-  const body = `<div class="banner banner-info"><strong>离线资源目录：</strong>下面是预置的官方就业服务入口，应用不会自动抓取网页；后续更新请导入带签名的资源清单。</div><div class="v4-stat-row"><div class="v4-stat"><span class="tiny">资源总数</span><b>${resources.length}</b></div><div class="v4-stat"><span class="tiny">当前显示</span><b>${filtered.length}</b></div><div class="v4-stat"><span class="tiny">地区</span><b>${new Set(resources.map(r => r.region).filter(Boolean)).size}</b></div><div class="v4-stat"><span class="tiny">已核验</span><b>${resources.filter(r => r.status === '有效').length}</b></div></div><div class="card employment-resource-shell"><div class="card-bd"><div class="v4-toolbar"><input class="inp" style="max-width:300px" data-v4-employment-search value="${esc(state.employmentQ || '')}" placeholder="搜索平台、主办单位或网址"><select class="inp" data-v4-employment-region><option value="">全部地区</option>${[...new Set(resources.map(r => r.region).filter(Boolean))].map(v => `<option value="${esc(v)}"${v === region ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select><select class="inp" data-v4-employment-industry><option value="">全部方向</option>${[...new Set(resources.map(r => r.industry).filter(Boolean))].map(v => `<option value="${esc(v)}"${v === industry ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></div><div class="employment-resource-grid">${rows || '<div class="empty">暂无匹配资源</div>'}</div></div></div>`;
-  return v4Page('毕业生就业', '把常用的官方就业入口整理在这里，学生查询时不用再翻收藏夹。', body, '<button class="btn" data-act="v4-employment-import">导入签名清单</button><button class="btn" data-act="v4-employment-export">导出签名清单</button><button class="btn btn-primary" data-act="v4-employment-new">新增资源</button>');
+  const state = app.v4 || (app.v4 = {});
+  const region = state.employmentRegion || ''; const category = state.employmentCategory || '';
+  const audience = state.employmentAudience || ''; const status = state.employmentStatus || '';
+  const favorites = state.employmentFavorites === true;
+  const filtered = window.CWBEmploymentResources
+    ? window.CWBEmploymentResources.filterResources(resources, { q:state.employmentQ, region, category, audience, status, favorite:favorites })
+    : resources.filter(r => (!state.employmentQ || [r.title, r.url, r.category, r.industry, r.audience, r.tags].join(' ').toLowerCase().includes(String(state.employmentQ).toLowerCase())) && (!region || r.region === region) && (!category || (r.category || r.industry) === category) && (!audience || r.audience === audience) && (!status || r.status === status) && (!favorites || r.favorite === true));
+  const categories = [...new Set(resources.map(r => r.category || r.industry).filter(Boolean))].sort();
+  const audiences = [...new Set(resources.map(r => r.audience).filter(Boolean))].sort();
+  const regions = [...new Set(resources.map(r => r.region).filter(Boolean))].sort();
+  const rows = filtered.map(r => { const index = resources.indexOf(r); const categoryLabel = r.category || r.industry || '综合'; const sourceLabel = r.source || r.organizer || '未记录来源'; return `<article class="employment-resource-card" data-employment-resource><div class="employment-resource-top"><span class="employment-resource-icon"><svg class="ic"><use href="#i-link"></use></svg></span><span class="tag ${r.status === '有效' ? 'tag-green' : r.status === '失效' ? 'tag-red' : 'tag-amber'}">${esc(r.status || '待核验')}</span></div><h3>${esc(r.title)}</h3><p>${esc(sourceLabel)} · ${esc(categoryLabel)}</p><div class="employment-resource-meta"><span>${esc(r.region || '全国')}</span><span>${esc(r.audience || '通用')}</span><span>核验 ${esc(r.verified_at || '未记录')}</span></div><div class="employment-resource-actions"><a class="btn btn-sm btn-primary" href="${esc(r.url)}" target="_blank" rel="noreferrer" title="在新窗口打开资源">打开官网</a><button class="btn btn-sm" data-act="v4-employment-favorite" data-index="${index}" title="${r.favorite ? '取消收藏' : '收藏'}">${r.favorite ? '★ 已收藏' : '☆ 收藏'}</button><button class="btn btn-sm" data-act="v4-employment-edit" data-index="${index}">编辑</button><button class="btn btn-sm btn-danger" data-act="v4-employment-delete" data-index="${index}">删除</button></div></article>`; }).join('');
+  const optionList = (items, current) => items.map(v => `<option value="${esc(v)}"${v === current ? ' selected' : ''}>${esc(v)}</option>`).join('');
+  const body = `<div class="banner banner-info"><strong>离线资源目录：</strong>预置官方就业服务入口，不自动抓取网页；资源可人工收藏、核验、编辑，并通过签名清单或 CSV 维护。</div><div class="v4-stat-row"><div class="v4-stat"><span class="tiny">资源总数</span><b>${resources.length}</b></div><div class="v4-stat"><span class="tiny">当前显示</span><b>${filtered.length}</b></div><div class="v4-stat"><span class="tiny">已收藏</span><b>${resources.filter(r => r.favorite === true).length}</b></div><div class="v4-stat"><span class="tiny">待核验 / 失效</span><b>${resources.filter(r => r.status !== '有效').length}</b></div></div><div class="card employment-resource-shell"><div class="card-bd"><div class="v4-toolbar"><input class="inp" style="max-width:300px" data-v4-employment-search value="${esc(state.employmentQ || '')}" placeholder="搜索名称、来源、网址或标签"><select class="inp" data-v4-employment-region><option value="">全部地区</option>${optionList(regions, region)}</select><select class="inp" data-v4-employment-category><option value="">全部分类</option>${optionList(categories, category)}</select><select class="inp" data-v4-employment-audience><option value="">全部对象</option>${optionList(audiences, audience)}</select><select class="inp" data-v4-employment-status><option value="">全部状态</option>${optionList(['有效','待核验','失效'], status)}</select><label class="chk"><input type="checkbox" data-v4-employment-favorites${favorites ? ' checked' : ''}><span>只看收藏</span></label></div><div class="employment-resource-grid">${rows || '<div class="empty">暂无匹配资源</div>'}</div></div></div>`;
+  return workspaceTabs('graduate', 'employment', [{ key:'records', label:'就业台账' }, { key:'intent', label:'就业意向' }, { key:'contacts', label:'联系记录' }, { key:'employment', label:'就业资源' }]) + v4Page('毕业生就业', '把常用的官方就业入口整理在这里，学生查询时不用再翻收藏夹。', body, '<button class="btn" data-act="v4-employment-import">导入签名清单</button><button class="btn" data-act="v4-employment-export">导出签名清单</button><button class="btn" data-act="v4-employment-csv-import">导入 CSV</button><button class="btn" data-act="v4-employment-csv-export">导出 CSV</button><button class="btn btn-primary" data-act="v4-employment-new">新增资源</button>');
+}
+function studentByReference(studentId, studentNumber) {
+  const id = String(studentId || '').trim(); const number = String(studentNumber || '').trim();
+  if (id) return DB.students.find(item => String(item.id || '') === id) || null;
+  return (number && DB.students.find(item => String(item.student_number || '') === number)) || null;
+}
+function linkedStudentValues(values) {
+  const item = Object.assign({}, values || {}); const student = studentByReference(item.student_id, item.student_number);
+  if (!student) return item;
+  return Object.assign(item, { student_id:student.id, student_number:student.student_number || '', student_name:student.full_name || '', class_name:student.class_name || item.class_name || '' });
+}
+function employmentStudent(studentId, studentNumber, studentName) {
+  const student = studentByReference(studentId, studentNumber);
+  return { student, name:student && student.full_name || studentName || studentNumber || '未匹配学生' };
+}
+function viewEmploymentIntent() {
+  const items = v4Collection('v4_employment_intents');
+  const grouped = new Map();
+  items.forEach(item => { const key = item.graduation_year || '未填年份'; if (!grouped.has(key)) grouped.set(key, []); grouped.get(key).push(item); });
+  const rows = items.slice().sort((a, b) => String(b.updated_at || '').localeCompare(String(a.updated_at || ''))).map(item => {
+    const student = employmentStudent(item.student_id, item.student_number, item.student_name);
+    const index = items.indexOf(item);
+    return `<tr><td><strong>${esc(student.name)}</strong><div class="tiny">${esc(item.student_number || '')}</div></td><td>${esc(item.graduation_year || '—')}</td><td>${esc(item.status || '待填报')}</td><td>${esc(item.direction || '—')}</td><td>${esc(item.expected_role || '—')}</td><td>${esc(item.preferred_region || '—')}</td><td class="td-acts"><button class="link-btn" data-act="employment-intent-edit" data-index="${index}">编辑</button><button class="link-btn danger" data-act="employment-intent-delete" data-index="${index}" style="margin-left:8px">删除</button></td></tr>`;
+  }).join('');
+  const summary = [...grouped.entries()].map(([year, list]) => `<span class="tag tag-blue">${esc(year)} · ${list.length} 人</span>`).join(' ');
+  const body = `<div class="card"><div class="card-hd"><h2>就业意向统计</h2><span class="sp"></span><span class="tiny">按毕业年份沉淀大三下学期意向，不覆盖就业台账</span></div><div class="card-bd"><div class="v4-toolbar">${summary || '<span class="muted">尚未登记就业意向</span>'}</div></div></div><div class="card"><div class="card-hd"><h2>学生就业意向</h2><span class="sp"></span><button class="btn btn-primary btn-sm" data-act="employment-intent-new"><svg class="ic ic-sm"><use href="#i-plus"/></svg>新增意向</button></div><div class="card-bd">${rows ? `<div class="tw"><table><thead><tr><th>学生</th><th>毕业年份</th><th>状态</th><th>方向</th><th>期望岗位</th><th>意向地区</th><th class="td-acts">操作</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="empty">还没有就业意向记录</div>'}</div></div>`;
+  return workspaceTabs('graduate', 'intent', [{ key:'records', label:'就业台账' }, { key:'intent', label:'就业意向' }, { key:'contacts', label:'联系记录' }, { key:'employment', label:'就业资源' }]) + v4Page('就业意向', '围绕毕业年份收集学生方向、地区和岗位偏好，作为就业指导的工作底稿。', body, '<button class="btn" data-act="employment-intent-new">登记学生意向</button>');
+}
+function viewEmploymentContacts() {
+  const items = v4Collection('v4_employment_contacts');
+  const rows = items.slice().sort((a, b) => String(b.contacted_at || '').localeCompare(String(a.contacted_at || ''))).map(item => {
+    const student = employmentStudent(item.student_id, item.student_number, item.student_name);
+    const index = items.indexOf(item);
+    return `<tr><td><strong>${esc(student.name)}</strong><div class="tiny">${esc(item.student_number || '')}</div></td><td>${esc(item.contacted_at || '—')}</td><td>${esc(item.channel || '—')}</td><td>${esc(item.contact_type || '—')}</td><td style="max-width:280px">${esc(item.summary || '—')}</td><td>${esc(item.next_at || '—')}</td><td class="td-acts"><button class="link-btn" data-act="employment-contact-edit" data-index="${index}">编辑</button><button class="link-btn danger" data-act="employment-contact-delete" data-index="${index}" style="margin-left:8px">删除</button></td></tr>`;
+  }).join('');
+  const body = `<div class="card"><div class="card-hd"><h2>就业联系全过程</h2><span class="sp"></span><span class="tiny">每次联系保留方式、结果和下一步行动</span><button class="btn btn-primary btn-sm" data-act="employment-contact-new"><svg class="ic ic-sm"><use href="#i-plus"/></svg>新增联系</button></div><div class="card-bd">${rows ? `<div class="tw"><table><thead><tr><th>学生</th><th>联系日期</th><th>方式</th><th>类型</th><th>记录摘要</th><th>下次跟进</th><th class="td-acts">操作</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="empty">还没有就业联系记录</div>'}</div></div>`;
+  return workspaceTabs('graduate', 'contacts', [{ key:'records', label:'就业台账' }, { key:'intent', label:'就业意向' }, { key:'contacts', label:'联系记录' }, { key:'employment', label:'就业资源' }]) + v4Page('就业联系记录', '以学号关联学生画像，连续记录就业指导、材料提醒和后续跟进。', body, '<button class="btn btn-primary" data-act="employment-contact-new">记录联系</button>');
+}
+const BUSINESS_MODULES = {
+  v4_assessments:{ title:'综合测评', icon:'i-chart', normalizer:'normalizeAssessment', fields:[['student_number','学生','select'],['term','学年学期','text'],['score','综测分数','number'],['rank','专业 / 班级排名','number'],['level','评定等级','text'],['awards','奖励加分说明','textarea'],['activities','社会工作 / 实践','textarea'],['status','状态','select',['已登记','待核验','已归档']],['note','备注','textarea']] },
+  v4_academic_terms:{ title:'学期学业汇总', icon:'i-alert', normalizer:'normalizeAcademicTerm', fields:[['student_number','学生','select'],['term','学年学期','text'],['failed_count','不及格门数','number'],['warning_level','预警等级','select',['无','蓝色','黄色','橙色','红色']],['average_score','平均分','number'],['earned_credits','已修学分','number'],['status','状态','select',['已登记','待核验','已归档']],['source','数据来源','text'],['note','备注','textarea']] },
+  v4_disciplines:{ title:'处分档案', icon:'i-lock', normalizer:'normalizeDiscipline', fields:[['student_number','学生','select'],['category','处分类型','select',['校级处分','院级处分','课堂纪律','宿舍违规','其他']],['level','处分等级','text'],['decision_date','决定日期','date'],['relieved','处分已解除','checkbox'],['relief_date','解除日期','date'],['status','状态','select',['生效中','已解除','申诉中','已撤销']],['summary','处分事实与处理','textarea'],['note','备注','textarea']] },
+  v4_aid_records:{ title:'困难认定与资助', icon:'i-shield', normalizer:'normalizeAid', fields:[['student_number','学生','select'],['term','学年学期','text'],['aid_type','业务类型','select',['困难认定','国家助学金','校内资助','临时补助','勤工助学']],['difficulty_level','困难等级','text'],['amount','金额','number'],['status','状态','select',['待落实','已认定','已发放','已结束']],['issued_at','落实日期','date'],['source','来源','text'],['note','备注','textarea']] },
+};
+function businessStudentOptions() {
+  return (DB.students || []).slice().sort((a, b) => String(a.full_name || '').localeCompare(String(b.full_name || ''), 'zh-CN')).map(student => ({ v:String(student.student_number || ''), n:`${student.full_name || '未命名'} · ${student.student_number || '无学号'}` }));
+}
+function businessRows(key) { return v4Collection(key); }
+function businessNormalize(key, value) {
+  const cfg = BUSINESS_MODULES[key];
+  return window.CWBBusiness && cfg && typeof window.CWBBusiness[cfg.normalizer] === 'function' ? window.CWBBusiness[cfg.normalizer](value) : Object.assign({ id:uid(), schema_version:8 }, value || {});
+}
+function businessStudentName(studentId, number) {
+  const student = studentByReference(studentId, number);
+  return student ? student.full_name : (number || '未关联学生');
+}
+function businessProfileSources() {
+  return {
+    assessments:businessRows('v4_assessments'), academicTerms:businessRows('v4_academic_terms'), disciplines:businessRows('v4_disciplines'), aids:businessRows('v4_aid_records'),
+    employmentIntents:v4Collection('v4_employment_intents'), employmentContacts:v4Collection('v4_employment_contacts'),
+  };
+}
+function businessForm(key, record) {
+  const cfg = BUSINESS_MODULES[key]; if (!cfg) return;
+  const fields = cfg.fields.map(([field, label, type, options]) => {
+    if (field === 'student_number') return { key:field, label, type:'select', options:businessStudentOptions() };
+    if (type === 'select') return { key:field, label, type, options };
+    if (type === 'textarea') return { key:field, label, type, rows:3, span:2 };
+    if (type === 'checkbox') return { key:field, label, type, hint:'保存后可继续上传对应文件。' };
+    return { key:field, label, type };
+  });
+  const next = Object.assign({ status:key === 'v4_disciplines' ? '生效中' : '已登记' }, record || {});
+  ui.form({ title:`${record ? '编辑' : '新增'}${cfg.title}`, size:'wide', data:next, fields, onSave(values) {
+    const normalized = businessNormalize(key, linkedStudentValues(Object.assign({}, record || {}, values, { student_id:'' })));
+    const rows = businessRows(key); const index = record ? rows.findIndex(item => String(item.id) === String(record.id)) : -1;
+    if (index >= 0) rows[index] = normalized; else rows.push(normalized);
+    const repository = window.CWB && window.CWB.repositories && window.CWB.repositories[key];
+    if (repository && typeof repository.put === 'function') repository.put(normalized).catch(error => ui.toast(error.message || '业务档案保存失败', 'err'));
+    else save('custom');
+    if (!repository || !window.CWB_V4_IDB_ACTIVE) save('custom');
+    render(); ui.toast(record ? '业务档案已保存' : '业务档案已添加', 'ok');
+  }});
+}
+function businessUploadDiscipline(id) {
+  const item = businessRows('v4_disciplines').find(row => String(row.id) === String(id)); if (!item) return;
+  const input = document.createElement('input'); input.type = 'file'; input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
+  input.onchange = async () => {
+    const file = input.files && input.files[0]; if (!file) return;
+    try {
+      const attachmentId = `discipline_attachment_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      if (!window.CWB || !window.CWB.attachments || typeof window.CWB.attachments.add !== 'function') throw new Error('附件仓储尚未就绪');
+      const student = studentByReference(item.student_id, item.student_number);
+      await window.CWB.attachments.add({ id:attachmentId, student_id:student ? student.id : '', name:file.name, blob:file, mimeType:file.type });
+      item.document_attachment_id = attachmentId; item.document_name = file.name; item.updated_at = new Date().toISOString();
+      const repository = window.CWB.repositories && window.CWB.repositories.v4_disciplines;
+      if (repository && repository.put) await repository.put(item); else save('custom');
+      render(); ui.toast('处分文件已归档', 'ok');
+    } catch (error) { ui.toast(error.message || '处分文件上传失败', 'err'); }
+  }; input.click();
+}
+function viewBusiness() {
+  const tab = BUSINESS_MODULES[app.businessTab] ? app.businessTab : 'v4_assessments';
+  app.businessTab = tab;
+  const cfg = BUSINESS_MODULES[tab]; const rows = businessRows(tab).slice().sort((a, b) => String(b.term || b.decision_date || b.issued_at || b.updated_at || '').localeCompare(String(a.term || a.decision_date || a.issued_at || a.updated_at || '')));
+  const count = key => businessRows(key).length;
+  const tableRows = rows.map((row, index) => {
+    const student = businessStudentName(row.student_id, row.student_number);
+    const middle = tab === 'v4_assessments' ? `${row.term || '—'} · ${row.score === '' ? '未填分数' : row.score} 分 · 排名 ${row.rank || '—'}`
+      : tab === 'v4_academic_terms' ? `${row.term || '—'} · 不及格 ${row.failed_count || 0} 门 · ${row.warning_level || '无'}预警`
+      : tab === 'v4_disciplines' ? `${row.category || '处分'} · ${row.level || '未分级'} · ${row.status || '生效中'}`
+      : `${row.term || '—'} · ${row.aid_type || '资助'} · ${row.amount || 0} 元 · ${row.status || '待落实'}`;
+    const attachment = tab === 'v4_disciplines' ? `<button class="link-btn" data-act="business-discipline-attach" data-id="${esc(row.id)}">${row.document_name ? '更换文件' : '上传文件'}</button>` : (row.note ? esc(row.note).slice(0, 30) : '—');
+    return `<tr><td><strong>${esc(student)}</strong><div class="tiny">${esc(row.student_number || '')}</div></td><td>${esc(middle)}</td><td class="muted">${attachment}</td><td class="td-acts"><button class="link-btn" data-act="business-edit" data-key="${tab}" data-id="${esc(row.id)}">编辑</button><button class="link-btn danger" data-act="business-delete" data-key="${tab}" data-id="${esc(row.id)}" style="margin-left:8px">删除</button></td></tr>`;
+  }).join('');
+  const tabs = Object.entries(BUSINESS_MODULES).map(([key, item]) => `<button class="workspace-tab${key === tab ? ' on' : ''}" data-business-tab="${key}">${item.title}<span class="tiny" style="margin-left:5px">${count(key)}</span></button>`).join('');
+  const body = `<div class="workspace-tabs" role="tablist"><div class="workspace-tabs-inner">${tabs}</div></div><div class="card"><div class="card-hd"><h2><svg class="ic" style="color:var(--accent)"><use href="#${cfg.icon}"/></svg>${cfg.title}</h2><span class="sp"></span><button class="btn btn-sm" data-act="business-export" data-key="${tab}">导出 CSV</button><button class="btn btn-primary btn-sm" data-act="business-new" data-key="${tab}"><svg class="ic ic-sm"><use href="#i-plus"/></svg>新增记录</button></div><div class="card-bd">${rows.length ? `<div class="tw"><table><thead><tr><th>学生</th><th>记录摘要</th><th>${tab === 'v4_disciplines' ? '文件' : '备注'}</th><th class="td-acts">操作</th></tr></thead><tbody>${tableRows}</tbody></table></div>` : `<div class="empty">暂无${cfg.title}记录，可按学号新增并归集到学生画像。</div>`}</div></div>`;
+  return v4Page('业务档案', '补充现有成绩、奖惩和资助模块的结构化字段，所有记录均以学号关联学生画像。', body);
+}
+const AI_PURPOSES = [
+  { key:'weekly_summary', label:'本周工作摘要' },
+  { key:'monthly_summary', label:'本月工作总结' },
+  { key:'semester_summary', label:'学期工作总结' },
+  { key:'risk_review', label:'学生预警辅助分析' },
+  { key:'notice_rewrite', label:'通知语气转换' },
+  { key:'assistant', label:'AI 工作助手' },
+];
+function aiProviderRecords() { return v4Collection('v4_ai_providers'); }
+function employmentResourceForm(item) {
+  const value = item || { title:'', region:'全国', category:'综合', audience:'', source:'', tags:'', url:'', verified_at:today(), status:'待核验', favorite:false };
+  const saveValue = async formValue => {
+    const resource = Object.assign({}, value, formValue, { id:value.id || `career_${Date.now()}` });
+    try {
+      if (window.CWB.employmentResourceProvider) await window.CWB.employmentResourceProvider.add(resource);
+      else { const list = v4Collection('v4_employment_resources'); const index = list.findIndex(row => row.id === resource.id); if (index >= 0) list[index] = resource; else list.push(resource); save('custom'); }
+      render(); ui.toast(item ? '就业资源已更新' : '就业资源已保存', 'ok');
+    } catch (error) { ui.toast(error.message || '就业资源保存失败', 'err'); }
+  };
+  return ui.form({ title:item ? '编辑就业资源' : '新增就业资源', data:value, fields:[
+    { key:'title', label:'资源名称', required:true }, { key:'region', label:'地域' }, { key:'category', label:'分类', required:true },
+    { key:'audience', label:'适用对象' }, { key:'source', label:'来源单位' }, { key:'tags', label:'标签', ph:'逗号分隔' },
+    { key:'url', label:'官方网址', required:true, type:'url' }, { key:'verified_at', label:'最后核验日期', type:'date' },
+    { key:'status', label:'状态', type:'select', options:[{v:'有效',n:'有效'},{v:'待核验',n:'待核验'},{v:'失效',n:'失效'}] }, { key:'favorite', label:'加入收藏', type:'checkbox' },
+  ], onSave:saveValue });
+}
+function aiSecretKey(id) { return `cwb_ai_secret_${String(id || '').replace(/[^a-z0-9_-]/gi, '_')}`; }
+function aiStoreSecret(id, secret) {
+  const value = String(secret || '').trim();
+  if (!value) return Promise.resolve(false);
+  if (window.cwbDesktop && typeof window.cwbDesktop.setAiSecret === 'function') return window.cwbDesktop.setAiSecret(id, value);
+  try { sessionStorage.setItem(aiSecretKey(id), value); return Promise.resolve(true); } catch (_) { return Promise.resolve(false); }
+}
+function aiReadSecret(id) {
+  if (window.cwbDesktop && typeof window.cwbDesktop.getAiSecret === 'function') return window.cwbDesktop.getAiSecret(id);
+  try { return Promise.resolve(sessionStorage.getItem(aiSecretKey(id)) || ''); } catch (_) { return Promise.resolve(''); }
+}
+function aiContextRecords(purpose) {
+  const records = [];
+  if (['weekly_summary','monthly_summary','semester_summary','assistant'].includes(purpose)) {
+    DB.tasks.slice(-80).forEach(item => records.push({ type:'task', title:item.title, due:item.due, status:item.status, summary:item.note }));
+    DB.talks.slice(-80).forEach(item => records.push({ type:'talk', student_number:item.student_number, name:item.student_name, date:item.date, summary:item.summary, follow_up:item.need_follow }));
+    DB.worklogs.slice(-80).forEach(item => records.push({ type:'worklog', student_number:item.student_number, name:item.student_name, date:item.date, title:item.title, summary:item.summary, status:item.status }));
+  }
+  if (purpose === 'risk_review') {
+    DB.warn.slice(-80).forEach(item => records.push({ type:'academic_warning', student_number:item.student_number, name:item.name, level:item.level, course:item.course, measure:item.measure, resolved:item.resolved }));
+    DB.focus.slice(-80).forEach(item => records.push({ type:'focus', student_number:item.student_number, name:item.name, level:item.level, category:item.category, reason:item.reason, status:item.status }));
+    DB.psych.slice(-80).forEach(item => records.push({ type:'psychology', student_number:item.student_number, name:item.name, level:item.level, concern:item.concern, status:item.status }));
+    businessRows('v4_academic_terms').slice(-80).forEach(item => records.push({ type:'academic_term', student_number:item.student_number, name:item.student_name, term:item.term, failed_count:item.failed_count, warning_level:item.warning_level, status:item.status }));
+  }
+  if (['weekly_summary','monthly_summary','semester_summary','assistant'].includes(purpose)) {
+    businessRows('v4_assessments').slice(-80).forEach(item => records.push({ type:'assessment', student_number:item.student_number, term:item.term, score:item.score, rank:item.rank, level:item.level }));
+    businessRows('v4_academic_terms').slice(-80).forEach(item => records.push({ type:'academic_term', student_number:item.student_number, term:item.term, failed_count:item.failed_count, warning_level:item.warning_level }));
+    businessRows('v4_aid_records').slice(-80).forEach(item => records.push({ type:'aid', student_number:item.student_number, term:item.term, aid_type:item.aid_type, amount:item.amount, status:item.status }));
+    v4Collection('v4_employment_intents').slice(-80).forEach(item => records.push({ type:'employment_intent', student_number:item.student_number, graduation_year:item.graduation_year, status:item.status, direction:item.direction }));
+    v4Collection('v4_employment_contacts').slice(-80).forEach(item => records.push({ type:'employment_contact', student_number:item.student_number, contacted_at:item.contacted_at, contact_type:item.contact_type, status:item.status }));
+  }
+  return records;
+}
+function aiSystemPrompt(purpose, sensitive) {
+  const rule = sensitive ? '用户已明确授权本次请求携带原始敏感字段，只能用于当前任务，不得在输出中复述不必要的敏感信息。' : '所有敏感字段已脱敏，不得猜测、补造或还原任何学生身份。';
+  return `你是辅导员工作台的办公助手。任务类型：${purpose}。${rule}只能基于提供的记录回答；信息不足时明确说明；涉及心理、纪律、资助、学业预警的内容只给工作建议，不下专业结论，不替代人工确认。输出应结构清晰、可编辑。`;
+}
+function aiGovernedPurpose(purpose) {
+  if (purpose === 'notice_rewrite') return 'notice_rewrite';
+  if (purpose === 'risk_review') return 'warning_assist';
+  if (purpose === 'certificate_recognition') return 'certificate_recognition';
+  return 'work_summary';
+}
+async function aiWorkflowRun(options) {
+  const input = options || {}; const provider = input.provider;
+  const purpose = aiGovernedPurpose(input.purpose);
+  const records = Array.isArray(input.records) ? input.records : aiContextRecords(input.purpose);
+  const sensitive = input.sensitive === true;
+  const auditBase = { action:'generate', purpose, provider:provider && provider.key || 'custom', model:provider && provider.model || '', sensitiveAuthorized:sensitive, recordCount:records.length };
+  try {
+    if (!window.CWBAI || !window.CWBAIWorkflow) throw new Error('AI_WORKFLOW_UNAVAILABLE');
+    window.CWBAIWorkflow.authorize(provider, purpose, v4Collection('v4_ai_audit'));
+    const context = window.CWBAI.buildContext({ purpose, includeSensitive:sensitive, records });
+    const response = input.send
+      ? await input.send({ provider, purpose, context })
+      : await window.CWBAI.sendChat(provider, input.messages || [], { apiKey:input.apiKey, signal:input.signal, max_tokens:input.max_tokens });
+    const audit = window.CWBAI.createAuditEntry(Object.assign({}, auditBase, { status:'completed', recordCount:context.records.length }));
+    const draft = window.CWBAIWorkflow.normalizeDraft({ kind:input.kind || 'general', provider_id:provider.id, audit_id:audit.id, source_attachment_id:input.source_attachment_id, student_id:input.student_id, student_number:input.student_number, payload:Object.assign({ text:String(response && response.text || '') }, input.payload || {}) });
+    v4Collection('v4_ai_audit').push(audit); if (input.createDraft !== false) v4Collection('v4_ai_drafts').push(draft); save('custom');
+    return { result:response, audit, draft, context };
+  } catch (error) {
+    const audit = window.CWBAI && window.CWBAI.createAuditEntry
+      ? window.CWBAI.createAuditEntry(Object.assign({}, auditBase, { status:'failed', error:error.message || String(error) }))
+      : { id:`ai_audit_${Date.now()}`, schema_version:8, status:'failed', purpose, error:error.message || String(error), created_at:new Date().toISOString() };
+    v4Collection('v4_ai_audit').push(audit); save('custom'); throw error;
+  }
+}
+let activeAiController = null;
+function aiCreateCertificateDraft(values) {
+  if (!window.CWBAIWorkflow) throw new Error('AI_WORKFLOW_UNAVAILABLE');
+  const input = values || {};
+  const draft = window.CWBAIWorkflow.normalizeDraft({
+    kind:'certificate', provider_id:input.provider_id, audit_id:input.audit_id,
+    source_attachment_id:input.source_attachment_id, student_id:input.student_id, student_number:input.student_number,
+    payload:{ title:input.title || '', level:input.level || '', date:input.date || '', organizer:input.organizer || '', project:input.project || '', summary:input.summary || '' },
+  });
+  v4Collection('v4_ai_drafts').push(draft); save('custom'); return draft;
+}
+function aiConfirmCertificateDraft(draftId, values) {
+  const draft = v4Collection('v4_ai_drafts').find(item => String(item.id) === String(draftId));
+  const input = values || {}; const linked = linkedStudentValues({ student_id:input.student_id, student_number:input.student_number });
+  const title = String(input.title || draft && draft.payload && draft.payload.title || '').trim();
+  if (!draft || draft.kind !== 'certificate' || draft.status !== 'draft' || !linked.student_id || !title) throw new Error('CERTIFICATE_CONFIRMATION_INVALID');
+  const payload = Object.assign({}, draft.payload || {}, input);
+  const reward = Object.assign(normV4Record({
+    id:`reward_${Date.now()}`, student_id:linked.student_id, student_number:linked.student_number, student_name:linked.student_name, class_name:linked.class_name,
+    title, date:payload.date || '', organizer:payload.organizer || '', level:payload.level || '', project:payload.project || '', summary:payload.summary || '',
+    attachment_id:draft.source_attachment_id || '', category:'证书识别', status:'已确认', source:'AI 证书识别（人工确认）', schema_version:8,
+  }, 'rewards'), { student_id:linked.student_id, student_number:linked.student_number, student_name:linked.student_name, class_name:linked.class_name, attachment_id:draft.source_attachment_id || '', category:'证书识别', status:'已确认', source:'AI 证书识别（人工确认）' });
+  const rewards = DB.rewards; rewards.push(reward); draft.status = 'confirmed'; draft.student_id = linked.student_id; draft.student_number = linked.student_number; draft.updated_at = new Date().toISOString();
+  save('rewards'); save('custom'); return reward;
+}
+function aiRecordsForRange(from, to) {
+  const start = String(from || ''); const end = String(to || ''); const rows = [];
+  const add = (items, type, dateKey, titleKey, summaryKey) => (items || []).forEach(item => { const date = String(item[dateKey] || ''); if (date && (!start || date >= start) && (!end || date <= end)) rows.push({ type, date, title:item[titleKey] || '', summary:item[summaryKey] || '', id:item.id || '' }); });
+  add(DB.tasks, 'task', 'due', 'title', 'note'); add(DB.talks, 'talk', 'date', 'student_name', 'summary'); add(DB.activities, 'activity', 'date', 'title', 'summary'); add(DB.worklogs, 'worklog', 'date', 'title', 'summary');
+  return rows.sort((a, b) => a.date.localeCompare(b.date));
+}
+function aiConfirmWorkSummary(values) {
+  const input = values || {}; const text = String(input.text || '').trim(); const sources = Array.isArray(input.sources) ? input.sources : [];
+  if (!text) throw new Error('WORK_SUMMARY_CONFIRMATION_INVALID');
+  const worklog = normV4Record({ id:`worklog_${Date.now()}`, date:today(), title:'AI 工作总结', summary:text, source:'AI 工作总结（人工确认）', ai_range_from:input.range && input.range.from || '', ai_range_to:input.range && input.range.to || '', ai_source_count:sources.length, ai_source_types:[...new Set(sources.map(item => item.type).filter(Boolean))], status:'已确认', schema_version:8 }, 'worklogs');
+  worklog.source = 'AI 工作总结（人工确认）'; worklog.ai_source_count = sources.length; DB.worklogs.push(worklog); save('worklogs'); return worklog;
+}
+async function aiRunDraft(purpose, prompt, records, options) {
+  const providers = aiProviderRecords(); const state = app.v4 || (app.v4 = {});
+  const providerIndex = Number.isInteger(Number(state.aiProviderIndex)) ? Number(state.aiProviderIndex) : 0;
+  const provider = providers[providerIndex]; if (!provider) throw new Error('请先配置并选择一个模型');
+  if (!window.CWBAI) throw new Error('AI 治理运行时尚未加载，请刷新页面');
+  const sensitive = state.aiSensitive === true;
+  const secret = await aiReadSecret(provider.id); if (!secret) throw new Error('AI_API_KEY_REQUIRED');
+  const controller = options && options.signal ? null : new AbortController();
+  const signal = options && options.signal || controller.signal;
+  if (activeAiController) throw new Error('AI_REQUEST_ACTIVE');
+  activeAiController = controller;
+  try {
+    const outcome = await aiWorkflowRun({ provider, purpose, records:records || aiContextRecords(purpose), sensitive, apiKey:secret, signal, kind:'work_summary', messages:[{ role:'system', content:aiSystemPrompt(purpose, sensitive) }, { role:'user', content:prompt || '请生成可编辑的工作草稿。' }] });
+    state.aiOutput = outcome.result.text; state.aiPurpose = purpose; state.aiPrompt = prompt || ''; state.aiProviderIndex = providerIndex; state.aiSummarySources = records || aiRecordsForRange(state.aiRangeFrom, state.aiRangeTo);
+    return outcome.result.text;
+  } finally { if (activeAiController === controller) activeAiController = null; }
+}
+function openNoticeRewrite() {
+  ui.modal({ title:'通知语气转换', size:'wide', body:`<div class="banner banner-info">只生成候选文案，不会自动发布；请在复制或发送前检查时间、对象和政策口径。</div><div class="form-row"><label class="lab">上级通知原文</label><textarea class="inp" data-notice-source rows="10" placeholder="粘贴需要转换的正式通知"></textarea></div><div class="grid2"><div class="form-row"><label class="lab">目标对象</label><select class="inp" data-notice-audience><option>全体学生</option><option>班级群</option><option>重点关注学生</option><option>家长</option></select></div><div class="form-row"><label class="lab">表达风格</label><select class="inp" data-notice-tone><option>清晰友好</option><option>简短明确</option><option>正式稳妥</option><option>温和提醒</option></select></div></div><div class="form-row" style="margin-top:12px"><label class="lab">生成候选</label><textarea class="inp" data-notice-output rows="8" placeholder="点击生成候选"></textarea></div>`, footer:'<button class="btn" data-close>取消</button><button class="btn" data-notice-generate>生成候选</button><button class="btn btn-primary" data-notice-use>复制候选</button>', onOpen(mask) {
+    $('[data-notice-generate]', mask).onclick = async () => {
+      const source = ($('[data-notice-source]', mask) || {}).value || ''; if (!source.trim()) return ui.toast('请先粘贴通知原文', 'warn');
+      try { const audience = $('[data-notice-audience]', mask).value; const tone = $('[data-notice-tone]', mask).value; const output = await aiRunDraft('notice_rewrite', `请将以下通知改写为面向“${audience}”、风格为“${tone}”的候选文案。保留所有时间、地点、材料、截止日期和政策要求，不得补造事实。\n\n原文：\n${source}`, []); $('[data-notice-output]', mask).value = output; ui.toast('通知候选已生成，请人工校对', 'ok', 2600); }
+      catch (error) { ui.toast(error.message === 'AI_API_KEY_REQUIRED' ? '请先在 AI 工作台配置 API 密钥' : error.message, 'err', 4200); }
+    };
+    $('[data-notice-use]', mask).onclick = async () => { const output = ($('[data-notice-output]', mask) || {}).value || ''; if (!output.trim()) return ui.toast('请先生成候选文案', 'warn'); try { await navigator.clipboard.writeText(output); ui.toast('候选文案已复制，发布前请再次核对', 'ok'); } catch (_) { ui.toast('当前环境无法自动复制，请手动复制候选文案', 'warn'); } };
+  }});
+}
+function viewAi() {
+  const providers = aiProviderRecords();
+  const state = app.v4 || (app.v4 = {});
+  const selected = providers[Number(state.aiProviderIndex) || 0];
+  const output = String(state.aiOutput || '');
+  const summaryFrom = state.aiRangeFrom || shiftDay(today(), -6);
+  const summaryTo = state.aiRangeTo || today();
+  const providerRows = providers.map((item, index) => `<div class="v4-list-item"><div><strong>${esc(item.name || item.key)}</strong><div class="tiny">${esc(item.model || '未配置模型')} · ${esc(item.baseUrl || '')} · ${esc((item.allowedPurposes || []).join('、') || '未授权用途')} · ${item.dailyQuota ? `每日 ${item.dailyQuota} 次` : '不限次数'}${item.supportsVision ? ' · 支持图像' : ''}</div></div><span class="sp"></span><span class="tag ${item.enabled === false ? 'tag-amber' : 'tag-green'}">${item.enabled === false ? '已停用' : '启用'}</span><span class="tiny">${item.secret_set ? '密钥已保存' : '未设置密钥'}</span><button class="btn btn-sm" data-act="ai-provider-edit" data-index="${index}">编辑</button><button class="btn btn-sm btn-danger" data-act="ai-provider-delete" data-index="${index}">删除</button></div>`).join('');
+  const providerOptions = providers.map((item, index) => `<option value="${index}"${index === Number(state.aiProviderIndex || 0) ? ' selected' : ''}>${esc(item.name || item.key)} · ${esc(item.model || '未配置')}</option>`).join('');
+  const body = `<div class="card"><div class="card-hd"><h2>AI 工作助手</h2><span class="sp"></span><span class="tag tag-blue">默认脱敏</span><button class="btn btn-primary btn-sm" data-act="ai-provider-new"><svg class="ic ic-sm"><use href="#i-plus"/></svg>添加模型</button></div><div class="card-bd"><div class="banner banner-info">AI 只在你点击生成时读取本机已有记录。学生姓名、学号、联系方式、心理、纪律和资助字段默认脱敏；勾选原文授权后才允许本次请求携带原始敏感字段。</div><div class="v4-toolbar"><label class="tiny">总结区间</label><input class="inp" type="date" data-ai-range-from value="${esc(summaryFrom)}"><span class="tiny">至</span><input class="inp" type="date" data-ai-range-to value="${esc(summaryTo)}"><button class="btn btn-sm" data-act="ai-summary-generate">按区间生成</button><button class="btn btn-sm" data-act="ai-summary-confirm">确认写入工作留痕</button></div><div class="v4-toolbar"><select class="inp" data-ai-provider><option value="">选择已配置模型</option>${providerOptions}</select><select class="inp" data-ai-purpose>${AI_PURPOSES.map(item => `<option value="${item.key}"${item.key === (state.aiPurpose || 'weekly_summary') ? ' selected' : ''}>${item.label}</option>`).join('')}</select></div><textarea class="inp" data-ai-prompt rows="5" placeholder="例如：请把本周工作整理成给学院领导看的摘要，分为完成事项、重点跟进和下周计划">${esc(state.aiPrompt || '')}</textarea><label class="chk" style="margin-top:12px"><input type="checkbox" data-ai-sensitive${state.aiSensitive ? ' checked' : ''}><span>本次请求授权携带原始敏感字段</span></label><div class="v4-toolbar" style="margin-top:12px"><button class="btn btn-primary" data-act="ai-run">生成草稿</button><button class="btn" data-act="ai-cancel">取消请求</button><button class="btn" data-act="ai-report-draft">生成本周摘要</button><button class="btn" data-act="ai-risk-review">预警辅助分析</button><button class="btn" data-act="ai-notice-rewrite">通知改写</button><button class="btn" data-act="ai-certificate">识别获奖证书</button><button class="btn" data-act="ai-clear-output">清空草稿</button></div>${output ? `<div class="card" style="margin-top:14px;background:var(--card-2)"><div class="card-hd"><h3>可编辑草稿</h3><span class="sp"></span><button class="btn btn-sm" data-act="ai-copy-output">复制</button></div><div class="card-bd"><textarea class="inp" data-ai-output rows="12">${esc(output)}</textarea></div></div>` : ''}</div></div><div class="card"><div class="card-hd"><h2>模型连接与权限</h2><span class="sp"></span><span class="tiny">密钥不进入业务备份和导出包</span></div><div class="card-bd"><div class="v4-list">${providerRows || '<div class="empty">尚未配置模型。可添加内置连接器或自定义 OpenAI-compatible 接口。</div>'}</div></div></div><div class="card"><div class="card-hd"><h2>调用审计</h2><span class="sp"></span><span class="tiny">仅保留用途、模型、授权状态和结果状态，不保存密钥</span></div><div class="card-bd"><div class="v4-list">${v4Collection('v4_ai_audit').slice(-12).reverse().map(item => `<div class="v4-list-item"><span class="tag ${item.status === 'completed' ? 'tag-green' : 'tag-red'}">${item.status === 'completed' ? '完成' : '失败'}</span><span>${esc(item.purpose || 'general')}</span><span class="tiny">${esc(item.provider || '')} · ${esc(item.created_at || '')} · ${item.sensitiveAuthorized ? '已授权原文' : '默认脱敏'}</span></div>`).join('') || '<div class="empty">暂无调用记录</div>'}</div></div></div>`;
+  return v4Page('AI 智能工作台', '把总结、分析和通知改写嵌入已有工作记录，不替代辅导员的确认和判断。', body);
 }
 function viewBackupV4() {
   const schedule = DB.settings.backup_schedule || { frequency:'weekly', enabled:false, folder:'', retain:8, last_run_at:'' };
@@ -7296,7 +7809,7 @@ const VIEWS = {
   stay:viewStay, leave:viewLeave, honor:viewHonor, report:viewReport, bridge:viewBridge,
   pleave:viewPleave, attend:viewAttend, node:viewNode,
   warn:viewWarn, help:viewHelp, grant:viewGrant,
-  focus:viewFocus, psych:viewPsych, graduate:viewGraduate,
+  focus:viewFocus, psych:viewPsych, graduate:viewGraduate, business:viewBusiness, ai:viewAi,
   policy:viewPolicy, material:viewMaterial, comp:viewComp, tpl:viewTpl, learning:viewLearning,
   photos:viewPhotos, org:viewOrg, orgs:() => viewV4Collection('orgs'), party:() => viewV4Collection('party'), rewards:() => viewV4Collection('rewards'), activities:() => viewV4Collection('activities'), grades:() => viewV4Collection('grades'), worklogs:() => viewV4Collection('worklogs'), files:viewFiles, employment:viewEmployment, backup:viewBackupV4,
 };
@@ -7782,12 +8295,14 @@ const ACTS = {
   ], onSave(v){ const now = new Date().toISOString(); v4Collection('v4_files').push({ id:`file_${Date.now()}`, ...v, version:1, versions:[{ version:1, at:now, content:v.content || '', url:v.url || '' }], created_at:now, updated_at:now, schema_version:8 }); save('custom'); render(); ui.toast('文件条目已保存','ok'); }}),
   'v4-file-download': async (id, btn) => { const item = v4Collection('v4_files')[Number(btn.dataset.index)]; if (!item) return; if (item.attachment_id) { try { const record = window.CWB.attachments && await window.CWB.attachments.get(item.attachment_id); let blob = record && record.blob; if (!blob && window.cwbDesktop && window.cwbDesktop.readAttachment) blob = new Blob([await window.cwbDesktop.readAttachment(item.attachment_id)], { type:item.mime_type || 'application/octet-stream' }); if (blob) { const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = item.title; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); return; } } catch (error) { ui.toast(error.message || '文件读取失败','err'); } } ui.modal({ title:item.title, size:'wide', body:`<div class="tiny">${esc(item.category)} · ${esc(item.tags || '无标签')}</div><pre style="white-space:pre-wrap;line-height:1.7;margin:14px 0 0">${esc(item.content || '该条目暂无正文，请在编辑器中补充文件说明或链接。')}</pre>`, footer:'<button class="btn" data-close>关闭</button>' }); },
   'v4-file-delete': (id, btn) => { const items = v4Collection('v4_files'); const item = items[Number(btn.dataset.index)]; if (!item) return; ui.confirm('删除文件', `确定删除“${item.title || '未命名文件'}”及其附件吗？`, async () => { if (item.attachment_id) { try { if (window.CWB.attachments && window.CWB.attachments.delete) await window.CWB.attachments.delete(item.attachment_id); if (window.cwbDesktop && window.cwbDesktop.deleteAttachment) await window.cwbDesktop.deleteAttachment(item.attachment_id); } catch (error) { return ui.toast(error.message || '附件删除失败','err'); } } items.splice(Number(btn.dataset.index), 1); if (window.CWB.audit && window.CWB.audit.log) await window.CWB.audit.log('file_delete', { file_id:item.id, title:item.title || '' }); save('custom'); render(); ui.toast('文件已删除','ok'); }, true); },
-  'v4-employment-new': () => ui.form({ title:'新增就业资源', data:{ title:'', region:'全国', industry:'综合', url:'', verified_at:today(), status:'有效' }, fields:[
-    { key:'title', label:'资源名称', required:true }, { key:'region', label:'地域' }, { key:'industry', label:'行业' }, { key:'url', label:'官方网址', required:true, type:'url' }, { key:'verified_at', label:'最后核验日期', type:'date' }, { key:'status', label:'状态', type:'select', options:[{v:'有效',n:'有效'},{v:'待核验',n:'待核验'},{v:'失效',n:'失效'}] },
-  ], onSave(v){ const saveResource = async () => { try { if (window.CWB.employmentResourceProvider) await window.CWB.employmentResourceProvider.add({ id:`career_${Date.now()}`, ...v }); else { v4Collection('v4_employment_resources').push({ id:`career_${Date.now()}`, ...v }); save('custom'); } render(); ui.toast('就业资源已保存','ok'); } catch (error) { ui.toast(error.message || '就业资源保存失败','err'); } }; saveResource(); }}),
-  'v4-employment-delete': (id, btn) => { v4Collection('v4_employment_resources').splice(Number(btn.dataset.index), 1); save('custom'); render(); },
+  'v4-employment-new': () => employmentResourceForm(null),
+  'v4-employment-edit': (id, btn) => employmentResourceForm(v4Collection('v4_employment_resources')[Number(btn.dataset.index)]),
+  'v4-employment-favorite': async (id, btn) => { const item = v4Collection('v4_employment_resources')[Number(btn.dataset.index)]; if (!item) return; item.favorite = item.favorite !== true; try { if (window.CWB.employmentResourceProvider) await window.CWB.employmentResourceProvider.add(item); else save('custom'); render(); ui.toast(item.favorite ? '已收藏就业资源' : '已取消收藏', 'ok'); } catch (error) { ui.toast(error.message || '收藏状态保存失败', 'err'); } },
+  'v4-employment-delete': (id, btn) => { const item = v4Collection('v4_employment_resources')[Number(btn.dataset.index)]; if (!item) return; ui.confirm('删除就业资源', `确定删除“${item.title || '未命名资源'}”吗？`, async () => { try { if (window.CWB.employmentResourceProvider) await window.CWB.employmentResourceProvider.remove(item.id); else { v4Collection('v4_employment_resources').splice(Number(btn.dataset.index), 1); save('custom'); } render(); ui.toast('就业资源已删除','ok'); } catch (error) { ui.toast(error.message || '删除失败','err'); } }, true); },
   'v4-employment-export': async () => { try { const manifest = await window.CWB.employmentResourceProvider.exportManifest(); download(`就业资源签名清单_${today()}.json`, JSON.stringify(manifest, null, 2), 'application/json'); ui.toast('已导出签名资源清单','ok'); } catch (error) { ui.toast(error.message || '导出失败','err'); } },
   'v4-employment-import': () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json'; input.onchange = () => { const file = input.files && input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async () => { try { const count = await window.CWB.employmentResourceProvider.importManifest(JSON.parse(reader.result)); render(); ui.toast(`已导入 ${count} 条签名资源`, 'ok'); } catch (error) { ui.toast(`签名校验失败：${error.message || '清单无效'}`, 'err', 4200); } }; reader.readAsText(file, 'utf-8'); }; input.click(); },
+  'v4-employment-csv-export': () => { const rows = [['id','title','url','category','region','audience','source','tags','verified_at','status','favorite']].concat(v4Collection('v4_employment_resources').map(item => [item.id, item.title, item.url, item.category || item.industry, item.region, item.audience, item.source || item.organizer, item.tags, item.verified_at, item.status, item.favorite ? '是' : '否'])); download(`就业资源_${today()}.csv`, toCSV(rows), 'text/csv'); ui.toast('就业资源 CSV 已导出','ok'); },
+  'v4-employment-csv-import': () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.csv,text/csv'; input.onchange = () => { const file = input.files && input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async () => { try { const rows = csvTextToObjects(String(reader.result || '')); let count = 0; for (const row of rows) { if (!String(row.title || '').trim() || !String(row.url || '').trim()) continue; const resource = { id:String(row.id || `career_${Date.now()}_${count}`), title:row.title, url:row.url, category:row.category || row.industry || '综合', region:row.region || '全国', audience:row.audience || '', source:row.source || row.organizer || '', tags:row.tags || '', verified_at:row.verified_at || today(), status:row.status || '待核验', favorite:/^(是|true|1)$/i.test(String(row.favorite || '')) }; if (window.CWB.employmentResourceProvider) await window.CWB.employmentResourceProvider.add(resource); else v4Collection('v4_employment_resources').push(resource); count++; } if (!window.CWB.employmentResourceProvider) save('custom'); render(); ui.toast(`已导入 ${count} 条 CSV 资源`, 'ok'); } catch (error) { ui.toast(`CSV 导入失败：${error.message || '格式无效'}`, 'err', 4200); } }; reader.readAsText(file, 'utf-8'); }; input.click(); },
   'v4-backup-config': () => ui.form({ title:'配置自动备份', data:Object.assign({ frequency:'weekly', enabled:false, folder:'', retain:8, password:'' }, DB.settings.backup_schedule || {}), fields:[
     { key:'enabled', label:'启用计划', type:'checkbox' }, { key:'frequency', label:'周期', type:'select', options:[{v:'daily',n:'每日'},{v:'weekly',n:'每周'},{v:'monthly',n:'每月'}] }, { key:'folder', label:'目标文件夹', required:true, ph:'桌面版可选择本地文件夹；网页端请手工导出' }, { key:'retain', label:'保留份数', type:'number' }, { key:'password', label:'桌面版备份口令', type:'password', ph:'至少 8 位；不会写入网页数据库' },
   ], onSave(v){ if (!window.CWB.backup) return; const webOnly = !(window.cwbDesktop && typeof window.cwbDesktop.setBackupSecret === 'function'); window.CWB.backup.configureSchedule(v).then(() => { ui.toast(webOnly && v.enabled ? '网页端仅支持手动加密备份，未启用定时写入' : '备份计划已保存', webOnly && v.enabled ? 'warn' : 'ok'); render(); }).catch(error => ui.toast(v4ErrorMessage(error, '备份计划保存失败'),'err',5200)); }}),
@@ -7947,7 +8462,7 @@ const ACTS = {
     ui.confirm('确认批量删除', `将删除 <b>${before.length}</b> 名学生。谈话和其他关联记录会保留，删除后可撤销一次。`, () => {
       bulk.undo = { kind:'delete', before, page:app.filters.students.page, ids:ids.slice() };
       DB.students = DB.students.filter(item => !ids.includes(item.id)); bulk.ids.clear();
-      studentPageState(filterStudents()); persistUiState(); save('students'); render(); ui.toast(`已删除 ${before.length} 名学生，可撤销一次`, 'ok');
+      save('students'); studentPageState(filterStudents()); persistUiState(); render(); ui.toast(`已删除 ${before.length} 名学生，可撤销一次`, 'ok');
     }, true);
   },
   'student-bulk-undo': () => {
@@ -7959,19 +8474,40 @@ const ACTS = {
       const beforeById = new Map(undo.before.map(item => [item.id, item]));
       DB.students = DB.students.map(item => beforeById.has(item.id) ? cloneData(beforeById.get(item.id)) : item);
     }
-    app.filters.students.page = undo.page; bulk.undo = null; bulk.ids.clear(); studentPageState(filterStudents()); persistUiState(); save('students'); render(); ui.toast('已撤销上一次批量操作', 'ok');
+    app.filters.students.page = undo.page; bulk.undo = null; bulk.ids.clear(); save('students'); studentPageState(filterStudents()); persistUiState(); render(); ui.toast('已撤销上一次批量操作', 'ok');
   },
   'student-view': id => { const s = DB.students.find(x => x.id === id); if (s) openStudent(s); },
   'student-del': id => {
     const s = DB.students.find(x => x.id === id); if (!s) return;
     security.require('删除学生', () => ui.confirm('删除学生', `确定从台账中删除 <b>${esc(s.full_name)}</b> 吗？相关谈话记录不会被删除。`, () => {
       const bulk = studentBulkState(); bulk.undo = { kind:'delete', before:[cloneData(s)], page:app.filters.students.page, ids:[id] };
-      DB.students = DB.students.filter(x => x.id !== id); studentPageState(filterStudents()); persistUiState(); save('students'); render(); ui.toast('已删除，可撤销一次', 'ok'); }, true));
+      DB.students = DB.students.filter(x => x.id !== id); save('students'); studentPageState(filterStudents()); persistUiState(); render(); ui.toast('已删除，可撤销一次', 'ok'); }, true));
   },
   'student-import': () => $('#file-csv').click(),
   'student-export': () => openStudentExportPreview(false),
   'student-export-sensitive': () => security.require('导出学生敏感字段', () => ui.confirm('确认敏感导出', '导出文件将包含身份证号、家庭地址、家长电话等敏感信息，请确认保存位置安全。', () => openStudentExportPreview(true))),
   'student-template': studentTemplate,
+  'business-new': (id, button) => businessForm(button && button.dataset.key),
+  'business-edit': (id, button) => {
+    const key = button && button.dataset.key; const item = BUSINESS_MODULES[key] && businessRows(key).find(row => String(row.id) === String(id)); if (item) businessForm(key, item);
+  },
+  'business-delete': (id, button) => {
+    const key = button && button.dataset.key; const rows = key && businessRows(key); const index = rows && rows.findIndex(row => String(row.id) === String(id)); const item = BUSINESS_MODULES[key] && index >= 0 && rows[index];
+    if (!item) return;
+    ui.confirm('删除业务档案', '确定删除这条记录吗？学生基础档案不会受到影响。', async () => {
+      const repository = window.CWB && window.CWB.repositories && window.CWB.repositories[key];
+      if (repository && repository.delete) await repository.delete(item.id); else { businessRows(key).splice(index, 1); save('custom'); }
+      render(); ui.toast('业务档案已删除', 'ok');
+    }, true);
+  },
+  'business-discipline-attach': id => businessUploadDiscipline(id),
+  'business-export': (id, button) => {
+    const key = button && button.dataset.key; const rows = key && businessRows(key); if (!rows) return;
+    const labels = { student_number:'学号', term:'学年学期', score:'分数', rank:'排名', warning_level:'预警等级', failed_count:'不及格门数', category:'类型', level:'等级', status:'状态', amount:'金额', aid_type:'业务类型', decision_date:'决定日期', relief_date:'解除日期', document_name:'处分文件', note:'备注' };
+    const keys = [...new Set(rows.flatMap(row => Object.keys(row)).filter(keyName => !['id','schema_version','created_at','updated_at','student_name'].includes(keyName)))];
+    download(`${BUSINESS_MODULES[key].title}_${today()}.csv`, toCSV([keys.map(keyName => labels[keyName] || keyName)].concat(rows.map(row => keys.map(keyName => row[keyName])))), 'text/csv');
+    ui.toast('业务档案已导出', 'ok');
+  },
   'v4-new': (id, button) => v4RecordForm(button && button.dataset.kind),
   'v4-bulk-toggle': (id, button) => {
     const kind = button && button.dataset.kind; if (!V4_MODULES[kind]) return;
@@ -8243,6 +8779,54 @@ const ACTS = {
       .concat(DB.graduate.map(s => [s.name, s.student_number, s.class_name, s.major_name, s.graduation_year, s.employment_status, s.employer, s.job_type, s.location, s.salary_range, s.signed, s.updated_at, s.note]));
     download(`毕业生档案_${today()}.csv`, toCSV(rows), 'text/csv'); ui.toast('已导出','ok');
   },
+  'employment-intent-new': () => ui.form({ title:'登记就业意向', data:{ student_number:'', graduation_year:'', status:'待填报', direction:'', expected_role:'', preferred_region:'', preferred_industry:'', expected_salary:'', needs_help:'', note:'' }, fields:[
+    { key:'student_number', label:'学生', type:'select', required:true, options:DB.students.map(s => ({ v:s.student_number, n:`${s.full_name} · ${s.student_number}` })) },
+    { key:'graduation_year', label:'毕业年份', type:'number', required:true },
+    { key:'status', label:'意向状态', type:'select', options:[{v:'待填报',n:'待填报'},{v:'已填报',n:'已填报'},{v:'已确认',n:'已确认'},{v:'暂不确定',n:'暂不确定'}] },
+    { key:'direction', label:'就业方向', type:'select', options:[{v:'就业',n:'就业'},{v:'升学',n:'升学'},{v:'考公考编',n:'考公考编'},{v:'创业',n:'创业'},{v:'暂不就业',n:'暂不就业'}] },
+    { key:'expected_role', label:'期望岗位' }, { key:'preferred_region', label:'意向地区' }, { key:'preferred_industry', label:'意向行业' }, { key:'expected_salary', label:'期望薪酬' },
+    { key:'needs_help', label:'需要的帮助', type:'textarea', rows:3 }, { key:'note', label:'备注', type:'textarea', rows:3 },
+  ], onSave(v){ const normalizer = window.CWBEmployment && window.CWBEmployment.normalizeIntent; const linked = linkedStudentValues(v); const item = normalizer ? normalizer(linked) : Object.assign({ id:`employment_intent_${Date.now()}`, schema_version:8 }, linked); v4Collection('v4_employment_intents').push(item); save('custom'); render(); ui.toast('就业意向已保存','ok'); }}),
+  'employment-intent-edit': (id, btn) => { const items = v4Collection('v4_employment_intents'); const item = items[Number(btn.dataset.index)]; if (!item) return; ui.form({ title:'编辑就业意向', data:item, fields:[
+    { key:'student_number', label:'学生', type:'select', required:true, options:DB.students.map(s => ({ v:s.student_number, n:`${s.full_name} · ${s.student_number}` })) }, { key:'graduation_year', label:'毕业年份', type:'number', required:true },
+    { key:'status', label:'意向状态', type:'select', options:['待填报','已填报','已确认','暂不确定'] }, { key:'direction', label:'就业方向', type:'select', options:['就业','升学','考公考编','创业','暂不就业'] },
+    { key:'expected_role', label:'期望岗位' }, { key:'preferred_region', label:'意向地区' }, { key:'preferred_industry', label:'意向行业' }, { key:'expected_salary', label:'期望薪酬' }, { key:'needs_help', label:'需要的帮助', type:'textarea', rows:3 }, { key:'note', label:'备注', type:'textarea', rows:3 },
+  ], onSave(v){ const normalizer = window.CWBEmployment && window.CWBEmployment.normalizeIntent; const linked = linkedStudentValues(Object.assign({}, item, v, { student_id:'' })); Object.assign(item, normalizer ? normalizer(linked) : linked); save('custom'); render(); ui.toast('就业意向已更新','ok'); }}); },
+  'employment-intent-delete': (id, btn) => { const items = v4Collection('v4_employment_intents'); const item = items[Number(btn.dataset.index)]; if (!item) return; ui.confirm('删除就业意向', '确定删除这条就业意向记录吗？', () => { items.splice(Number(btn.dataset.index), 1); save('custom'); render(); ui.toast('已删除','ok'); }, true); },
+  'employment-contact-new': () => ui.form({ title:'记录就业联系', data:{ student_number:'', contacted_at:today(), channel:'面谈', contact_type:'就业指导', summary:'', outcome:'', next_action:'', next_at:'', operator:DB.settings.counselor_name || '', status:'已记录' }, fields:[
+    { key:'student_number', label:'学生', type:'select', required:true, options:DB.students.map(s => ({ v:s.student_number, n:`${s.full_name} · ${s.student_number}` })) }, { key:'contacted_at', label:'联系日期', type:'date', required:true }, { key:'channel', label:'联系方式', type:'select', options:['面谈','电话','微信','短信','邮件','线上会议'] }, { key:'contact_type', label:'联系类型', type:'select', options:['就业指导','材料提醒','岗位推荐','签约跟进','升学咨询','其他'] }, { key:'summary', label:'联系摘要', type:'textarea', rows:4, required:true }, { key:'outcome', label:'本次结果', type:'textarea', rows:3 }, { key:'next_action', label:'下一步行动', type:'textarea', rows:3 }, { key:'next_at', label:'下次跟进日期', type:'date' }, { key:'operator', label:'记录人' },
+  ], onSave(v){ const normalizer = window.CWBEmployment && window.CWBEmployment.normalizeContact; const linked = linkedStudentValues(v); const item = normalizer ? normalizer(linked) : Object.assign({ id:`employment_contact_${Date.now()}`, schema_version:8 }, linked); v4Collection('v4_employment_contacts').push(item); save('custom'); render(); ui.toast('联系记录已保存','ok'); }}),
+  'employment-contact-edit': (id, btn) => { const items = v4Collection('v4_employment_contacts'); const item = items[Number(btn.dataset.index)]; if (!item) return; ui.form({ title:'编辑就业联系记录', data:item, fields:[
+    { key:'student_number', label:'学生', type:'select', required:true, options:DB.students.map(s => ({ v:s.student_number, n:`${s.full_name} · ${s.student_number}` })) }, { key:'contacted_at', label:'联系日期', type:'date', required:true }, { key:'channel', label:'联系方式', type:'select', options:['面谈','电话','微信','短信','邮件','线上会议'] }, { key:'contact_type', label:'联系类型', type:'select', options:['就业指导','材料提醒','岗位推荐','签约跟进','升学咨询','其他'] }, { key:'summary', label:'联系摘要', type:'textarea', rows:4, required:true }, { key:'outcome', label:'本次结果', type:'textarea', rows:3 }, { key:'next_action', label:'下一步行动', type:'textarea', rows:3 }, { key:'next_at', label:'下次跟进日期', type:'date' }, { key:'operator', label:'记录人' },
+  ], onSave(v){ const normalizer = window.CWBEmployment && window.CWBEmployment.normalizeContact; const linked = linkedStudentValues(Object.assign({}, item, v, { student_id:'' })); Object.assign(item, normalizer ? normalizer(linked) : linked); save('custom'); render(); ui.toast('联系记录已更新','ok'); }}); },
+  'employment-contact-delete': (id, btn) => { const items = v4Collection('v4_employment_contacts'); if (!items[Number(btn.dataset.index)]) return; ui.confirm('删除联系记录', '确定删除这条联系记录吗？', () => { items.splice(Number(btn.dataset.index), 1); save('custom'); render(); ui.toast('已删除','ok'); }, true); },
+  'ai-provider-new': () => ui.form({ title:'添加 AI 模型连接', data:{ key:'openai', name:'', baseUrl:'https://api.openai.com/v1', model:'', protocol:'openai-compatible', api_key:'', enabled:true, allowed_purposes:'work_summary,notice_rewrite,warning_assist', dailyQuota:30, supportsVision:false }, fields:[
+    { key:'key', label:'连接器', type:'select', options:(window.CWBAI ? window.CWBAI.providerCatalog().map(item => ({ v:item.key, n:item.name })) : [{v:'custom',n:'自定义 OpenAI-compatible'}]) }, { key:'name', label:'显示名称', required:true }, { key:'baseUrl', label:'接口地址', type:'url', required:true }, { key:'model', label:'模型名称', required:true }, { key:'protocol', label:'协议', type:'select', options:[{v:'openai-compatible',n:'OpenAI-compatible'},{v:'anthropic',n:'Anthropic Messages'},{v:'gemini',n:'Gemini'}] }, { key:'api_key', label:'API 密钥', type:'password', ph:'只保存在本机安全存储或本次浏览器会话' }, { key:'allowed_purposes', label:'授权用途', ph:'work_summary, notice_rewrite, warning_assist, certificate_recognition' }, { key:'dailyQuota', label:'每日成功调用上限', type:'number' }, { key:'supportsVision', label:'该模型支持图片输入', type:'checkbox' }, { key:'enabled', label:'启用该模型', type:'checkbox' },
+  ], onSave(v){ try { if (!window.CWBAI) throw new Error('AI_RUNTIME_UNAVAILABLE'); const config = window.CWBAI.validateProviderConfig(Object.assign({}, v, { allowedPurposes:String(v.allowed_purposes || '').split(',').map(item => item.trim()).filter(Boolean) })); const item = Object.assign({}, config, { secret_set:!!String(v.api_key || '').trim() }); delete item.apiKey; v4Collection('v4_ai_providers').push(item); save('custom'); aiStoreSecret(item.id, v.api_key).then(() => { render(); ui.toast('模型连接已保存，密钥未进入业务备份','ok'); }).catch(() => { render(); ui.toast('模型已保存，但密钥未能写入本机存储','warn'); }); } catch (error) { ui.toast(error.message || '模型配置无效','err'); return false; } }}),
+  'ai-provider-edit': (id, btn) => { const item = aiProviderRecords()[Number(btn.dataset.index)]; if (!item) return; ui.form({ title:'编辑 AI 模型连接', data:Object.assign({}, item, { api_key:'', allowed_purposes:(item.allowedPurposes || []).join(',') }), fields:[
+    { key:'key', label:'连接器', type:'select', options:(window.CWBAI ? window.CWBAI.providerCatalog().map(value => ({ v:value.key, n:value.name })) : [{v:'custom',n:'自定义 OpenAI-compatible'}]) }, { key:'name', label:'显示名称', required:true }, { key:'baseUrl', label:'接口地址', type:'url', required:true }, { key:'model', label:'模型名称', required:true }, { key:'protocol', label:'协议', type:'select', options:[{v:'openai-compatible',n:'OpenAI-compatible'},{v:'anthropic',n:'Anthropic Messages'},{v:'gemini',n:'Gemini'}] }, { key:'api_key', label:'替换 API 密钥', type:'password', ph:'留空则保留已有密钥' }, { key:'allowed_purposes', label:'授权用途', ph:'work_summary, notice_rewrite, warning_assist, certificate_recognition' }, { key:'dailyQuota', label:'每日成功调用上限', type:'number' }, { key:'supportsVision', label:'该模型支持图片输入', type:'checkbox' }, { key:'enabled', label:'启用该模型', type:'checkbox' },
+  ], onSave(v){ try { const config = window.CWBAI.validateProviderConfig(Object.assign({}, v, { allowedPurposes:String(v.allowed_purposes || '').split(',').map(value => value.trim()).filter(Boolean) })); Object.assign(item, config); if (String(v.api_key || '').trim()) { item.secret_set = true; aiStoreSecret(item.id, v.api_key); } save('custom'); render(); ui.toast('模型连接已更新','ok'); } catch (error) { ui.toast(error.message || '模型配置无效','err'); return false; } }}); },
+  'ai-provider-delete': (id, btn) => { const items = aiProviderRecords(); const item = items[Number(btn.dataset.index)]; if (!item) return; ui.confirm('删除模型连接', '将删除模型配置和本机保存的密钥，业务数据不会受影响。确定继续吗？', async () => { items.splice(Number(btn.dataset.index), 1); if (window.cwbDesktop && window.cwbDesktop.deleteAiSecret) await window.cwbDesktop.deleteAiSecret(item.id).catch(() => {}); try { sessionStorage.removeItem(aiSecretKey(item.id)); } catch (_) {} save('custom'); render(); ui.toast('模型连接已删除','ok'); }, true); },
+  'ai-summary-generate': async () => { const from = String(($('[data-ai-range-from]') || {}).value || ''); const to = String(($('[data-ai-range-to]') || {}).value || ''); if (!from || !to || from > to) return ui.toast('请填写有效的总结起止日期','warn'); const sources = aiRecordsForRange(from, to); app.v4 = Object.assign({}, app.v4, { aiRangeFrom:from, aiRangeTo:to, aiSummarySources:sources, aiSensitive:false, aiPurpose:'weekly_summary' }); try { await aiRunDraft('weekly_summary', `请根据 ${from} 至 ${to} 的已有工作记录生成可编辑摘要，分为已完成事项、重点跟进、数据概览和下一步计划。只写已有记录。`, sources, { signal:null }); render(); ui.toast(`已生成区间摘要：${sources.length} 条来源记录，请人工确认`, 'ok', 3200); } catch (error) { ui.toast(error.message === 'AI_API_KEY_REQUIRED' ? '请先在 AI 工作台配置 API 密钥' : error.message, 'err', 4200); } },
+  'ai-summary-confirm': () => { const text = String(($('[data-ai-output]') || {}).value || app.v4 && app.v4.aiOutput || '').trim(); const from = app.v4 && app.v4.aiRangeFrom || ''; const to = app.v4 && app.v4.aiRangeTo || ''; if (!text) return ui.toast('请先生成并检查摘要内容','warn'); try { const worklog = window.CWB.ai.confirmWorkSummary({ text, range:{ from, to }, sources:app.v4 && app.v4.aiSummarySources || aiRecordsForRange(from, to) }); app.v4.aiOutput = ''; save('settings'); render(); ui.toast(`已确认并写入工作留痕：${worklog.title}`, 'ok', 3200); } catch (error) { ui.toast(error.message || '工作总结确认失败','err'); } },
+  'ai-report-draft': async () => {
+    const range = reportRange(); app.v4 = Object.assign({}, app.v4, { aiSensitive:false, aiPurpose:'weekly_summary' });
+    try { await aiRunDraft('weekly_summary', `请根据 ${range.name}（${range.from} 至 ${range.to}）的已有工作记录生成可编辑摘要，分为已完成事项、重点跟进、数据概览和下一步计划。只写已有记录。`); go('ai'); ui.toast('区间工作草稿已生成，请人工检查', 'ok', 3200); }
+    catch (error) { ui.toast(error.message === 'AI_API_KEY_REQUIRED' ? '请先在 AI 工作台配置 API 密钥' : error.message, 'err', 4200); }
+  },
+  'ai-notice-rewrite': () => openNoticeRewrite(),
+  'ai-risk-review': async () => {
+    app.v4 = Object.assign({}, app.v4, { aiSensitive:false, aiPurpose:'risk_review' });
+    try {
+      const output = await aiRunDraft('risk_review', '请对现有学生预警记录做初步分层和原因提示。输出学生编号、数据依据、建议关注等级和需要人工核验的问题；不得直接修改任何预警、心理、处分或资助结论。');
+      ui.modal({ title:'预警辅助分析 · 待人工确认', size:'wide', body:`<div class="banner banner-warn">以下内容只是基于已有记录的辅助建议。确认只会保存审计记录，不会改变学业预警、心理、处分或资助结论。</div><textarea class="inp" data-ai-risk-output rows="14">${esc(output)}</textarea>`, footer:'<button class="btn" data-close>暂不确认</button><button class="btn btn-primary" data-ai-risk-confirm>确认已人工查看</button>', onOpen(mask, close) { $('[data-ai-risk-confirm]', mask).onclick = () => { const audit = window.CWBAI.createAuditEntry({ action:'risk_review_confirmed', purpose:'risk_review', status:'completed', recordCount:aiContextRecords('risk_review').length }); v4Collection('v4_ai_audit').push(audit); save('custom'); close(); ui.toast('已记录人工查看，不会自动改写预警结论', 'ok', 3200); }; } });
+    } catch (error) { ui.toast(error.message === 'AI_API_KEY_REQUIRED' ? '请先在 AI 工作台配置 API 密钥' : error.message, 'err', 4200); }
+  },
+  'ai-run': async () => { const purpose = (($('[data-ai-purpose]') || {}).value || 'assistant'); const prompt = String(($('[data-ai-prompt]') || {}).value || '').trim() || '请根据已有记录生成一份结构清晰、可编辑的工作草稿。'; const providerIndex = Number(($('[data-ai-provider]') || {}).value); app.v4 = Object.assign({}, app.v4, { aiPurpose:purpose, aiSensitive:!!(($('[data-ai-sensitive]') || {}).checked), aiProviderIndex:Number.isInteger(providerIndex) ? providerIndex : 0 }); try { await aiRunDraft(purpose, prompt, null, { signal:null }); render(); ui.toast('AI 草稿已生成，请人工检查后使用','ok',3200); } catch (error) { ui.toast(error.message === 'AI_API_KEY_REQUIRED' ? '请先为该模型配置 API 密钥' : error.message === 'AI_REQUEST_ACTIVE' ? '已有 AI 请求正在进行，请稍候或取消当前请求' : `生成失败：${error.message || '请重试'}`, 'err', 4600); } },
+  'ai-cancel': () => { if (!activeAiController) return ui.toast('当前没有正在进行的 AI 请求','warn'); activeAiController.abort(); activeAiController = null; ui.toast('已取消 AI 请求','ok'); },
+  'ai-certificate': () => { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/png,image/jpeg,image/webp'; input.onchange = async () => { const file = input.files && input.files[0]; if (!file) return; const providers = aiProviderRecords(); const providerIndex = Number(($('[data-ai-provider]') || {}).value); const provider = providers[Number.isInteger(providerIndex) ? providerIndex : 0]; if (!provider || provider.supportsVision !== true) return ui.toast('请先配置并选择支持图片输入的视觉模型','warn',4200); try { const secret = await aiReadSecret(provider.id); if (!secret) throw new Error('AI_API_KEY_REQUIRED'); const dataUrl = await readFileDataUrl(file); const attachmentId = `certificate_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`; if (window.CWB.attachments && window.CWB.attachments.add) await window.CWB.attachments.add({ id:attachmentId, name:file.name, blob:file, mimeType:file.type }); if (window.cwbDesktop && window.cwbDesktop.writeAttachment) await window.cwbDesktop.writeAttachment({ id:attachmentId, mimeType:file.type, bytes:new Uint8Array(await file.arrayBuffer()) }); const response = await aiWorkflowRun({ provider, purpose:'certificate_recognition', records:[], sensitive:false, apiKey:secret, kind:'certificate', createDraft:false, source_attachment_id:attachmentId, messages:[{ role:'system', content:'你是证书信息识别助手。只从图片中提取可见信息，不猜测缺失内容。请用 JSON 输出 title、date、organizer、level、project、summary 字段。' }, window.CWBAI.buildVisionMessage('请识别证书名称、获奖等级、颁发单位、日期、项目名称，并保留无法确认的字段为空。', dataUrl)], max_tokens:1200 }); const parsed = window.CWBAIWorkflow.parseCertificateResponse(response.result.text); const draft = window.CWB.ai.createCertificateDraft(Object.assign({}, parsed, { provider_id:provider.id, audit_id:response.audit.id, source_attachment_id:attachmentId })); ui.modal({ title:'证书识别草稿', size:'wide', body:`<div class="banner banner-info">识别结果只是草稿。请选择对应学生，检查证书字段后再写入获奖档案；图片不会自动写入学生资料。</div><div class="grid2"><div class="form-row"><label class="lab">对应学生</label><select class="inp" data-ai-certificate-student><option value="">请选择学生</option>${DB.students.map(s => `<option value="${esc(s.student_number)}">${esc(s.full_name)} · ${esc(s.student_number)}</option>`).join('')}</select></div><div class="form-row"><label class="lab">证书名称</label><input class="inp" data-ai-certificate-title value="${esc(parsed.title || '')}"></div><div class="form-row"><label class="lab">获奖等级</label><input class="inp" data-ai-certificate-level value="${esc(parsed.level || '')}"></div><div class="form-row"><label class="lab">颁发单位</label><input class="inp" data-ai-certificate-organizer value="${esc(parsed.organizer || '')}"></div><div class="form-row"><label class="lab">获奖日期</label><input class="inp" data-ai-certificate-date type="date" value="${esc(parsed.date || '')}"></div><div class="form-row"><label class="lab">项目名称</label><input class="inp" data-ai-certificate-project value="${esc(parsed.project || '')}"></div><div class="form-row span2"><label class="lab">识别原文 / 备注</label><textarea class="inp" data-ai-certificate-summary rows="5">${esc(parsed.summary || response.result.text)}</textarea></div></div>`, footer:'<button class="btn" data-close>取消</button><button class="btn btn-primary" data-ai-certificate-confirm>确认并写入获奖档案</button>', onOpen(mask, close) { $('[data-ai-certificate-confirm]', mask).onclick = () => { const studentNumber = ($('[data-ai-certificate-student]', mask) || {}).value || ''; const title = (($('[data-ai-certificate-title]', mask) || {}).value || '').trim(); if (!studentNumber || !title) return ui.toast('请选择学生并填写证书名称','warn'); try { window.CWB.ai.confirmCertificateDraft(draft.id, { student_number:studentNumber, title, date:( $('[data-ai-certificate-date]', mask) || {}).value || '', organizer:( $('[data-ai-certificate-organizer]', mask) || {}).value || '', level:( $('[data-ai-certificate-level]', mask) || {}).value || '', project:( $('[data-ai-certificate-project]', mask) || {}).value || '', summary:( $('[data-ai-certificate-summary]', mask) || {}).value || '' }); close(); render(); ui.toast('已写入获奖档案，请继续完成人工核验','ok',3600); } catch (error) { ui.toast(error.message || '证书确认失败','err'); } }; } }); } catch (error) { ui.toast(error.message === 'AI_API_KEY_REQUIRED' ? '请先为该模型配置 API 密钥' : `证书识别失败：${error.message || '请重试'}`, 'err', 4600); } }; input.click(); },
+  'ai-clear-output': () => { app.v4 = Object.assign({}, app.v4, { aiOutput:'' }); render(); },
+  'ai-copy-output': () => { const output = $('[data-ai-output]'); if (!output) return; if (navigator.clipboard) navigator.clipboard.writeText(output.value).then(() => ui.toast('草稿已复制','ok')); else { output.select(); document.execCommand('copy'); ui.toast('草稿已复制','ok'); } },
 
   'export-json': exportJSON,
   'export-portable': exportPortable,
@@ -8331,6 +8915,36 @@ const ACTS = {
 };
 
 const IMPORT_EXPORT_ACTIONS = { tasks:'task-export', talks:'talk-export', stay:'stay-export', leave:'leave-export', honor:'honor-export', pleave:'pleave-export', attend:'attend-export', node:'node-export', warn:'warn-export', help:'help-export', grant:'grant-export', focus:'focus-export', psych:'psych-export', graduate:'graduate-export', policy:'policy-export', material:'material-export', comp:'comp-export', tpl:'tpl-export' };
+ACTS['leadership-view-edit'] = () => {
+  const current = leadershipViewCurrent();
+  const selected = new Set(current ? current.metricKeys : LEADERSHIP_DEFAULT_METRICS);
+  const metrics = LEADERSHIP_METRIC_DEFINITIONS.map(metric => `<label class="chk" style="padding:8px 0"><input type="checkbox" data-leadership-metric="${esc(metric.key)}"${selected.has(metric.key) ? ' checked' : ''}><span>${esc(metric.label)}</span></label>`).join('');
+  ui.modal({
+    title:current ? '编辑领导统计视图' : '新建领导统计视图', size:'narrow',
+    body:`<div class="form-row"><label class="lab">视图名称</label><input class="inp" data-leadership-view-name maxlength="40" value="${esc(current && current.name || '')}" placeholder="例如：院系周报"></div><div class="form-row"><label class="lab">展示指标</label><div class="grid2" style="column-gap:18px">${metrics}</div></div>`,
+    footer:`${current ? '<button class="btn btn-danger btn-sm" data-leadership-view-delete>删除视图</button>' : ''}<span class="sp"></span><button class="btn" data-close>取消</button><button class="btn btn-primary" data-leadership-view-save>保存视图</button>`,
+    onOpen(mask, close) {
+      $('[data-leadership-view-save]', mask).onclick = () => {
+        const name = String(($('[data-leadership-view-name]', mask) || {}).value || '').trim();
+        const metricKeys = $$('[data-leadership-metric]:checked', mask).map(input => input.dataset.leadershipMetric);
+        if (!name) return ui.toast('请填写视图名称', 'warn');
+        const saved = current ? leadershipViewUpdate(current.id, { name, metricKeys }) : leadershipViewCreate({ name, metricKeys });
+        leadershipViewSelect(saved.id); close(); render(); ui.toast('领导统计视图已保存', 'ok');
+      };
+      const remove = $('[data-leadership-view-delete]', mask);
+      if (remove) remove.onclick = () => ui.confirm('删除统计视图', `将删除“${current.name}”，统计数据不会受影响。`, () => { leadershipViewRemove(current.id); close(); render(); ui.toast('领导统计视图已删除', 'ok'); }, true);
+    },
+  });
+};
+ACTS['leadership-view-export'] = () => {
+  const current = leadershipViewCurrent();
+  const metricKeys = current ? current.metricKeys : LEADERSHIP_DEFAULT_METRICS;
+  const values = new Map(leadershipMetrics().map(metric => [metric.key, metric]));
+  const rows = [['指标', '数值']].concat(metricKeys.map(key => values.get(key)).filter(Boolean).map(metric => [metric.label, metric.value]));
+  const name = String(current && current.name || '默认概览').replace(/[\\/:*?"<>|]/g, '_');
+  download(`领导统计_${name}_${today()}.csv`, toCSV(rows), 'text/csv;charset=utf-8');
+  ui.toast('领导统计已导出', 'ok');
+};
 Object.entries(IMPORT_EXPORT_ACTIONS).forEach(([coll, action]) => { ACTS[action] = () => exportCollectionCSV(coll); });
 ACTS['import-undo'] = id => security.require('撤销导入', () => ui.confirm('撤销此次导入', '将把对应模块恢复到导入前的完整快照，确定继续吗？', async () => {
   const ok = importer.undoAsync ? await importer.undoAsync(id) : importer.undo(id);
@@ -8465,6 +9079,8 @@ document.addEventListener('click', e => {
   }
   const studentTab = e.target.closest('[data-student-tab]');
   if (studentTab) { app.filters.students.tab = studentTab.dataset.studentTab; render(); return; }
+  const businessTab = e.target.closest('[data-business-tab]');
+  if (businessTab) { app.businessTab = businessTab.dataset.businessTab; render(); return; }
   const analysisCell = e.target.closest('[data-v4-analysis-chart][data-analysis-value]');
   if (analysisCell) {
     const key = analysisCell.dataset.v4AnalysisChart === 'class' ? 'cls' : 'q';
@@ -8493,6 +9109,12 @@ document.addEventListener('click', e => {
   if (btn && ACTS[btn.dataset.act]) { ACTS[btn.dataset.act](btn.dataset.id, btn); }
 });
 document.addEventListener('change', e => {
+  const leadershipView = e.target.closest('[data-leadership-view-select]');
+  if (leadershipView) {
+    leadershipViewSelect(leadershipView.value);
+    render();
+    return;
+  }
   const pageSize = e.target.closest('[data-student-page-size]');
   if (pageSize) {
     app.filters.students.pageSize = studentPageSize(pageSize.value);
@@ -8537,10 +9159,26 @@ document.addEventListener('input', e => {
   }
 });
 document.addEventListener('change', e => {
+  const aiRangeFrom = e.target.closest('[data-ai-range-from]');
+  if (aiRangeFrom) { app.v4 = Object.assign({}, app.v4, { aiRangeFrom:aiRangeFrom.value }); return; }
+  const aiRangeTo = e.target.closest('[data-ai-range-to]');
+  if (aiRangeTo) { app.v4 = Object.assign({}, app.v4, { aiRangeTo:aiRangeTo.value }); return; }
+  const aiProvider = e.target.closest('[data-ai-provider]');
+  if (aiProvider) { app.v4 = Object.assign({}, app.v4, { aiProviderIndex:Number(aiProvider.value) || 0 }); render(); return; }
+  const aiPurpose = e.target.closest('[data-ai-purpose]');
+  if (aiPurpose) { app.v4 = Object.assign({}, app.v4, { aiPurpose:aiPurpose.value }); return; }
+  const aiSensitive = e.target.closest('[data-ai-sensitive]');
+  if (aiSensitive) { app.v4 = Object.assign({}, app.v4, { aiSensitive:aiSensitive.checked }); return; }
   const employmentRegion = e.target.closest('[data-v4-employment-region]');
   if (employmentRegion) { app.v4 = Object.assign({}, app.v4, { employmentRegion:employmentRegion.value }); render(); return; }
-  const employmentIndustry = e.target.closest('[data-v4-employment-industry]');
-  if (employmentIndustry) { app.v4 = Object.assign({}, app.v4, { employmentIndustry:employmentIndustry.value }); render(); return; }
+  const employmentCategory = e.target.closest('[data-v4-employment-category]');
+  if (employmentCategory) { app.v4 = Object.assign({}, app.v4, { employmentCategory:employmentCategory.value }); render(); return; }
+  const employmentAudience = e.target.closest('[data-v4-employment-audience]');
+  if (employmentAudience) { app.v4 = Object.assign({}, app.v4, { employmentAudience:employmentAudience.value }); render(); return; }
+  const employmentStatus = e.target.closest('[data-v4-employment-status]');
+  if (employmentStatus) { app.v4 = Object.assign({}, app.v4, { employmentStatus:employmentStatus.value }); render(); return; }
+  const employmentFavorites = e.target.closest('[data-v4-employment-favorites]');
+  if (employmentFavorites) { app.v4 = Object.assign({}, app.v4, { employmentFavorites:employmentFavorites.checked }); render(); return; }
   const fileCategory = e.target.closest('[data-v4-file-category]');
   if (fileCategory) { app.v4 = Object.assign({}, app.v4, { fileCategory:fileCategory.value }); render(); return; }
   const f = e.target.closest('[data-filter]');
@@ -8756,9 +9394,9 @@ const testData = {
       if (repo && typeof repo.putMany === 'function') await repo.putMany([], { atomic:true, render:false });
       else if (!window.CWB_V4_IDB_ACTIVE) save(key);
     }
-    const customKeys = ['v4_positions','v4_party_cases','v4_files','v4_employment_resources'];
     DB.custom = DB.custom || {};
-    for (const key of customKeys) {
+    const workspaceCustomKeys = CWB_COLLECTIONS.custom.filter(key => key !== 'v4_test_snapshots');
+    for (const key of workspaceCustomKeys) {
       DB.custom[key] = [];
       const repo = window.CWB && window.CWB.repositories && window.CWB.repositories[key];
       if (repo && typeof repo.putMany === 'function') await repo.putMany([], { atomic:true, render:false });
@@ -8787,7 +9425,7 @@ const testData = {
   },
 };
 const PHONE_SYNC_COLLECTION_KEYS = ['students','tasks','talks','stay','leave','honor','orgs','party','rewards','activities','grades','worklogs','pleave','attend','node','warn','help','grant','focus','psych','graduate','policy','material','comp','tpl','learning_materials','learning_notes','learning_sessions'];
-const PHONE_SYNC_CUSTOM_KEYS = ['v4_positions','v4_party_cases','v4_files','v4_employment_resources'];
+const PHONE_SYNC_CUSTOM_KEYS = CWB_COLLECTIONS.custom;
 function stablePhoneJson(value) {
   if (Array.isArray(value)) return `[${value.map(stablePhoneJson).join(',')}]`;
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stablePhoneJson(value[key])}`).join(',')}}`;
@@ -9230,7 +9868,7 @@ function installV4Integration() {
       async count() { if (bulkMode) return DB[key].length; if (desktopRepository) return Number(await desktopRepository.repositoryCount(`records_${key}`) || 0); const rows = await unpackRows(await backing.list()); return rows.length || (DB[key] || []).length; },
     };
   });
-  const customRepositoryKeys = ['v4_positions', 'v4_party_cases', 'v4_files', 'v4_employment_resources', 'v4_test_snapshots'];
+  const customRepositoryKeys = CWB_COLLECTIONS.custom;
   customRepositoryKeys.forEach(key => {
     const backing = portableRepository(`records_custom_${key}`);
     backingRepos[key] = backing;
@@ -9260,6 +9898,10 @@ function installV4Integration() {
   repositories.files = repositories.v4_files;
   repositories.employmentResources = repositories.v4_employment_resources;
   repositories.resources = repositories.v4_employment_resources;
+  repositories.employmentIntents = repositories.v4_employment_intents;
+  repositories.employmentContacts = repositories.v4_employment_contacts;
+  repositories.aiProviders = repositories.v4_ai_providers;
+  repositories.aiAudit = repositories.v4_ai_audit;
   repositories.testSnapshots = repositories.v4_test_snapshots;
   repositories.meta = metaRepository;
   repositories.auditLog = auditRepository;
@@ -9282,7 +9924,7 @@ function installV4Integration() {
   let queueV8LegacySave = null;
   let v8LegacySaveSuspended = 0;
   const syncV4Storage = function syncV4Storage(part) {
-    const keys = part === 'custom' ? ['v4_positions','v4_party_cases','v4_files','v4_employment_resources','v4_test_snapshots'] : (part ? [part] : collectionKeys);
+    const keys = part === 'custom' ? CWB_COLLECTIONS.custom : (part ? [part] : collectionKeys);
     for (const key of keys) {
       const backing = backingRepos[key];
       if (!backing) continue;
@@ -9377,7 +10019,7 @@ function installV4Integration() {
       store.write('settings', cloneData(state.settings || {}));
       for (const key of collectionKeys) await directReplaceCollection(key, state[key] || []);
       const custom = state.custom || {};
-      for (const key of ['v4_positions','v4_party_cases','v4_files','v4_employment_resources','v4_test_snapshots']) {
+      for (const key of CWB_COLLECTIONS.custom) {
         await directReplaceCollection(key, custom[key] || []);
       }
     };
@@ -9386,7 +10028,7 @@ function installV4Integration() {
     } else if (collection && collection !== 'attachments') {
       if (collection === 'custom') {
         const custom = state.custom || {};
-        for (const key of ['v4_positions','v4_party_cases','v4_files','v4_employment_resources','v4_test_snapshots']) {
+        for (const key of CWB_COLLECTIONS.custom) {
           await directReplaceCollection(key, custom[key] || []);
         }
       } else if (collection === 'settings') {
@@ -9486,6 +10128,10 @@ function installV4Integration() {
       const exportTemplates = new Map();
       const saveWorkspaceSettings = key => {
         const settings = Object.assign({}, v8Workspace.getState().settings || {});
+        if (Array.isArray(DB.settings.leadership_views)) {
+          settings.leadership_views = cloneData(DB.settings.leadership_views);
+          settings.leadership_view_id = String(DB.settings.leadership_view_id || '');
+        }
         settings[key] = key === 'personal_views' ? [...personalViews.values()]
           : key === 'export_templates' ? [...exportTemplates.values()]
             : key === 'import_tasks' ? [...importTasks.values()]
@@ -9560,12 +10206,20 @@ function installV4Integration() {
   const importStagingRepository = portableRepository('v4_import_staging', { dbName:'counselor_desk_v4_imports' });
   const importCheckpointKey = id => `v4_import_job_${id}`;
   const readImportCheckpoint = id => { try { return store.read(importCheckpointKey(id), null); } catch (_) { return null; } };
+  const importCheckpointCadence = 512;
+  const importCheckpointProgress = new Map();
   const writeImportCheckpoint = (id, checkpoint) => {
     // v4 checkpoints live in IndexedDB; the localStorage read above is retained only for v3.9 migration.
+    const processed = Math.max(0, Number(checkpoint && checkpoint.processed) || 0);
+    const prior = importCheckpointProgress.get(id);
+    const terminal = checkpoint && checkpoint.status !== 'running';
+    if (!terminal && prior != null && processed - prior < importCheckpointCadence) return;
+    importCheckpointProgress.set(id, processed);
     importJobsRepository.put(Object.assign({ id, schema_version:8, updated_at:new Date().toISOString() }, checkpoint)).catch(() => {});
   };
   const clearImportCheckpoint = id => {
     try { store.remove(importCheckpointKey(id)); } catch (_) {}
+    importCheckpointProgress.delete(id);
     importJobsRepository.delete(id).catch(() => {});
   };
   function createImportJob(id, options, checkpoint) {
@@ -9573,9 +10227,13 @@ function installV4Integration() {
     const stagingStudents = cloneData(DB.students || []);
     const stagingReady = opts.collection === 'students'
       ? importStagingRepository.list().then(rows => rows.filter(row => row.job_id === id).forEach(row => {
-        const value = row.student || row;
-        const index = stagingStudents.findIndex(item => item.student_number && studentIdentityKey(item) === studentIdentityKey(value));
-        if (index >= 0) stagingStudents[index] = Object.assign({}, stagingStudents[index], value); else stagingStudents.push(value);
+        // New jobs store one bounded chunk per record; accept the old one-row
+        // format so interrupted imports created before this optimization resume.
+        const values = Array.isArray(row.students) ? row.students : [row.student || row];
+        values.forEach(value => {
+          const index = stagingStudents.findIndex(item => item.student_number && studentIdentityKey(item) === studentIdentityKey(value));
+          if (index >= 0) stagingStudents[index] = Object.assign({}, stagingStudents[index], value); else stagingStudents.push(value);
+        });
       })).catch(() => {})
       : Promise.resolve();
     let stagingByNumber;
@@ -9587,7 +10245,7 @@ function installV4Integration() {
         if (typeof opts.onProgress === 'function') opts.onProgress(progress);
         hooks.emit('v4:import-progress', progress);
       },
-      async onChunk(chunk) {
+      async onChunk(chunk, meta) {
         await stagingReady;
         if (typeof opts.onChunk === 'function') return opts.onChunk(chunk);
         if (opts.collection === 'students') {
@@ -9599,8 +10257,11 @@ function installV4Integration() {
             if (current) { Object.assign(current, Object.fromEntries(Object.entries(value).filter(([, v]) => v !== '' && v != null))); changed.push(current); }
             else { stagingStudents.push(value); if (value.student_number) stagingByNumber.set(studentIdentityKey(value), value); changed.push(value); }
           });
-          const stagedRows = changed.map(value => ({ id:`${id}:${value.id}`, job_id:id, student:value }));
-          if (importStagingRepository.putMany) await importStagingRepository.putMany(stagedRows);
+          const offset = meta && Number.isFinite(Number(meta.start)) ? Number(meta.start) : Date.now();
+          const stagedRows = [{ id:`${id}:${offset}`, job_id:id, students:changed }];
+          // A controller chunk is already bounded; keep it in one IndexedDB
+          // transaction instead of splitting it into 100-row transactions.
+          if (importStagingRepository.putMany) await importStagingRepository.putMany(stagedRows, { atomic:true });
           else await Promise.all(stagedRows.map(value => importStagingRepository.put(value)));
         }
       },
@@ -9615,7 +10276,7 @@ function installV4Integration() {
       controller,
       options: opts,
       async commit() {
-        if (repositories.students && repositories.students.putMany) await repositories.students.putMany(stagingStudents, { render:false, normalized:true });
+        if (repositories.students && repositories.students.putMany) await repositories.students.putMany(stagingStudents, { render:false, normalized:true, atomic:true });
         else { DB.students = stagingStudents; save('students'); }
         const refresh = () => { try { render(); } catch (_) {} };
         if (typeof requestIdleCallback === 'function') requestIdleCallback(refresh, { timeout:1000 });
@@ -10197,8 +10858,8 @@ function installV4Integration() {
 }
 
 window.CWB = {
-  version: APP_VERSION,
-  db: DB, store, storage, schema, importSchemas:IMPORT_SCHEMAS, studentImportSchema:STUDENT_IMPORT_SCHEMA, ui, hooks, bridge, modules, onboarding, welcome:welcomeExperience, theme, security, importer, testData, sync,
+  version: APP_VERSION, ai:null, employment:window.CWBEmployment || null,
+  db: DB, store, storage, schema, importSchemas:IMPORT_SCHEMAS, studentImportSchema:STUDENT_IMPORT_SCHEMA, ui, hooks, bridge, modules, onboarding, welcome:welcomeExperience, theme, security, importer, testData, sync, leadershipViews:leadershipViewsApi,
   // Keep plain legacy JSON recovery available if optional workspace runtimes cannot load.
   // Attachments and v8 history require the transactional workspace adapter installed below.
   importExchangePackage: async (pkg, mode) => {
@@ -10230,6 +10891,7 @@ window.CWB = {
     learningMaterial:normLearningMaterial, learningNote:normLearningNote, learningSession:normLearningSession, normV4Record,
   },
 };
+window.CWB.ai = { governance:window.CWBAI || null, run:aiWorkflowRun, createCertificateDraft:aiCreateCertificateDraft, confirmCertificateDraft:aiConfirmCertificateDraft, recordsForRange:aiRecordsForRange, confirmWorkSummary:aiConfirmWorkSummary };
 
 /* Compatibility consumers can query attachment helpers before the asynchronous
    repository integration finishes. The full repository replaces this stub. */

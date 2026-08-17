@@ -1,12 +1,14 @@
 /* Schema-v8 package migration is deliberately storage-agnostic. It upgrades a
  * copy of an exchange/portable package and leaves legacy collections intact. */
 (function attachV8Migration(root, factory) {
-  const api = factory();
+  const CWBCollections = root && root.CWBCollections || (typeof module === 'object' && module.exports ? require('./cwb-collections.js').CWBCollections : null);
+  const api = factory(CWBCollections);
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) root.CWBv8Migration = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function createV8Migration() {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function createV8Migration(CWBCollections) {
   'use strict';
 
+  if (!CWBCollections) throw new Error('CWB_COLLECTION_MANIFEST_REQUIRED');
   const SCHEMA_VERSION = 8;
   const DEFAULT_RECOVERY_POINT_LIMIT = 3;
   const CANONICAL_COLLECTIONS = Object.freeze(['orgs', 'party', 'rewards', 'activities', 'grades', 'worklogs']);
@@ -16,24 +18,8 @@
     { from:'honor', to:'rewards' },
     { from:'node', to:'worklogs' },
   ]);
-  const LOGICAL_COLLECTION_PATHS = Object.freeze([
-    'students', 'tasks', 'talks', 'stay', 'leave', 'honor', 'pleave', 'attend', 'node', 'warn', 'help', 'grant',
-    'focus', 'psych', 'graduate', 'policy', 'material', 'comp', 'tpl', 'learning_materials', 'learning_notes',
-    'learning_sessions', 'attachments', 'orgs', 'party', 'rewards', 'activities', 'grades', 'worklogs',
-    'custom.v4_positions', 'custom.v4_party_cases', 'custom.v4_files', 'custom.v4_employment_resources', 'custom.v4_test_snapshots',
-  ]);
-  const STORAGE_COLLECTION_PATHS = Object.freeze({
-    records_students:'students', records_tasks:'tasks', records_talks:'talks', records_stay:'stay', records_leave:'leave',
-    records_honor:'honor', records_pleave:'pleave', records_attend:'attend', records_node:'node', records_warn:'warn',
-    records_help:'help', records_grant:'grant', records_focus:'focus', records_psych:'psych', records_graduate:'graduate',
-    records_policy:'policy', records_material:'material', records_comp:'comp', records_tpl:'tpl',
-    records_learning_materials:'learning_materials', records_learning_notes:'learning_notes', records_learning_sessions:'learning_sessions',
-    records_orgs:'orgs', records_party:'party', records_rewards:'rewards', records_activities:'activities', records_grades:'grades',
-    records_worklogs:'worklogs',
-    records_custom_v4_positions:'custom.v4_positions', records_custom_v4_party_cases:'custom.v4_party_cases',
-    records_custom_v4_files:'custom.v4_files', records_custom_v4_employment_resources:'custom.v4_employment_resources',
-    records_custom_v4_test_snapshots:'custom.v4_test_snapshots',
-  });
+  const LOGICAL_COLLECTION_PATHS = Object.freeze([...CWBCollections.logical.map(CWBCollections.logicalPath), 'attachments']);
+  const STORAGE_COLLECTION_PATHS = CWBCollections.storagePaths();
   // Top-level attachments are already logical package data. Only a decrypted
   // row whose storage collection is literally `attachments` uses this map.
   const STORAGE_ROW_COLLECTION_PATHS = Object.freeze(Object.assign({}, STORAGE_COLLECTION_PATHS, { attachments:'attachments' }));

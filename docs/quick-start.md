@@ -6,7 +6,7 @@
 
 | 你的情况 | 建议 | 说明 |
 | --- | --- | --- |
-| 想先看看界面 | [在线体验](https://7752777.github.io/counselor-desk/) | 当前已验证发布版本为 v4.4.2；v4.4.3 正在通过发布门禁。请只使用演示或脱敏数据体验流程。 |
+| 想先看看界面 | [在线体验](https://7752777.github.io/counselor-desk/) | 当前已验证发布版本为 v4.4.2；v4.4.4 开发批次已收尾但尚未公开发布。请只使用演示或脱敏数据体验流程。 |
 | 不想安装，临时或离线使用 | 网页离线版 | 从 [Release](https://github.com/7752777/counselor-desk/releases) 下载实际存在的 HTML 文件，双击打开。 |
 | 在固定 Windows 电脑上长期使用 | Windows 桌面版 | 从 Release 下载实际存在的 Windows 安装包；安装、升级和数据位置见[桌面端安装](./v4-desktop-installation.md)。 |
 | 在 Mac 上使用 | macOS 桌面版 | 只使用 Release 中实际存在且说明完整的 DMG/ZIP；签名和公证状态以 Release 为准。 |
@@ -50,3 +50,4 @@
 - 想了解导入字段：看 [数据参考](./data-contract.md)。
 - 想换电脑或交接：看 [备份与迁移](./v4-migration-and-backup.md)。
 - 想了解敏感数据边界：看 [隐私与安全边界](./v4-privacy.md)。
+- 想了解本次开发补齐了什么：看 [开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。

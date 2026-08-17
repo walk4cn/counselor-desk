@@ -263,7 +263,7 @@ const bad = (msg, e) => { fail++; console.log('  ✗ ' + msg + (e ? ('\n      ' 
   }
 
   console.log('=== 9. APP_VERSION 与 UI 风格 ===');
-  if (cwb.version === '4.4.3') ok('APP_VERSION = 4.4.3');
+  if (cwb.version === '4.4.4') ok('APP_VERSION = 4.4.4');
   else bad('APP_VERSION 错误：' + cwb.version);
 
   const brandSub = $1('#brand-sub');

@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const path = require('node:path');
 const { JSDOM, VirtualConsole } = require('jsdom');
 
@@ -16,7 +17,9 @@ async function openApp(storage) {
     if (!/scrollTo|Not implemented|Could not load|getaddrinfo/i.test(error.message)) errors.push(error.message);
   });
   virtualConsole.on('error', (...args) => errors.push(args.join(' ')));
-  const dom = await JSDOM.fromFile(file, {
+  const html = fs.readFileSync(file, 'utf8')
+    .replace('<script defer src="src/core/cwb-business.js" data-cwb-business></script>', () => `<script>${fs.readFileSync(path.join(__dirname, '..', 'src', 'core', 'cwb-business.js'), 'utf8')}</script>`);
+  const dom = new JSDOM(html, {
     beforeParse(window) {
       Object.entries(storage || {}).forEach(([key, value]) => window.localStorage.setItem(`cwb_v1_${key}`, JSON.stringify(value)));
     },
@@ -42,6 +45,7 @@ async function openApp(storage) {
   };
   const { dom, errors, window, document } = await openApp(storage);
   const cwb = window.CWB;
+  assert.ok(window.CWBBusiness, 'the business profile runtime should load with the application');
 
   assert.ok(cwb.db.orgs.some(row => row.id === 'position-1' && row.position === '班长'), 'legacy position records should map into orgs without changing IDs');
   assert.ok(cwb.db.party.some(row => row.id === 'party-1'), 'legacy party cases should map into party without changing IDs');
@@ -65,6 +69,19 @@ async function openApp(storage) {
   assert.ok(timeline, 'student dossier should expose a unified timeline');
   assert.match(timeline.textContent, /班会记录/, 'timeline should include worklogs');
   document.querySelector('[data-close]').click();
+
+  cwb.db.custom.v4_assessments = [window.CWBBusiness.normalizeAssessment({
+    id:'assessment-stable-id', student_id:'student-1', student_number:'S001', student_name:'王同学', term:'2025-2026-2', level:'优秀', score:90,
+  })];
+  cwb.db.students[0].student_number = 'S001-REVISED';
+  cwb.go('students');
+  await wait(25);
+  document.querySelector('[data-act="student-view"]').click();
+  await wait(25);
+  const stableProfile = activeModal(document);
+  assert.match(stableProfile.textContent, /综测记录\s*1/, 'stable IDs retain business profile counts after student-number correction');
+  assert.match(stableProfile.querySelector('[data-student-timeline]').textContent, /综合测评/, 'stable IDs retain business timeline entries after student-number correction');
+  stableProfile.querySelector('[data-close]').click();
 
   cwb.go('talks');
   await wait(25);

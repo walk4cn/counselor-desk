@@ -13,6 +13,7 @@ const forbiddenText = [
   'ea40c80e38ef48478bb12a2376e142ea.sh2.agentos-app.net'
 ];
 const forbiddenPaths = [
+  '开发入口说明.md',
   'docs/prompts',
   'docs/prompt-archive.md',
   'docs/项目反推提示词.md',

@@ -30,6 +30,7 @@ function createBrowserRuntime() {
   });
   [
     'vendor/argon2-bundled.min.js',
+    'src/core/cwb-collections.js',
     'src/core/v4-runtime.js',
     'src/core/v8-workspace-runtime.js',
     'src/core/v8-backup-codec.js',

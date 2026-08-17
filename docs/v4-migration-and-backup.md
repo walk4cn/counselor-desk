@@ -56,8 +56,8 @@
 
 ## 版本兼容
 
-发布版本会在 Release 说明中列出可导入的历史格式、schema、加密备份和桌面数据兼容范围。v4.4.3 延续 schema v8，但在发布门禁完成前，请继续只使用 [v4.4.2 正式 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 的程序或离线 HTML 处理正式数据，不要将开发分支构建用于生产迁移。
+发布版本会在 Release 说明中列出可导入的历史格式、schema、加密备份和桌面数据兼容范围。v4.4.4 延续 schema v8，但在发布门禁完成前，请继续只使用 [v4.4.2 正式 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 的程序或离线 HTML 处理正式数据，不要将开发分支构建用于生产迁移。
 
 ### v4.4 的迁移原则
 
-v4.4 使用 schema v8 工作区。它的迁移目标是保留内部 ID、附件关联、历史学号、自定义字段和可以读取的历史记录；迁移前会建立恢复点。遇到无法判断的旧字段或冲突记录，系统应提示并保留原始信息供人工判断，而不是静默覆盖。正式兼容范围、加密格式和桌面迁移结果见 [v4.4.2 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 与 [发布验收记录](./v4-acceptance-report.md)；v4.4.3 的新结论仅在其 Release 公开后写入。
+v4.4 使用 schema v8 工作区。它的迁移目标是保留内部 ID、附件关联、历史学号、自定义字段和可以读取的历史记录；迁移前会建立恢复点。遇到无法判断的旧字段或冲突记录，系统应提示并保留原始信息供人工判断，而不是静默覆盖。领导统计视图作为设置数据保存：旧版标记为领导视图的个人配置会补齐默认指标，已选视图可在 v8 工作区重启后恢复。正式兼容范围、加密格式和桌面迁移结果见 [v4.4.2 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 与 [发布验收记录](./v4-acceptance-report.md)；开发目录的新增验证见[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。

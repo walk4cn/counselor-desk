@@ -1,18 +1,13 @@
 (function installV4Runtime(global) {
   'use strict';
 
+  const CWBCollections = global.CWBCollections || (typeof module === 'object' && module.exports ? require('./cwb-collections.js').CWBCollections : null);
+  if (!CWBCollections) throw new Error('CWB_COLLECTION_MANIFEST_REQUIRED');
   const V4_SCHEMA_VERSION = 8;
   const memoryStores = new Map();
   const indexedDbConnections = new Map();
-  const DEFAULT_DB_STORES = Object.freeze([
-    'records_students', 'records_tasks', 'records_talks', 'records_stay', 'records_leave', 'records_honor',
-    'records_orgs', 'records_party', 'records_rewards', 'records_activities', 'records_grades', 'records_worklogs',
-    'records_pleave', 'records_attend', 'records_node', 'records_warn', 'records_help', 'records_grant',
-    'records_focus', 'records_psych', 'records_graduate', 'records_policy', 'records_material', 'records_comp',
-    'records_tpl', 'records_learning_materials', 'records_learning_notes', 'records_learning_sessions',
-    'records_custom_v4_positions', 'records_custom_v4_party_cases', 'records_custom_v4_files',
-    'records_custom_v4_employment_resources', 'records_custom_v4_test_snapshots', 'attachments', 'import_jobs', 'audit_log', 'meta',
-  ]);
+  const DEFAULT_DB_STORES = CWBCollections.desktopCollections;
+  const LEGACY_RECORD_STORE_MAP = Object.freeze(Object.fromEntries(CWBCollections.canonical.map(key => [key, CWBCollections.desktopName(key)])));
 
   function clone(value) {
     if (value == null) return value;
@@ -163,14 +158,13 @@
         const legacySources = [];
         // Schema v8 adds canonical business collections without abandoning
         // existing records or legacy custom collections in the same database.
-        const request = global.indexedDB.open(databaseName, 4);
+        const request = global.indexedDB.open(databaseName, 5);
         request.onupgradeneeded = () => {
           const database = request.result;
           stores.forEach(storeName => {
             if (!database.objectStoreNames.contains(storeName)) database.createObjectStore(storeName, { keyPath: 'id' });
           });
-          const legacyMap = { students:'records_students', tasks:'records_tasks', talks:'records_talks', stay:'records_stay', leave:'records_leave', honor:'records_honor', pleave:'records_pleave', attend:'records_attend', node:'records_node', warn:'records_warn', help:'records_help', grant:'records_grant', focus:'records_focus', psych:'records_psych', graduate:'records_graduate', policy:'records_policy', material:'records_material', comp:'records_comp', tpl:'records_tpl' };
-          Object.entries(legacyMap).forEach(([legacy, target]) => { if (database.objectStoreNames.contains(legacy) && database.objectStoreNames.contains(target)) legacySources.push([legacy, target]); });
+          Object.entries(LEGACY_RECORD_STORE_MAP).forEach(([legacy, target]) => { if (database.objectStoreNames.contains(legacy) && database.objectStoreNames.contains(target)) legacySources.push([legacy, target]); });
         };
         request.onsuccess = () => {
           const database = request.result;
@@ -420,8 +414,13 @@
     return {
       id: String(value.id || `employment_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`),
       title: String(value.title || '').trim(), region: String(value.region || '全国').trim(),
-      industry: String(value.industry || '综合').trim(), organizer: String(value.organizer || '').trim(),
+      category: String(value.category || value.industry || '综合').trim(),
+      audience: String(value.audience || '').trim(),
+      source: String(value.source || value.organizer || '').trim(),
+      tags: String(value.tags || '').trim(),
+      industry: String(value.industry || value.category || '综合').trim(), organizer: String(value.organizer || value.source || '').trim(),
       url, verified_at: String(value.verified_at || '').trim(),
+      favorite: value.favorite === true,
       status: value.status === '失效' || value.status === '待核验' ? value.status : '有效',
       schema_version: V4_SCHEMA_VERSION,
     };

@@ -7,15 +7,27 @@ directories:
   output: output/desktop
   buildResources: assets
 npmRebuild: false
+electronLanguages:
+  - zh-CN
+  - en-US
 files:
   - desktop/**
+  - '!desktop/package.json'
+  - '!desktop/package-lock.json'
+  - '!desktop/electron-builder.yml'
+  - '!desktop/installer.nsh'
+  - '!desktop/README.md'
   - index.html
+  - src/core/cwb-collections.js
   - src/core/v4-runtime.js
   - src/core/import-worker.js
   - src/core/v8-migration.js
   - src/core/v8-persistence-protocol.js
   - src/core/v8-workspace-runtime.js
   - src/core/v8-backup-codec.js
+  - src/core/cwb-ai.js
+  - src/core/cwb-employment.js
+  - src/core/cwb-business.js
   - assets/welcome-education-scene-v2.png
   - assets/welcome-morning.png
   - vendor/xlsx.full.min.js

@@ -4,6 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { createSqliteStore } = require('./sqlite-store.cjs');
 const { migrateLegacyDesktopData } = require('./data-migration.cjs');
+const { CWBCollections } = require('../src/core/cwb-collections.js');
 
 const APP_VERSION = require('../package.json').version;
 const APP_IDENTITY = 'Counselor Desk';
@@ -17,17 +18,7 @@ let mainWindow;
 let sqliteStore;
 let vaultKeyCache;
 
-const ALLOWED_COLLECTIONS = new Set([
-  'records_students', 'records_tasks', 'records_talks', 'records_stay', 'records_leave',
-  'records_honor', 'records_pleave', 'records_attend', 'records_node', 'records_warn',
-  'records_help', 'records_grant', 'records_focus', 'records_psych', 'records_graduate',
-  'records_policy', 'records_material', 'records_comp', 'records_tpl',
-  'records_learning_materials', 'records_learning_notes', 'records_learning_sessions',
-  'records_custom_v4_positions', 'records_custom_v4_party_cases', 'records_custom_v4_files',
-  'records_custom_v4_employment_resources', 'attachments', 'import_jobs', 'audit_log', 'meta',
-  'records_custom_v4_test_snapshots', 'records_orgs', 'records_party', 'records_rewards',
-  'records_activities', 'records_grades', 'records_worklogs', 'records_crisis_cases',
-]);
+const ALLOWED_COLLECTIONS = new Set(CWBCollections.desktopCollections);
 function validateCollection(collection) {
   const value = String(collection || '');
   if (!ALLOWED_COLLECTIONS.has(value)) throw new Error('REPOSITORY_COLLECTION_NOT_ALLOWED');
@@ -260,6 +251,26 @@ ipcMain.handle('desktop:set-backup-secret', async (_event, secret) => {
 ipcMain.handle('desktop:get-backup-secret', async () => {
   if (!safeStorage.isEncryptionAvailable()) return null;
   try { return safeStorage.decryptString(await fs.readFile(userDataPath('vault', 'backup-secret.bin'))); } catch (_) { return null; }
+});
+ipcMain.handle('desktop:set-ai-secret', async (_event, id, secret) => {
+  if (!safeStorage.isEncryptionAvailable()) return false;
+  const providerId = validateRecordId(id);
+  const value = String(secret || '').trim();
+  if (!value || value.length > 4096) return false;
+  const file = userDataPath('vault', `ai-secret-${safeFileName(providerId, 'provider')}.bin`);
+  await ensureDir(path.dirname(file));
+  await fs.writeFile(file, safeStorage.encryptString(value), { flag:'w' });
+  await writeMainAudit('ai_secret_saved', { provider_id:providerId });
+  return true;
+});
+ipcMain.handle('desktop:get-ai-secret', async (_event, id) => {
+  if (!safeStorage.isEncryptionAvailable()) return null;
+  const providerId = validateRecordId(id);
+  try { return safeStorage.decryptString(await fs.readFile(userDataPath('vault', `ai-secret-${safeFileName(providerId, 'provider')}.bin`))); } catch (_) { return null; }
+});
+ipcMain.handle('desktop:delete-ai-secret', async (_event, id) => {
+  const providerId = validateRecordId(id);
+  try { await fs.rm(userDataPath('vault', `ai-secret-${safeFileName(providerId, 'provider')}.bin`), { force:true }); await writeMainAudit('ai_secret_deleted', { provider_id:providerId }); return true; } catch (_) { return false; }
 });
 ipcMain.handle('desktop:prune-backups', async (_event, folder, retain) => {
   if (!folder || typeof folder !== 'string') return 0;
