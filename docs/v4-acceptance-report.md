@@ -1,8 +1,10 @@
 # v4.4.0 发布验收记录
 
-> 本页保留 v4.4.0 的首个完整发布证据，便于追溯发布基线；当前用户下载请前往 [v4.4.2 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2)，不要把本页中的历史附件名当作最新下载项。
+> 本页保留 v4.4.0 的首个完整发布证据，便于追溯发布基线；当前用户下载请前往 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)，不要把本页中的历史附件名当作最新下载项。
 
-v4.4.4 的开发收尾、专项验证和未完成发布事项记录在[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)；该文档不改变本页的 v4.4.0 历史发布事实。
+v4.4.4 的开发收尾、专项验证和正式发布证据记录在[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)；本页以下表格仍保留 v4.4.0 的历史发布事实。
+
+当前公开版本：[`v4.4.4 Release`](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)，发布提交 [`438badd4`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389)，在线体验为 [GitHub Pages](https://7752777.github.io/counselor-desk/)。完整 CI 记录见 [Actions run 32024091313](https://github.com/7752777/counselor-desk/actions/runs/32024091313)，Pages 记录见 [Actions run 32025171557](https://github.com/7752777/counselor-desk/actions/runs/32025171557)。
 
 本页记录已经发生并可复查的发布事实。它不是功能愿望清单，也不以“源码里有”代替可见、可下载、可恢复的产品能力。
 
@@ -19,7 +21,7 @@ v4.4.4 的开发收尾、专项验证和未完成发布事项记录在[开发收
 
 ## 交付物与下载
 
-下载时请只从 [v4.4.2 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.2) 获取当前附件，并核对随附件发布的 SHA-256 清单；下表仅说明 v4.4.0 基线当时的产物组成。
+下载时请只从 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4) 获取当前附件，并核对随附件发布的 SHA-256 清单；下表仅说明 v4.4.0 基线当时的产物组成。
 
 | 使用方式 | Release 附件 | 适用说明 |
 | --- | --- | --- |

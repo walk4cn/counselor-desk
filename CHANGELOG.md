@@ -2,7 +2,7 @@
 
 这里记录的是面向使用者与贡献者的产品演进，而不是开发过程摘录。版本状态以 [GitHub Releases](https://github.com/7752777/counselor-desk/releases) 中实际存在的附件、校验文件和说明为准。
 
-## [Unreleased] v4.4.4 — 本地 AI、业务档案与工作台可靠性
+## [4.4.4] · 2026-08-17 · 本地 AI、业务档案与工作台可靠性
 
 - 以实际校园学生名册、暑期离校统计、课程成绩和 GPA 汇总表走完浏览器实际预览、提交与学号关联验证。测试过程不改写原始工作簿，报告不保留学生身份或成绩明细。
 - 导入日期增加 `2026年7月28日`、`7月27号`、`7/25/26`与同行年份推断，统一规整为 ISO 日期后再校验；不存在的日期仍会被明确标出。
@@ -15,7 +15,7 @@
 - 新增领导统计视图，支持数值聚合、保存、选择、编辑、删除和 CSV 导出；设置并发写入与 v8 重启恢复均纳入回归。
 - 统一新增集合清单，接入浏览器 IndexedDB、便携 HTML、Electron SQLite、迁移、备份、交换包和桌面边界。
 
-> 这些变更是 `v4.4.4` 的发布候选内容，只有在当前提交的完整测试、Windows、macOS、网页产物和发布门禁均通过后，才会写入正式 Release。
+`v4.4.4` 已由提交 [`438badd4`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389) 发布；完整门禁记录见 [Actions run 32024091313](https://github.com/7752777/counselor-desk/actions/runs/32024091313)，下载附件、SHA-256 清单与未签名/未公证说明见 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)，在线体验见 [GitHub Pages](https://7752777.github.io/counselor-desk/)。
 
 ## [4.4.2] · 2026-08-14 · 欢迎体验与发布统一
 

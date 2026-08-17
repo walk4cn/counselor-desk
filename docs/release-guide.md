@@ -4,7 +4,18 @@
 
 ## 当前发布线
 
-`v4.4.4` 的开发批次已完成本地功能、专项测试、发布 HTML 和 Windows x64 / ARM64 安装包构建；完整证据见[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。它仍是发布候选，只有同一提交上的 Tests、Windows、macOS、网页产物、Draft Release 和人工 Pages 部署全部完成后，才可写为正式公开版。`v4.4.2`（提交 [`9a0fe04982a21eda9be59e7d75caee4c1f47809c`](https://github.com/7752777/counselor-desk/commit/9a0fe04982a21eda9be59e7d75caee4c1f47809c)）保留为当前已验证正式发布；`v4.4.3` Tag 保留为历史版本，不被本批重新指向；`v4.4.0` 保留为首个完整发布基线。
+`v4.4.4` 已完成本地与 CI 全量门禁并正式公开。发布提交为 [`438badd4`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389)，正式下载入口为 [`v4.4.4 Release`](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)，在线体验为 [GitHub Pages](https://7752777.github.io/counselor-desk/)。`v4.4.3` Tag 保留为历史版本，不被本批重新指向；`v4.4.0` 保留为首个完整发布基线。
+
+### v4.4.4 实际发布记录
+
+| 项目 | 已验证事实 |
+| --- | --- |
+| 发布提交 | `438badd4fd1fffd6aff36412912309642f02d389` |
+| 发布门禁 | [Actions run 32024091313](https://github.com/7752777/counselor-desk/actions/runs/32024091313)，Tests、Windows、macOS、Web、Draft Release 全部成功 |
+| 正式 Release | [辅导员工作台 v4.4.4](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)，2026-08-17 公开 |
+| Pages 部署 | [Actions run 32025171557](https://github.com/7752777/counselor-desk/actions/runs/32025171557)，部署成功 |
+| Release 附件 | Windows x64 / ARM64、macOS Universal DMG / ZIP、离线 HTML、Windows/macOS/Web 三份 SHA-256 清单 |
+| 签名状态 | Windows 与 macOS 构建未配置代码签名；macOS 同时未公证，安装前须核对哈希并遵循本校策略 |
 
 ## 发布前
 
@@ -17,7 +28,7 @@
 
 ## 版本事实检查
 
-发布说明必须把“候选已集成”“CI 已验证”“Release 已公开”“Pages 已切换”四种状态分开写。以下内容只能在实际发生后填写：
+发布说明必须把“候选已集成”“CI 已验证”“Release 已公开”“Pages 已切换”四种状态分开写。v4.4.4 已完成这四个状态，后续版本仍须按相同规则填写：
 
 - Git tag、Release URL、Pages URL 与发布提交 SHA；
 - Windows/macOS 安装包名称、SHA-256、签名和公证状态；

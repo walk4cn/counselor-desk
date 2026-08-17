@@ -1,10 +1,20 @@
 # v4.4 发布归档账本
 
-当前开发目录的收尾范围与发布边界见[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。本页仅记录历史档案与清理原则，不作为当前发布状态来源。
+当前开发目录的收尾范围与 v4.4.4 发布结果见[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。本页记录历史档案、v4.4.4 追溯证据与清理原则，不作为下载入口；当前附件以 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4) 为准。
 
 本页记录 v4.4.0 发布后仍有价值的取证边界。它不包含学生业务数据、不替代 Git 历史，也不把可重建的缓存和安装残留伪装成产品资产。
 
 ## 已固定的发布证据
+
+| 项目 | 记录 |
+| --- | --- |
+| 当前公开版本 | `v4.4.4`，提交 [`438badd4`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389) |
+| 正式附件 | [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4) 中的离线 HTML、Windows x64 / ARM64、macOS Universal DMG / ZIP 与三份 SHA-256 清单 |
+| 发布门禁 | [Actions #32024091313](https://github.com/7752777/counselor-desk/actions/runs/32024091313) |
+| Pages 部署 | [Actions #32025171557](https://github.com/7752777/counselor-desk/actions/runs/32025171557) |
+| 平台限制 | 未配置代码签名；macOS 未公证 |
+
+## 历史 v4.4.0 证据
 
 | 项目 | 记录 |
 | --- | --- |

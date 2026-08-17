@@ -2,7 +2,7 @@
 
 更新时间：2026-08-17
 
-本页是本次开发批次的收尾记录，描述当前开发目录中已经实现并完成本地验证的事实。它不是 GitHub Release 公告，也不把开发目录产物自动视为正式发布附件。正式下载版本、签名、公证、SHA-256 和 Pages 状态仍以公开 Release 为准。
+本页是本次开发批次的收尾记录，描述当前开发目录、CI 和公开发布中已经验证的事实。v4.4.4 已由提交 `438badd4fd1fffd6aff36412912309642f02d389` 正式发布；正式下载版本、签名、公证、SHA-256 和 Pages 状态仍以 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4) 为准。
 
 ## 交付范围
 
@@ -70,17 +70,25 @@ git diff --check
 - 学生台账筛选/排序/派生缓存和 10,000 行导入性能门禁通过。
 - 最终候选 HTML 已重新生成：`output/辅导员工作台.html`。
 - Windows x64 / ARM64 NSIS 安装包已按当前源码重建：`output/desktop/counselor-desk-4.4.4-x64.exe`、`output/desktop/counselor-desk-4.4.4-arm64.exe`，并生成对应 blockmap；PE 架构检查、解包应用双次持久化烟测和安装器双路径卸载烟测均通过。
-- 本地最终候选产物已完成一次 SHA-256 校验（尚未作为公开 Release 清单发布）：HTML `F61E5D515740806E213116EBE1CBCA405D977BA393AF6F6324ABE0260F5BC705`；Windows x64 `6E4240F5357002011AEF4DD2B721570667A6A957397921F4FA012C5C7D0BCA59`；Windows ARM64 `EBB51A6DB1BBD590BFD3F9BE77762490BE17EB6ADAEF38260647AC3FAEFE7193`。
+- 公开 Release 已提供最终 CI 产物和三份 SHA-256 清单：[Web-SHA256.txt](https://github.com/7752777/counselor-desk/releases/download/v4.4.4/Web-SHA256.txt)、[Windows-SHA256.txt](https://github.com/7752777/counselor-desk/releases/download/v4.4.4/Windows-SHA256.txt)、[macOS-SHA256.txt](https://github.com/7752777/counselor-desk/releases/download/v4.4.4/macOS-SHA256.txt)。下载后以清单中的 CI 产物哈希为准，不以开发目录中的中间候选文件替代公开清单。
 - 先前批次的迁移、备份、附件、交换包回滚、Electron、AI、业务档案和就业资源拆分测试已通过。
 - 单条 `pnpm test` 曾超过当前命令执行上限；等价拆分测试已按风险范围执行通过，不能把单条命令记为通过。
 
-## 发布边界
+## 外部发布结果
 
-- 当前目录是开发收尾状态，不等同于 GitHub Release 已公开。
-- 尚未在本轮生成或声明 macOS Universal 包、签名、公证或 Pages 部署；上述本地 SHA-256 仅用于最终候选产物核对，不等同于公开 Release 清单。
-- 当前工作树未配置 Git remote，且本机未安装 GitHub CLI（`gh`）；因此无法从本机触发 macOS runner、创建 Draft Release 或部署 Pages。
+- 发布提交：[`438badd4fd1fffd6aff36412912309642f02d389`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389)。
+- GitHub Actions：[run 32024091313](https://github.com/7752777/counselor-desk/actions/runs/32024091313) 已完成 Tests、Windows NSIS、macOS Universal、离线网页和 Draft Release，全 job 成功。
+- 正式 Release：[v4.4.4](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4) 已于 2026-08-17 公开，包含 Windows x64 / ARM64、macOS Universal DMG / ZIP、离线 HTML 和三份 SHA-256 清单。
+- Pages：[run 32025171557](https://github.com/7752777/counselor-desk/actions/runs/32025171557) 已成功部署到 [https://7752777.github.io/counselor-desk/](https://7752777.github.io/counselor-desk/)，线上入口已验收并无应用控制台错误。
+- macOS Universal 构建未配置代码签名或公证；Release 说明已明确标注，安装前必须核对哈希并遵循学校软件管理策略。
+- `v4.4.3` 历史 Tag 未被改写；`v4.4.4` 是当前公开下载版本。
 - 不应把 `output/v4-preview.html`、开发目录或本地 `4173` 服务当作正式生产下载入口。
-- 正式发布仍需按 [发布指南](../release-guide.md) 完成同一提交下的全量门禁、目标平台构建、包级烟测、Release 和 Pages 核对。
+
+## 剩余限制
+
+- 本地 `http://127.0.0.1:4173/` 仅用于开发验收，不是公开站点；公开体验入口以 Pages URL 为准。
+- 发布包未配置代码签名；macOS 包另外未公证，首次启动可能受系统安全策略提示影响。
+- 线上验收覆盖公开页面加载、入口结构和控制台错误检查，不等同于每一所学校的网络、安全软件、账号策略和终端兼容性认证。
 
 ## 文档入口
 
