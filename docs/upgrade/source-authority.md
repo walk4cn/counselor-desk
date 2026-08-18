@@ -10,12 +10,14 @@
 
 - 路径：`F:\CounselorDesk\counselor-desk-development`
 - 分支：`codex/ai-upgrade`
-- 当前候选基线提交：`849076a`（正式发布提交在最终验证后回填完整 SHA）
+- 当前正式发布提交：`44c833d1bafbe51df844f81cbcc0d638e7e9621e`
 - 既有历史 Tag：`v4.4.3` 指向 `5ddb502e527543f5f8e4f3f922979e09d57f1cf0`，本批不改写
-- 当前候选版本：`v4.4.5`；Tag、Release 与 Pages 状态待本次真实发布结果回填
+- 当前正式版本：`v4.4.5`；[Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 已公开并标记 Latest，[Pages](https://7752777.github.io/counselor-desk/) 已部署
 - 远程仓库：`origin https://github.com/7752777/counselor-desk.git`
 - Git 形态：独立完整克隆，不依赖外部 linked worktree 或主仓库目录
 - 当前架构：本地优先 Web/单文件离线 HTML/Electron 共用业务界面
+
+发布证据： [Release Actions #25](https://github.com/7752777/counselor-desk/actions/runs/32086383154) 和 [Pages 部署 #46](https://github.com/7752777/counselor-desk/actions/runs/32089792020) 均以当前正式发布提交成功；正式附件和 SHA-256 清单见[发布收尾记录](./release-v4.4.5.md)。
 
 当前目录包含源码、测试、构建配置、升级文档、依赖和已有验证产物。以后所有开发、测试、构建、提交都在此目录执行；父目录中的其他文件夹不再作为需求或源码依据。
 

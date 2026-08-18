@@ -4,7 +4,18 @@
 
 ## 当前发布线
 
-`v4.4.5` 是当前发布候选，目标是把 AI 深度融合、移动端收口、relay 安全和仓库门禁与网页、离线 HTML、Windows、macOS、Release、Pages 一起正式交付。`v4.4.4` 的正式发布事实保留在[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)，不得用旧产物证明新版本。
+`v4.4.5` 是当前正式发布线，已把 AI 深度融合、移动端收口、relay 安全和仓库门禁与网页、离线 HTML、Windows、macOS、Release、Pages 一起交付。`v4.4.4` 的正式发布事实保留在[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)，不得用旧产物证明新版本。
+
+### v4.4.5 正式发布记录
+
+| 项目 | 已验证事实 |
+| --- | --- |
+| 发布提交 | [`44c833d1bafbe51df844f81cbcc0d638e7e9621e`](https://github.com/7752777/counselor-desk/commit/44c833d1bafbe51df844f81cbcc0d638e7e9621e) |
+| 发布门禁 | [Release Actions #25 / run `32086383154`](https://github.com/7752777/counselor-desk/actions/runs/32086383154)，成功 |
+| 正式 Release | [辅导员工作台 v4.4.5](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5)，公开、Latest、非 Draft、非 Pre-release |
+| Pages 部署 | [Actions #46 / run `32089792020`](https://github.com/7752777/counselor-desk/actions/runs/32089792020)，成功；[在线入口](https://7752777.github.io/counselor-desk/) 已验收 |
+| 交付物 | 离线 HTML、Windows x64 / ARM64、macOS Universal DMG / ZIP、Windows/macOS/Web 三份 SHA-256 清单 |
+| 平台限制 | 未配置代码签名；macOS 未公证；AI relay 需独立受控 HTTPS 服务 |
 
 ### v4.4.4 历史发布记录
 
@@ -28,7 +39,7 @@
 
 ## 版本事实检查
 
-发布说明必须把“候选已集成”“CI 已验证”“Release 已公开”“Pages 已切换”四种状态分开写。v4.4.4 已完成这四个状态；v4.4.5 在真实结果写回前只能标为候选：
+发布说明必须把“候选已集成”“CI 已验证”“Release 已公开”“Pages 已切换”四种状态分开写。v4.4.4 和 v4.4.5 均已完成这四个状态；未来版本在真实结果完成前只能标为候选：
 
 - Git tag、Release URL、Pages URL 与发布提交 SHA；
 - Windows/macOS 安装包名称、SHA-256、签名和公证状态；
@@ -39,13 +50,13 @@
 
 ## 发布顺序
 
-测试 → Windows → macOS → 网页产物 → Draft Release → 人工公开确认 → Pages。
+测试 → Windows → macOS → 网页产物 → Draft Release → 人工公开确认 → Pages。v4.4.5 已按该顺序完成。
 
 任何一步失败、缺少产物或无法验证，都应停止在 Draft 阶段，不能让 Pages 指向未经验证的提交。
 
 ## 发布后
 
-- 在 CHANGELOG、Release 说明和版本状态页写入实际验证结果与明确限制。
+- 在 CHANGELOG、Release 说明和版本状态页写入实际验证结果与明确限制。v4.4.5 已完成这次回填。
 - 确认在线体验、下载链接、哈希文件、截图和 README 均指向同一版本。
 - 仅在新版本完整可用后，清理已过期的 Preview Release、Preview Tag 和远程开发分支；不改写历史提交。
 

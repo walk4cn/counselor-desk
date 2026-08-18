@@ -56,7 +56,7 @@
 
 ## 版本兼容
 
-发布版本会在 Release 说明中列出可导入的历史格式、schema、加密备份和桌面数据兼容范围。v4.4.5 延续 schema v8，正式数据应使用 [v4.4.5 正式 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 实际公开后的程序或离线 HTML；在 Release 公开前，当前工作区候选不应直接作为生产迁移工具。
+发布版本会在 Release 说明中列出可导入的历史格式、schema、加密备份和桌面数据兼容范围。v4.4.5 延续 schema v8，正式数据应使用已公开的 [v4.4.5 正式 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 程序或离线 HTML；当前工作区源码和开发构建不替代正式附件。
 
 ### v4.4 的迁移原则
 

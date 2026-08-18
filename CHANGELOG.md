@@ -13,7 +13,7 @@
 - 新增仓库发布密钥扫描、动态版本 Release 工作流、CHANGELOG 驱动的发布说明、Issue 模板、PR 模板和 Dependabot 配置。
 - 继续保持 schema v8、浏览器 IndexedDB、Electron SQLite、离线 HTML、备份、迁移、交换包、手机工作包和稳定 ID 兼容边界。
 
-本版本在完成最终测试、跨平台构建、正式 Release 和 Pages 部署后，才以 GitHub 的实际 Tag、Release 附件、SHA-256 清单和 Actions 记录作为公开事实；发布前状态不冒充已上线。
+本版本已正式公开。发布事实如下：提交 [`44c833d1`](https://github.com/7752777/counselor-desk/commit/44c833d1bafbe51df844f81cbcc0d638e7e9621e)，[Release Actions #25](https://github.com/7752777/counselor-desk/actions/runs/32086383154) 与 [Pages 部署 #46](https://github.com/7752777/counselor-desk/actions/runs/32089792020) 均成功，[v4.4.5 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 为非 Draft、非 Pre-release 的公开 Latest 版本。Release 包含离线 HTML、Windows x64 / ARM64、macOS Universal DMG / ZIP 和 `Windows-SHA256.txt`、`macOS-SHA256.txt`、`Web-SHA256.txt` 三份校验清单；哈希与签名限制见[发布收尾记录](./docs/upgrade/release-v4.4.5.md)。
 
 ## [4.4.4] · 2026-08-17 · 本地 AI、业务档案与工作台可靠性
 

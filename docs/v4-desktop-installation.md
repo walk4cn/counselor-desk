@@ -31,7 +31,7 @@
 
 桌面端的数据目录属于用户数据，不应随意删除、同步到公共位置或直接用文本编辑器修改。安装目录和数据目录是两回事：升级或重装前应导出备份，卸载时也应先确认数据保留选项。
 
-v4.4.5 的 Windows x64 / ARM64 安装器及 macOS Universal DMG / ZIP 必须由新 Tag 对应的 CI 运行器构建并完成包级烟测。正式下载、SHA-256 与签名状态以 [v4.4.5 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 实际附件为准；预期 Windows 文件名为 `counselor-desk-4.4.5-x64.exe` / `counselor-desk-4.4.5-arm64.exe`，macOS 文件名为 `counselor-desk-4.4.5-mac-universal.dmg` / `.zip`。本版本未配置代码签名，macOS 也未公证；安装前请核对 Release 附带清单并遵循本校软件管理要求。开发构建证据与边界见[发布收尾记录](./upgrade/release-v4.4.5.md)。
+v4.4.5 的 Windows x64 / ARM64 安装器及 macOS Universal DMG / ZIP 已由新 Tag 对应的 CI 运行器构建并完成包级烟测。正式下载、SHA-256 与签名状态以 [v4.4.5 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 实际附件为准；Windows 文件名为 `counselor-desk-4.4.5-x64.exe` / `counselor-desk-4.4.5-arm64.exe`，macOS 文件名为 `counselor-desk-4.4.5-mac-universal.dmg` / `.zip`。本版本未配置代码签名，macOS 也未公证；安装前请核对 Release 附带清单并遵循本校软件管理要求。开发构建证据与边界见[发布收尾记录](./upgrade/release-v4.4.5.md)。
 
 ### 升级时最重要的事
 

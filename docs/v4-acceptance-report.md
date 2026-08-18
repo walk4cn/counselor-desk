@@ -1,10 +1,20 @@
-# v4.4.0 发布验收记录
+# v4 发布验收记录
 
-> 本页保留 v4.4.0 的首个完整发布证据，便于追溯发布基线；v4.4.4 是上一版正式发布，v4.4.5 当前处于新版本发布收口阶段。当前用户下载只应使用实际公开 Release 的附件，不要把本页历史附件名当作最新下载项。
+> 本页保留 v4.4.0 的首个完整发布证据，便于追溯发布基线；v4.4.4 是上一版正式发布，v4.4.5 是当前正式发布。当前用户下载只应使用 v4.4.5 Release 的公开附件，不要把本页历史附件名当作最新下载项。
 
 v4.4.5 的开发收尾、专项验证和正式上线结果记录在[发布收尾记录](./upgrade/release-v4.4.5.md)；v4.4.4 的历史发布证据仍记录在[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)；本页以下表格保留 v4.4.0 的历史发布事实。
 
-当前候选版本：`v4.4.5`。正式提交、Release、Actions、Pages 和附件哈希待真实发布完成后回填到[发布收尾记录](./upgrade/release-v4.4.5.md)；上一版公开事实见[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。
+当前正式版本：`v4.4.5`。正式提交、Release、Actions、Pages 和附件哈希已回填到[发布收尾记录](./upgrade/release-v4.4.5.md)；上一版公开事实见[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)。
+
+## v4.4.5 当前公开事实
+
+| 项目 | 记录 |
+| --- | --- |
+| 发布提交 | [`44c833d1bafbe51df844f81cbcc0d638e7e9621e`](https://github.com/7752777/counselor-desk/commit/44c833d1bafbe51df844f81cbcc0d638e7e9621e) |
+| Release | [v4.4.5](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5)，公开 Latest |
+| Release Actions | [#25 / `32086383154`](https://github.com/7752777/counselor-desk/actions/runs/32086383154)，成功 |
+| Pages | [#46 / `32089792020`](https://github.com/7752777/counselor-desk/actions/runs/32089792020)，成功；[在线体验](https://7752777.github.io/counselor-desk/) |
+| 当前下载 | 离线 HTML、Windows x64 / ARM64、macOS Universal DMG / ZIP 和三份 SHA-256 清单，均在 v4.4.5 Release |
 
 本页记录已经发生并可复查的发布事实。它不是功能愿望清单，也不以“源码里有”代替可见、可下载、可恢复的产品能力。
 
@@ -21,7 +31,7 @@ v4.4.5 的开发收尾、专项验证和正式上线结果记录在[发布收尾
 
 ## 交付物与下载
 
-下载时请只从实际公开的 v4.4.5 Release 获取当前附件，并核对随附件发布的 SHA-256 清单；在 v4.4.5 未公开前不要把历史 v4.4.0 表格当作当前下载清单。
+下载时请只从已公开的 v4.4.5 Release 获取当前附件，并核对随附件发布的 SHA-256 清单；本页的 v4.4.0 表格只用于历史追溯，不是当前下载清单。
 
 | 使用方式 | Release 附件 | 适用说明 |
 | --- | --- | --- |

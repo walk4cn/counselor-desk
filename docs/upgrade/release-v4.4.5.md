@@ -2,7 +2,7 @@
 
 更新时间：2026-08-18
 
-本页是 v4.4.5 的统一事实记录，汇总本次 AI 深度融合、移动端体验修复、发布工程整理、验证范围和正式产品上线状态。发布完成前，所有“正式 Release / Pages / 下载附件”字段必须保持为“待真实发布结果回填”，不能用本地候选产物冒充公开版本。
+本页是 v4.4.5 的统一事实记录，汇总本次 AI 深度融合、移动端体验修复、发布工程整理、验证范围和正式产品上线状态。v4.4.5 已完成正式发布；本页的 Release、Pages、附件和哈希均以公开页面与成功的 Actions 结果为证，不以本地候选产物替代公开附件。
 
 ## 版本范围
 
@@ -41,7 +41,7 @@ v4.4.5 在保留 schema v8、稳定 `student_id`、历史学号兼容、IndexedD
 
 ## 已完成验证
 
-下列命令已在 v4.4.5 候选源码上实际执行并通过；最终发布前若提交内容再变化，只重跑受影响的命令和一次最终门禁：
+下列命令已在 v4.4.5 发布源码上实际执行并通过；跨平台包和 Pages 另外由同一发布提交对应的 GitHub Actions 完成构建与部署：
 
 ```powershell
 pnpm test
@@ -55,23 +55,26 @@ pnpm test:release
 git diff --check
 ```
 
-已覆盖的风险包括：浏览器 IndexedDB/schema v8、Electron SQLite、交换包与迁移、导入和性能、AI 脱敏/授权/审计、relay/外链 SSRF 边界、移动导航、离线 HTML 和发布契约。完整 `pnpm test`、`pnpm test:cwb-ai`、`pnpm test:optimization`、`pnpm lint`、`pnpm build:release`、`pnpm check:public`、`pnpm run check:secrets`、`pnpm test:release` 和 `git diff --check` 均已通过；jsdom 的 `c.local` 加载和 `window.scrollTo` 提示来自测试夹具，不影响断言。跨平台 Windows 与 macOS 包必须以新 Tag 对应的 GitHub runner 结果作为最终证据。
+已覆盖的风险包括：浏览器 IndexedDB/schema v8、Electron SQLite、交换包与迁移、导入和性能、AI 脱敏/授权/审计、relay/外链 SSRF 边界、移动导航、离线 HTML 和发布契约。完整 `pnpm test`、`pnpm test:cwb-ai`、`pnpm test:optimization`、`pnpm lint`、`pnpm build:release`、`pnpm check:public`、`pnpm run check:secrets`、`pnpm test:release` 和 `git diff --check` 均已通过；jsdom 的 `c.local` 加载和 `window.scrollTo` 提示来自测试夹具，不影响断言。跨平台 Windows 与 macOS 包由同一发布提交对应的 GitHub runner 完成构建与包级烟测。
 
 ## 正式上线结果
 
-以下字段必须在真实发布操作完成后回填：
+以下是已完成真实发布操作后的固定记录：
 
 | 项目 | v4.4.5 事实 |
 | --- | --- |
-| 发布提交 | 待提交后回填完整 SHA |
-| Git Tag | `v4.4.5`，待推送验证 |
-| GitHub Actions | 待回填完整 Release workflow run |
-| 正式 Release | 待创建并确认非 Draft、非 Pre-release |
-| Pages 部署 | 待正式 Release 公开后触发并回填 run |
-| Windows | x64 / ARM64 NSIS，待新 runner 产物与 SHA-256 |
-| macOS | Universal DMG / ZIP，待新 runner 产物与 SHA-256；未签名、未公证 |
-| 离线网页 | `CounselorDesk-v4.4.5-Offline.html`，待新产物与 SHA-256 |
-| 本机候选 HTML | `output/辅导员工作台.html`，13,101,023 bytes，SHA-256 `28CCC04E404B96E237B32BD568BCF840054B8D53CE21A9839013B6EFB4B5E8E4`；仅代表本机候选，不替代 CI Release 清单 |
+| 发布提交 | [`44c833d1bafbe51df844f81cbcc0d638e7e9621e`](https://github.com/7752777/counselor-desk/commit/44c833d1bafbe51df844f81cbcc0d638e7e9621e) |
+| Git Tag | [`v4.4.5`](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5)，已推送并作为 Latest |
+| GitHub Actions | [Release workflow #25 / run `32086383154`](https://github.com/7752777/counselor-desk/actions/runs/32086383154)，成功 |
+| 正式 Release | [v4.4.5](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5)，公开、非 Draft、非 Pre-release |
+| Pages 部署 | [#46 / run `32089792020`](https://github.com/7752777/counselor-desk/actions/runs/32089792020)，成功；[在线入口](https://7752777.github.io/counselor-desk/) 返回 200，运行时版本为 4.4.5 |
+| Windows x64 | [`counselor-desk-4.4.5-x64.exe`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/counselor-desk-4.4.5-x64.exe)，SHA-256 `418FB1E96B5CDACEF63FEA368FF32B1128274A212BB21CD022F0682290DF2F14` |
+| Windows ARM64 | [`counselor-desk-4.4.5-arm64.exe`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/counselor-desk-4.4.5-arm64.exe)，SHA-256 `C6E3F506CFD988C700D462347C9B55BE41CAE9790FFCCF1D413384FA9E7F919E` |
+| macOS Universal DMG | [`counselor-desk-4.4.5-mac-universal.dmg`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/counselor-desk-4.4.5-mac-universal.dmg)，SHA-256 `CE7085976CB99020090B4D08ACDF40B3C20BE1FBDC33228CD25D153C68565910` |
+| macOS Universal ZIP | [`counselor-desk-4.4.5-mac-universal.zip`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/counselor-desk-4.4.5-mac-universal.zip)，SHA-256 `E8E80C77ECAE7C79E78985412C7CC562F9D1B06438402FB1332E67FE9624F14` |
+| 离线网页 | [`CounselorDesk-v4.4.5-Offline.html`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/CounselorDesk-v4.4.5-Offline.html)，SHA-256 `9AA871D077DEEFDC02A7A323A95AE6EA974EC07DEE25DF013B41F50F86CD5F23` |
+| 校验清单 | [`Windows-SHA256.txt`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/Windows-SHA256.txt) · [`macOS-SHA256.txt`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/macOS-SHA256.txt) · [`Web-SHA256.txt`](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/Web-SHA256.txt) |
+| 本机构建文件 | `output/辅导员工作台.html` 仅用于开发验证；公开下载与哈希以 Release 附件及清单为准 |
 | 已知限制 | 未配置代码签名；macOS 未公证；relay 需要独立受控 HTTPS 服务 |
 
 ## 密钥边界
@@ -80,4 +83,4 @@ git diff --check
 
 ## 收尾原则
 
-正式上线以真实 Tag、Release 附件、三份 SHA-256 清单、Windows/macOS runner 结果和 Pages 在线验收为准。若任一平台构建、包级烟测、公开面检查、Release 或 Pages 验证失败，版本保持在候选/Draft 状态，不修改历史 `v4.4.4` 记录。
+正式上线已由真实 Tag、Release 附件、三份 SHA-256 清单、Windows/macOS runner 结果和 Pages 在线验收共同确认。后续维护不得移动或改写 `v4.4.5` Tag；新增能力应从该发布提交创建新分支和新版本。此前在对话中暴露过的外部 API 密钥仍需由账户持有人在服务后台撤销并轮换，代码扫描不能替代服务端操作。

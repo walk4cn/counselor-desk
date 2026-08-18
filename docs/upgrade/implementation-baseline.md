@@ -49,7 +49,7 @@
 - 集成：导航、v8 迁移、Electron surface、Electron package config、v40 UI / runtime / integration layout
 - 桌面：Electron 启动冒烟、已打包应用双次持久化冒烟，均覆盖 SQLite、附件、迁移和备份
 - 浏览器：业务档案、AI、工作留痕入口及 390px 视口无横向溢出
-- v4.4.4 的 Windows NSIS 重建历史产物为 `output/desktop/counselor-desk-4.4.4-x64.exe` 和 `output/desktop/counselor-desk-4.4.4-arm64.exe`；v4.4.5 必须由新 Tag 对应的 Windows runner 重新打包，不能沿用旧哈希。
+- v4.4.4 的 Windows NSIS 重建历史产物为 `output/desktop/counselor-desk-4.4.4-x64.exe` 和 `output/desktop/counselor-desk-4.4.4-arm64.exe`；v4.4.5 已由新 Tag 对应的 Windows runner 重新打包并公开，哈希以 [Windows-SHA256.txt](https://github.com/7752777/counselor-desk/releases/download/v4.4.5/Windows-SHA256.txt) 为准。
 
 单条 `pnpm test` 在当前环境超过 10 分钟命令上限；性能门禁及其后的测试已拆批全部通过，不能把单条命令超时误记为测试失败。
 

@@ -168,3 +168,14 @@ git diff --check
 - 发布工作流已改为动态版本附件名和 CHANGELOG 发布说明，并增加 `check:secrets`、Dependabot、Issue 表单和 PR 模板。
 
 在 v4.4.5 的真实 Tag、Actions、Release、跨平台附件和 Pages 完成前，不能把本候选写成正式公开版本，也不能用 v4.4.4 的旧哈希证明新产物。
+
+## 后续附录：v4.4.5 已正式公开
+
+以上“发布候选收口”段落保留 2026-08-18 发布前的历史记录，不改写当时的判断。其后，v4.4.5 已由提交 [`44c833d1bafbe51df844f81cbcc0d638e7e9621e`](https://github.com/7752777/counselor-desk/commit/44c833d1bafbe51df844f81cbcc0d638e7e9621e) 正式公开：
+
+- [GitHub Release v4.4.5](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 已为非 Draft、非 Pre-release 的 Latest 版本。
+- [Release Actions #25](https://github.com/7752777/counselor-desk/actions/runs/32086383154) 和 [Pages 部署 #46](https://github.com/7752777/counselor-desk/actions/runs/32089792020) 均成功。
+- 正式 Release 已提供离线 HTML、Windows x64 / ARM64、macOS Universal DMG / ZIP 和三份 SHA-256 清单；具体附件哈希见[ v4.4.5 发布收尾记录](./release-v4.4.5.md)。
+- [在线 Pages 入口](https://7752777.github.io/counselor-desk/) 已返回 200 并确认运行时版本为 4.4.5。
+
+因此，v4.4.5 的正式发布事实以新增附录和[发布收尾记录](./release-v4.4.5.md)为准；本页前文仍只作为 v4.4.4 及发布前候选阶段的历史证据。

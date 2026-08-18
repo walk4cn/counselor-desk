@@ -8,7 +8,10 @@
 
 | 项目 | 记录 |
 | --- | --- |
-| 当前候选版本 | `v4.4.5`，正式提交和公开状态待回填 |
+| 当前正式版本 | `v4.4.5`，提交 [`44c833d1`](https://github.com/7752777/counselor-desk/commit/44c833d1bafbe51df844f81cbcc0d638e7e9621e)，已公开并标记 Latest |
+| 当前正式附件 | [v4.4.5 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 中的离线 HTML、Windows x64 / ARM64、macOS Universal DMG / ZIP 与三份 SHA-256 清单 |
+| 当前发布门禁 | [Actions #32086383154](https://github.com/7752777/counselor-desk/actions/runs/32086383154) |
+| 当前 Pages 部署 | [Actions #32089792020](https://github.com/7752777/counselor-desk/actions/runs/32089792020) |
 | 上一版正式版本 | `v4.4.4`，提交 [`438badd4`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389) |
 | 上一版正式附件 | [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4) 中的离线 HTML、Windows x64 / ARM64、macOS Universal DMG / ZIP 与三份 SHA-256 清单 |
 | 上一版发布门禁 | [Actions #32024091313](https://github.com/7752777/counselor-desk/actions/runs/32024091313) |
