@@ -2951,23 +2951,9 @@ function mirrorCanonicalV4Legacy(kind) {
   });
   DB.custom[legacyKey] = [...byId.values()];
 }
-let lastUiStateSignature = '';
-let uiStateWorkspaceTimer = null;
 function persistUiState() {
   const value = { view:app.view, filters:cloneData(app.filters), v4:cloneData(app.v4 || {}) };
   store.write('ui_state', value);
-  const workspace = window.CWB && window.CWB.workspace;
-  if (!workspace || typeof workspace.mutate !== 'function') return;
-  const signature = JSON.stringify(value);
-  if (signature === lastUiStateSignature) return;
-  lastUiStateSignature = signature;
-  clearTimeout(uiStateWorkspaceTimer);
-  uiStateWorkspaceTimer = setTimeout(() => {
-    const settings = Object.assign({}, DB.settings || {}, { ui_state:value, updated_at:new Date().toISOString() });
-    workspace.mutate({ type:'ui_state.save', collection:'settings', operation:'replace', singleton:true, data:settings, actor:'ui-state' }).catch(error => {
-      if (typeof reportWorkspaceFailure === 'function') reportWorkspaceFailure(error);
-    });
-  }, 900);
 }
 
 /* ---------- 11.1 内联 SVG 图表 ---------- */
@@ -11836,6 +11822,13 @@ function installV4Integration() {
   const activateV8 = () => {
     if (v8Workspace || v8Activation || !window.CWBv8 || !window.CWBv8Migration) return v8Activation || v8Workspace;
     v8Activation = Promise.all(repositoryReady).then(async () => {
+      // cwb-supabase.js is a deferred sibling of the v8 modules and may not be
+      // attached yet when the v8-ready/v4-ready events fire. Wait for it so the
+      // adapter choice below reflects a restored cloud session (startup pull).
+      const supabaseDeadline = Date.now() + 4000;
+      while (!window.CWBSupabase && Date.now() < supabaseDeadline) {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
       if (window.CWBSupabase && typeof window.CWBSupabase.init === 'function') {
         try { await Promise.race([window.CWBSupabase.init(), new Promise(resolve => setTimeout(resolve, 4000))]); } catch (_) {}
       }
@@ -12806,6 +12799,7 @@ window.CWB.buildPortableHtml = buildPortableHtml;
 window.CWB.exportPackage = exportPackage;
 window.addEventListener('cwb:v4-ready', installV4Integration);
 window.addEventListener('cwb:v8-ready', installV4Integration);
+window.addEventListener('load', installV4Integration);
 boot();
 installV4Integration();
 })();

@@ -99,8 +99,17 @@ function addStudent(dom) {
   const w = dom.window;
   const before = w.CWB.db.students.length;
   w.CWB.db.students.push({ id:`stu-${Date.now()}`, student_number:String(10000 + before), full_name:'张三', gender:'男', class_name:'计科2401', schema_version:8 });
-  w.CWB_V4_SYNC('students');
-  return before;
+  return w.CWB_V4_SYNC('students');
+}
+
+async function waitForSaveStatus(dom, timeoutMs = 8000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const element = dom.window.document.querySelector('[data-save-status]');
+    if (element && element.dataset.state === 'saved') return true;
+    await wait(50);
+  }
+  return false;
 }
 
 async function run() {
@@ -111,8 +120,8 @@ async function run() {
   const bridge = createDesktopBridge();
 
   const dom1 = await openApp(bridge, null, virtualConsole);
-  addStudent(dom1);
-  await wait(400);
+  await addStudent(dom1);
+  assert.ok(await waitForSaveStatus(dom1), 'local save completes');
   assert.ok(dom1.window.CWB.db.students.some(s => s.full_name === '张三'), '张三 appears in the live DB');
   assert.equal(dom1.window.document.querySelector('[data-save-status]').dataset.state, 'saved', 'save status shows saved');
   dom1.window.close();
@@ -126,8 +135,8 @@ async function run() {
   const dom3 = await openApp(null, mock, virtualConsole);
   dom3.window.CWBSupabase.setConfig({ url: 'https://demo.supabase.co', anonKey: 'anon-key' });
   await dom3.window.CWBSupabase.signIn('demo@example.com', 'password123');
-  addStudent(dom3);
-  await wait(600);
+  await addStudent(dom3);
+  assert.ok(await waitForSaveStatus(dom3), 'cloud save completes');
   assert.equal(dom3.window.document.querySelector('[data-save-status]').dataset.state, 'saved', 'cloud save status shows saved');
   const cloudHasStudent = Array.from(mock.storage.values())
     .some(record => {
