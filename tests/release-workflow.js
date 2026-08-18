@@ -23,7 +23,7 @@ assert.match(release, /windows:\s*\n[\s\S]*?needs: validate/, 'Windows packaging
 assert.match(release, /macos:\s*\n[\s\S]*?needs: \[validate, windows\]/, 'macOS packaging must wait for Windows and retain validate outputs');
 assert.match(release, /web:\s*\n[\s\S]*?needs: \[validate, macos\]/, 'offline web packaging must wait for macOS and retain validate outputs');
 assert.match(release, /release:\s*\n[\s\S]*?needs: \[validate, web\]/, 'a Release may only be drafted after all build gates');
-assert.match(release, /release:\s*\n[\s\S]*?uses: actions\/checkout@v4[\s\S]*?ref: refs\/tags\/\$\{\{ needs\.validate\.outputs\.tag \}\}[\s\S]*?actions\/download-artifact@v4/, 'the draft Release job must check out the verified tag before gh --verify-tag');
+assert.match(release, /release:\s*\n[\s\S]*?uses: actions\/checkout@v5[\s\S]*?ref: refs\/tags\/\$\{\{ needs\.validate\.outputs\.tag \}\}[\s\S]*?actions\/download-artifact@v5/, 'the draft Release job must check out the verified tag before gh --verify-tag');
 assert.match(release, /--draft --verify-tag/, 'the public release starts as a verified draft');
 assert.match(release, /gh release delete "\$tag" --yes/, 'rebuilding an explicitly retagged release must replace its stale draft and assets');
 assert.match(release, /isDraft,isPrerelease/, 'release rebuilds must inspect existing release state before replacement');
@@ -63,6 +63,6 @@ assert.match(pages, /Prepare public site artifact/, 'Pages must stage a product-
 assert.match(pages, /mkdir -p site\/assets site\/vendor site\/src\/core/, 'Pages must explicitly scope the site artifact');
 assert.match(pages, /path: site/, 'Pages must deploy the staged site, never the full repository');
 assert.doesNotMatch(pages, /path: \./, 'Pages must not upload the entire repository');
-assert.match(pages, /actions\/deploy-pages@v4/, 'the Pages deployment action remains explicit');
+assert.match(pages, /actions\/deploy-pages@v5/, 'the Pages deployment action remains explicit');
 
 console.log('PASS release-workflow');
