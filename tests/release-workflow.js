@@ -36,6 +36,8 @@ assert.match(release, /name: web-v\$\{\{ needs\.validate\.outputs\.version \}\}/
 assert.match(release, /CounselorDesk-v\$version-Offline\.html/, 'the offline HTML asset must have a recognizable product download name');
 assert.match(release, /desktop:build:win/, 'the workflow must build Windows packages');
 assert.match(release, /desktop:build:mac/, 'the workflow must build macOS universal packages');
+assert.match(release, /for attempt in 1 2/, 'macOS DMG packaging must retry a transient busy disk image once');
+assert.match(release, /hdiutil detach .* -force/, 'macOS retry must clean up only runner disk images reported by the failed build');
 assert.match(release, /x64 and arm64 NSIS installers/, 'Windows x64 and ARM64 NSIS packages must both be required');
 assert.match(release, /output\/desktop\/counselor-desk-\*-x64\.exe[\s\S]*output\/desktop\/counselor-desk-\*-arm64\.exe/, 'the public Release must upload only the explicitly verified Windows architecture installers');
 assert.doesNotMatch(release, /output\/desktop\/\*\.exe/, 'the public Release must not upload unverified generic Windows executables');

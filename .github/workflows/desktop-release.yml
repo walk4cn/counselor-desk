@@ -120,7 +120,23 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Build universal desktop package
-        run: pnpm run desktop:build:mac
+        shell: bash
+        run: |
+          set -euo pipefail
+          build_log="mac-build.log"
+          for attempt in 1 2; do
+            rm -rf output/desktop
+            if pnpm run desktop:build:mac 2>&1 | tee "$build_log"; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 2 ]; then
+              exit 1
+            fi
+            while read -r disk; do
+              [ -n "$disk" ] && hdiutil detach "$disk" -force || true
+            done < <(grep -oE 'disk[0-9]+' "$build_log" | sort -u)
+            sleep 5
+          done
       - name: Verify universal artifacts and smoke paths
         shell: bash
         run: |
