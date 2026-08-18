@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-      description: Published release tag to deploy
+        description: Published release tag to deploy
         required: true
         type: string
 
