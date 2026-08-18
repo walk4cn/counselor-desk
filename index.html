@@ -2951,16 +2951,23 @@ function mirrorCanonicalV4Legacy(kind) {
   });
   DB.custom[legacyKey] = [...byId.values()];
 }
+let lastUiStateSignature = '';
+let uiStateWorkspaceTimer = null;
 function persistUiState() {
   const value = { view:app.view, filters:cloneData(app.filters), v4:cloneData(app.v4 || {}) };
   store.write('ui_state', value);
   const workspace = window.CWB && window.CWB.workspace;
-  if (workspace && typeof workspace.mutate === 'function') {
+  if (!workspace || typeof workspace.mutate !== 'function') return;
+  const signature = JSON.stringify(value);
+  if (signature === lastUiStateSignature) return;
+  lastUiStateSignature = signature;
+  clearTimeout(uiStateWorkspaceTimer);
+  uiStateWorkspaceTimer = setTimeout(() => {
     const settings = Object.assign({}, DB.settings || {}, { ui_state:value, updated_at:new Date().toISOString() });
     workspace.mutate({ type:'ui_state.save', collection:'settings', operation:'replace', singleton:true, data:settings, actor:'ui-state' }).catch(error => {
       if (typeof reportWorkspaceFailure === 'function') reportWorkspaceFailure(error);
     });
-  }
+  }, 900);
 }
 
 /* ---------- 11.1 内联 SVG 图表 ---------- */
@@ -3241,7 +3248,7 @@ function learningForm(item) {
     { key:'tags', label:'标签', span:2, ph:'多个标签用逗号分隔' }, { key:'url', label:'链接', span:2 },
     { key:'status', label:'学习状态', type:'select', options:['未开始','进行中','已完成'] }, { key:'progress', label:'进度（0–100）', type:'number' },
     { key:'content', label:'正文 / 要点', type:'textarea', rows:6, span:2 }, { key:'summary', label:'摘要', type:'textarea', rows:3, span:2 },
-  ], onSave(v) { if (isNew) DB.learning_materials.push(normLearningMaterial(v)); else Object.assign(item, normLearningMaterial(Object.assign({}, item, v))); save('learning_materials'); render(); ui.toast(isNew ? '资料已添加' : '资料已保存', 'ok'); }});
+  ], onSave(v) { if (isNew) DB.learning_materials.push(normLearningMaterial(v)); else { const cur = liveRecord('learning_materials', item); Object.assign(cur, normLearningMaterial(Object.assign({}, cur, v))); } save('learning_materials'); render(); ui.toast(isNew ? '资料已添加' : '资料已保存', 'ok'); }});
 }
 function learningNoteForm(materialId) {
   ui.form({ title:'记录学习笔记', size:'wide', data:{ material_id:materialId, title:'', content:'', tags:'', anchor:'' }, fields:[
@@ -5549,11 +5556,15 @@ function taskForm(t) {
       if (isNew) { DB.tasks.push(normTask(v)); ui.toast('任务已创建', 'ok'); }
       else {
         if (v.status === 'done' && t.status !== 'done') v.done_at = today();
-        Object.assign(t, normTask(Object.assign({}, t, v))); ui.toast('已保存', 'ok');
+        Object.assign(liveRecord('tasks', t), normTask(Object.assign({}, t, v))); ui.toast('已保存', 'ok');
       }
       save('tasks'); render();
     }
   });
+}
+function liveRecord(coll, rec) {
+  const list = Array.isArray(DB[coll]) ? DB[coll] : [];
+  return list.find(x => x && x.id === rec.id) || rec;
 }
 function studentForm(s) {
   const isNew = !s;
@@ -5587,7 +5598,11 @@ function studentForm(s) {
       if (isNew) {
         if (DB.students.some(x => x.student_number === v.student_number)) { ui.toast('该学号已存在', 'warn'); return false; }
         added = normStudent(v); DB.students.push(added); ui.toast('学生已添加', 'ok');
-      } else { Object.assign(s, normStudent(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      } else {
+        const cur = DB.students.find(x => x.id === s.id) || s;
+        Object.assign(cur, normStudent(Object.assign({}, cur, v)));
+        ui.toast('已保存', 'ok');
+      }
       save('students'); render();
       if (added) {
         const list = filterStudents();
@@ -5628,7 +5643,7 @@ function talkForm(t, preset) {
     },
     onSave(v) {
       if (isNew) { DB.talks.push(normTalk(v)); ui.toast('谈话记录已保存', 'ok'); }
-      else { Object.assign(t, normTalk(Object.assign({}, t, v))); ui.toast('已更新', 'ok'); }
+      else { const cur = liveRecord('talks', t); Object.assign(cur, normTalk(Object.assign({}, cur, v))); ui.toast('已更新', 'ok'); }
       save('talks'); render();
     }
   });
@@ -5667,7 +5682,7 @@ function pleaveForm(s, mode) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.pleave.push(normPleave(v)); ui.toast('请假已登记', 'ok'); }
-      else { Object.assign(s, normPleave(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('pleave', s); Object.assign(cur, normPleave(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('pleave'); render();
     }
   });
@@ -5691,7 +5706,7 @@ function attendForm(s) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.attend.push(normAttend(v)); ui.toast('考勤已登记', 'ok'); }
-      else { Object.assign(s, normAttend(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('attend', s); Object.assign(cur, normAttend(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('attend'); render();
     }
   });
@@ -5713,7 +5728,7 @@ function nodeForm(s) {
     ],
     onSave(v) {
       if (isNew) { DB.node.push(normNode(v)); ui.toast('节点已添加', 'ok'); }
-      else { if (v.status === 'done' && s.status !== 'done') v.done_at = today(); Object.assign(s, normNode(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { if (v.status === 'done' && s.status !== 'done') v.done_at = today(); const cur = liveRecord('node', s); Object.assign(cur, normNode(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('node'); render();
     }
   });
@@ -5739,7 +5754,7 @@ function warnForm(s) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.warn.push(normWarn(v)); ui.toast('预警已登记', 'ok'); }
-      else { Object.assign(s, normWarn(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('warn', s); Object.assign(cur, normWarn(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('warn'); render();
     }
   });
@@ -5765,7 +5780,7 @@ function helpForm(s, pre) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.help.push(normHelp(v)); ui.toast('帮扶已登记', 'ok'); }
-      else { Object.assign(s, normHelp(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('help', s); Object.assign(cur, normHelp(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('help'); render();
     }
   });
@@ -5789,7 +5804,7 @@ function grantForm(s) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.grant.push(normGrant(v)); ui.toast('记录已添加', 'ok'); }
-      else { Object.assign(s, normGrant(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('grant', s); Object.assign(cur, normGrant(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('grant'); render();
     }
   });
@@ -5816,7 +5831,7 @@ function focusForm(s) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.focus.push(normFocus(v)); ui.toast('档案已登记', 'ok'); }
-      else { Object.assign(s, normFocus(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('focus', s); Object.assign(cur, normFocus(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('focus'); render();
     }
   });
@@ -5844,7 +5859,7 @@ function psychForm(s) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.psych.push(normPsych(v)); ui.toast('摸排已登记', 'ok'); }
-      else { Object.assign(s, normPsych(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('psych', s); Object.assign(cur, normPsych(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('psych'); render();
     }
   });
@@ -5872,7 +5887,7 @@ function graduateForm(s) {
     onOpen(mask) { bindStuPicker(mask, 'name', 'student_number', 'class_name'); },
     onSave(v) {
       if (isNew) { DB.graduate.push(normGraduate(v)); ui.toast('档案已添加', 'ok'); }
-      else { Object.assign(s, normGraduate(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('graduate', s); Object.assign(cur, normGraduate(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('graduate'); render();
     }
   });
@@ -5898,7 +5913,7 @@ function policyForm(s) {
     ],
     onSave(v) {
       if (isNew) { DB.policy.push(normPolicy(v)); ui.toast('已添加', 'ok'); }
-      else { Object.assign(s, normPolicy(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('policy', s); Object.assign(cur, normPolicy(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('policy'); render();
     }
   });
@@ -5918,7 +5933,7 @@ function materialForm(s) {
     ],
     onSave(v) {
       if (isNew) { DB.material.push(normMaterial(v)); ui.toast('已添加', 'ok'); }
-      else { Object.assign(s, normMaterial(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('material', s); Object.assign(cur, normMaterial(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('material'); render();
     }
   });
@@ -5939,7 +5954,7 @@ function compForm(s) {
     ],
     onSave(v) {
       if (isNew) { DB.comp.push(normComp(v)); ui.toast('已添加', 'ok'); }
-      else { Object.assign(s, normComp(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('comp', s); Object.assign(cur, normComp(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('comp'); render();
     }
   });
@@ -5958,7 +5973,7 @@ function tplForm(s) {
     ],
     onSave(v) {
       if (isNew) { DB.tpl.push(normTpl(v)); ui.toast('已添加', 'ok'); }
-      else { Object.assign(s, normTpl(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('tpl', s); Object.assign(cur, normTpl(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('tpl'); render();
     }
   });
@@ -5984,7 +5999,7 @@ function stayForm(t) {
     ],
     onSave(v) {
       if (isNew) { DB.stay.push(normStay(v)); ui.toast('已添加', 'ok'); }
-      else { Object.assign(t, normStay(Object.assign({}, t, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('stay', t); Object.assign(cur, normStay(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('stay'); render();
     }
   });
@@ -6011,7 +6026,7 @@ function leaveForm(t) {
     ],
     onSave(v) {
       if (isNew) { DB.leave.push(normLeave(v)); ui.toast('已添加', 'ok'); }
-      else { Object.assign(t, normLeave(Object.assign({}, t, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('leave', t); Object.assign(cur, normLeave(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('leave'); render();
     }
   });
@@ -6036,7 +6051,7 @@ function honorForm(t) {
     ],
     onSave(v) {
       if (isNew) { DB.honor.push(normHonor(v)); ui.toast('已添加', 'ok'); }
-      else { Object.assign(t, normHonor(Object.assign({}, t, v))); ui.toast('已保存', 'ok'); }
+      else { const cur = liveRecord('honor', t); Object.assign(cur, normHonor(Object.assign({}, cur, v))); ui.toast('已保存', 'ok'); }
       save('honor'); render();
     }
   });
@@ -9213,9 +9228,11 @@ function updateBadges() {
   const sb = $('#nb-students'); if (sb) { sb.textContent = DB.students.length; sb.classList.toggle('hide', !DB.students.length); }
 }
 function paintWho() {
-  const s = DB.settings;
-  $('#who').textContent = s.counselor_name ? `${s.counselor_name}${s.college_name ? ' · ' + s.college_name : ''}` : '';
-}
+    const s = DB.settings;
+    const name = s.counselor_name === '示例老师' ? '' : String(s.counselor_name || '').trim();
+    const college = s.college_name === '示例学院' ? '' : String(s.college_name || '').trim();
+    $('#who').textContent = name ? `${name}${college ? ' · ' + college : ''}` : '';
+  }
 function applyTheme(t, persist) {
   const root = document.documentElement;
   if (t === 'dark') {
@@ -11847,6 +11864,7 @@ function installV4Integration() {
           DB.settings = cloneData(nextState.settings || {});
           DB.custom = cloneData(nextState.custom || {});
           collectionKeys.forEach(key => { DB[key] = cloneData(nextState[key] || []); });
+          if (typeof invalidateStudentDerived === 'function') invalidateStudentDerived();
         } else if (collection === 'settings') {
           const incoming = nextState.settings || {};
           const current = DB.settings || {};
@@ -11854,7 +11872,10 @@ function installV4Integration() {
             DB.settings = cloneData(incoming);
           }
         } else if (collection === 'custom') DB.custom = cloneData(nextState.custom || {});
-        else if (collectionKeys.includes(collection)) DB[collection] = cloneData(nextState[collection] || []);
+        else if (collectionKeys.includes(collection)) {
+          DB[collection] = cloneData(nextState[collection] || []);
+          if (collection === 'students' && typeof invalidateStudentDerived === 'function') invalidateStudentDerived();
+        }
         if (typeof render === 'function' && result && result.operation !== 'checkpoint' && result.operation !== 'flush') {
           setTimeout(() => { try { render(); } catch (_) {} }, 0);
         }
@@ -11971,15 +11992,36 @@ function installV4Integration() {
         removeTemplate(id) { const removed = exportTemplates.delete(String(id)); if (removed) saveWorkspaceSettings('export_templates'); return removed; },
         preview(id, rows) { const template = typeof id === 'object' ? id : exportTemplates.get(String(id)); if (!template) throw new Error('EXPORT_TEMPLATE_NOT_FOUND'); const fields = template.fields || []; const sensitive = new Set(template.sensitiveFields || []); return { template:cloneData(template), rows:(Array.isArray(rows) ? rows : []).map(row => Object.fromEntries(fields.map(field => [field, template.redactSensitive && sensitive.has(field) ? '***' : row && row[field]]))) }; },
       };
+      // Coalesce legacy saves per collection: each save is a full replace of one
+      // collection, so a burst of saves for the same collection only needs the
+      // latest snapshot persisted. Pending versions are drained sequentially,
+      // and the returned promise resolves only after the latest version lands,
+      // so flush callers keep a true "persisted" guarantee. This bounds the
+      // workspace queue (full-envelope commits are expensive) without changing
+      // per-collection FIFO ordering.
+      const legacySaveVersions = new Map();
+      const legacySaveChains = new Map();
+      const snapshotLegacyCollection = name => name === 'settings' ? cloneData(DB.settings || {}) : name === 'custom' ? cloneData(DB.custom || {}) : cloneData(DB[name] || []);
+      const drainLegacySave = async name => {
+        let version;
+        while ((version = legacySaveVersions.get(name))) {
+          legacySaveVersions.delete(name);
+          await v8Workspace.mutate({ type:'legacy.save', collection:name, operation:'replace', singleton:name === 'settings', data:version.data, actor:'legacy-ui' });
+        }
+      };
+      const queueLegacySaveOne = name => {
+        legacySaveVersions.set(name, { data:snapshotLegacyCollection(name) });
+        if (legacySaveChains.has(name)) return legacySaveChains.get(name);
+        const chain = drainLegacySave(name).catch(reportWorkspaceFailure).finally(() => legacySaveChains.delete(name));
+        legacySaveChains.set(name, chain);
+        return chain;
+      };
       queueV8LegacySave = part => {
         // A verified workspace hydrate mirrors every collection atomically.
         // Do not enqueue redundant full snapshots while importing it.
         if (v8LegacySaveSuspended) return Promise.resolve({ suspended:true });
         const names = part === 'custom' ? ['custom'] : part ? [part] : ['settings'].concat(collectionKeys, 'custom');
-        return Promise.all(names.map(name => {
-          const data = name === 'settings' ? cloneData(DB.settings || {}) : name === 'custom' ? cloneData(DB.custom || {}) : cloneData(DB[name] || []);
-          return v8Workspace.mutate({ type:'legacy.save', collection:name, operation:'replace', singleton:name === 'settings', data, actor:'legacy-ui' });
-        })).catch(reportWorkspaceFailure);
+        return Promise.all(names.map(queueLegacySaveOne));
       };
       window.CWB.diagnostics = {
         create:() => ({ workspace:v8Workspace.diagnostics(), storage:window.desktopRepositoryReady ? 'ready' : 'compatibility' }),
