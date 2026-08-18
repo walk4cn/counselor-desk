@@ -19,6 +19,7 @@
 | 导入名单、处理字段不一致 | [数据参考](./data-contract.md) |
 | 换电脑、交接、恢复或备份 | [备份与迁移](./v4-migration-and-backup.md) |
 | 安装或排查桌面端数据位置 | [桌面端安装](./v4-desktop-installation.md) |
+| 多台设备互通数据（Supabase 云端同步） | [云端同步](./supabase-sync.md) |
 | 理解隐私和敏感信息边界 | [隐私与安全边界](./v4-privacy.md) |
 
 ## 📚 查一项规则

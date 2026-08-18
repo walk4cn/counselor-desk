@@ -28,6 +28,7 @@ files:
   - src/core/cwb-ai.js
   - src/core/cwb-employment.js
   - src/core/cwb-business.js
+  - src/core/cwb-supabase.js
   - assets/welcome-education-scene-v2.png
   - assets/welcome-morning.png
   - vendor/xlsx.full.min.js

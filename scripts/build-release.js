@@ -18,6 +18,7 @@ const cwbAiWorkflowSource = path.join(root, 'src', 'core', 'cwb-ai-workflow.js')
 const cwbEmploymentSource = path.join(root, 'src', 'core', 'cwb-employment.js');
 const cwbEmploymentResourcesSource = path.join(root, 'src', 'core', 'cwb-employment-resources.js');
 const cwbBusinessSource = path.join(root, 'src', 'core', 'cwb-business.js');
+const cwbSupabaseSource = path.join(root, 'src', 'core', 'cwb-supabase.js');
 const importWorkerSource = path.join(root, 'src', 'core', 'import-worker.js');
 const welcomeEducationSceneSource = path.join(root, 'assets', 'welcome-education-scene-v2.png');
 const welcomeMorningSceneSource = path.join(root, 'assets', 'welcome-morning.png');
@@ -46,6 +47,7 @@ const cwbAiWorkflow = fs.readFileSync(cwbAiWorkflowSource, 'utf8');
 const cwbEmployment = fs.readFileSync(cwbEmploymentSource, 'utf8');
 const cwbEmploymentResources = fs.readFileSync(cwbEmploymentResourcesSource, 'utf8');
 const cwbBusiness = fs.readFileSync(cwbBusinessSource, 'utf8');
+const cwbSupabase = fs.readFileSync(cwbSupabaseSource, 'utf8');
 const importWorker = fs.readFileSync(importWorkerSource, 'utf8').replace('/*__XLSX_SOURCE__*/', xlsx);
 const portableWelcomeAssets = {
   'welcome-education-scene-v2.png': `data:image/png;base64,${fs.readFileSync(welcomeEducationSceneSource).toString('base64')}`,
@@ -81,6 +83,8 @@ const portable = html.replace(/<script defer src="vendor\/xlsx\.full\.min\.js" d
     () => `<script data-cwb-employment-resources>\n${cwbEmploymentResources}\n</script>`)
   .replace(/<script defer src="src\/core\/cwb-business\.js" data-cwb-business><\/script>/,
     () => `<script data-cwb-business>\n${cwbBusiness}\n</script>`)
+  .replace(/<script defer src="src\/core\/cwb-supabase\.js" data-cwb-supabase><\/script>/,
+    () => `<script data-cwb-supabase>\n${cwbSupabase}\n</script>`)
   .replace(/<script type="text\/plain" id="cwb-import-worker-source" data-cwb-import-worker><\/script>/,
     () => `<script type="text/plain" id="cwb-import-worker-source" data-cwb-import-worker>${importWorker.replace(/<\//g, '<\\/')}</script>`)
   .replace('</head>', () => `<script>window.__CWB_PORTABLE_ASSETS__=${JSON.stringify(portableWelcomeAssets).replace(/<\//g, '<\\/')}</script></head>`);
@@ -96,6 +100,7 @@ if (portable.includes('src/core/cwb-ai-workflow.js')) throw new Error('AI workfl
 if (portable.includes('src/core/cwb-employment.js')) throw new Error('Employment runtime was not inlined');
 if (portable.includes('src/core/cwb-employment-resources.js')) throw new Error('Employment resources runtime was not inlined');
 if (portable.includes('src/core/cwb-business.js')) throw new Error('Business runtime was not inlined');
+if (portable.includes('src/core/cwb-supabase.js')) throw new Error('Supabase sync runtime was not inlined');
 if (portable.includes('vendor/argon2-bundled.min.js')) throw new Error('Argon2 runtime was not inlined');
 if (portable.includes('vendor/jszip.min.js')) throw new Error('JSZip runtime was not inlined');
 if (portable.includes('vendor/echarts.min.js')) throw new Error('ECharts runtime was not inlined');

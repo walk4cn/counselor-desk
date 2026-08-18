@@ -46,6 +46,7 @@
 <script defer src="src/core/cwb-employment.js" data-cwb-employment></script>
 <script defer src="src/core/cwb-employment-resources.js" data-cwb-employment-resources></script>
 <script defer src="src/core/cwb-business.js" data-cwb-business></script>
+<script defer src="src/core/cwb-supabase.js" data-cwb-supabase></script>
 <script type="text/plain" id="cwb-import-worker-source" data-cwb-import-worker></script>
 <title>辅导员工作台</title>
 <style>
@@ -908,6 +909,7 @@ tbody tr:last-child td{border-bottom:none}
   <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21.2l7.7-7.8 1.1-1a5.5 5.5 0 000-7.8z"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7L12.3 19"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H7a4.5 4.5 0 01-.4-9 6 6 0 0111.6-1.5A4 4 0 0117.5 19z"/><path d="M12 15.5V9M9.5 12l2.5 2.5L14.5 12"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></symbol>
@@ -6117,7 +6119,7 @@ function openSettings() {
       { key:'org_code', label:'组织代码', hint:'与服务端平台保持一致' },
       { key:'platform_url', label:'平台地址（选填）' },
     ],
-    extra: `<div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-sun"/></svg>界面个性化</div><div class="grid2"><div class="form-row"><label class="lab">配色方案</label><select class="inp" id="settings-preset">${Object.entries(THEME_PRESETS).map(([k,p]) => `<option value="${k}">${p.label}</option>`).join('')}</select></div><div class="form-row"><label class="lab">背景透明度 <span id="settings-opacity-value" class="tiny"></span></label><input class="inp" id="settings-opacity" type="range" min="0" max="0.35" step="0.01"></div></div><div class="form-row"><label class="lab">背景图片</label><input class="inp" id="settings-background" type="file" accept="image/*"><div class="hint">支持最大 4MB 的 JPG、PNG、WebP 等图片；过大的图片会在本机自动压缩后保存，透明度最高 35%。</div></div><button class="btn btn-sm" type="button" data-theme-reset>恢复默认外观</button><button class="btn btn-sm" type="button" data-onboarding-reset style="margin-left:8px">重新查看首次引导</button></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-sparkles"/></svg>首次欢迎体验</div><div class="grid2"><label class="chk"><input type="checkbox" id="settings-welcome-greeting"><span>每天打开显示暖心问候</span></label><label class="chk"><input type="checkbox" id="settings-welcome-quote"><span>同时显示每日教育金句</span></label></div><div class="hint" style="margin:8px 0 10px">称呼、问候与主题只保存在本机；关闭后仍可通过“重新设置欢迎体验”再次开启。</div><button class="btn btn-sm" type="button" data-welcome-reset>重新设置欢迎体验</button></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-lock"/></svg>登录锁与敏感操作</div><div class="hint" style="margin-bottom:8px">这是界面访问锁，不是数据库加密。浏览器存储中的数据仍可能被技术手段读取。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" type="button" data-security-set>设置 / 修改密码</button><button class="btn btn-sm" type="button" data-security-lock>立即上锁</button><button class="btn btn-sm btn-danger" type="button" data-security-disable>关闭登录锁</button></div></div>`,
+    extra: `<div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-sun"/></svg>界面个性化</div><div class="grid2"><div class="form-row"><label class="lab">配色方案</label><select class="inp" id="settings-preset">${Object.entries(THEME_PRESETS).map(([k,p]) => `<option value="${k}">${p.label}</option>`).join('')}</select></div><div class="form-row"><label class="lab">背景透明度 <span id="settings-opacity-value" class="tiny"></span></label><input class="inp" id="settings-opacity" type="range" min="0" max="0.35" step="0.01"></div></div><div class="form-row"><label class="lab">背景图片</label><input class="inp" id="settings-background" type="file" accept="image/*"><div class="hint">支持最大 4MB 的 JPG、PNG、WebP 等图片；过大的图片会在本机自动压缩后保存，透明度最高 35%。</div></div><button class="btn btn-sm" type="button" data-theme-reset>恢复默认外观</button><button class="btn btn-sm" type="button" data-onboarding-reset style="margin-left:8px">重新查看首次引导</button></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-sparkles"/></svg>首次欢迎体验</div><div class="grid2"><label class="chk"><input type="checkbox" id="settings-welcome-greeting"><span>每天打开显示暖心问候</span></label><label class="chk"><input type="checkbox" id="settings-welcome-quote"><span>同时显示每日教育金句</span></label></div><div class="hint" style="margin:8px 0 10px">称呼、问候与主题只保存在本机；关闭后仍可通过“重新设置欢迎体验”再次开启。</div><button class="btn btn-sm" type="button" data-welcome-reset>重新设置欢迎体验</button></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-lock"/></svg>登录锁与敏感操作</div><div class="hint" style="margin-bottom:8px">这是界面访问锁，不是数据库加密。浏览器存储中的数据仍可能被技术手段读取。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" type="button" data-security-set>设置 / 修改密码</button><button class="btn btn-sm" type="button" data-security-lock>立即上锁</button><button class="btn btn-sm btn-danger" type="button" data-security-disable>关闭登录锁</button></div></div><div class="settings-section"><div class="sub-hd"><svg class="ic ic-sm"><use href="#i-cloud"/></svg>云端同步（Supabase）</div><div class="hint" style="margin-bottom:8px">把工作区数据保存到自己的 Supabase 项目，多台设备登录同一账号即可互通。首次使用请先在 Supabase 控制台执行 <code>supabase/schema.sql</code>，再填写下方项目地址与 anon 公开密钥。</div><div class="grid2"><div class="form-row"><label class="lab">项目地址</label><input class="inp" id="supabase-url" placeholder="https://xxxx.supabase.co"></div><div class="form-row"><label class="lab">anon 公开密钥</label><input class="inp" id="supabase-anon" placeholder="eyJhbGciOiJIUzI1NiIs..."></div><div class="form-row"><label class="lab">邮箱</label><input class="inp" id="supabase-email" type="email" placeholder="name@example.com"></div><div class="form-row"><label class="lab">密码</label><input class="inp" id="supabase-pass" type="password" placeholder="至少 6 位"></div></div><div class="hint" id="supabase-status" style="margin:8px 0 10px">未配置</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" type="button" data-supabase-save>保存配置</button><button class="btn btn-sm btn-primary" type="button" data-supabase-signin>登录</button><button class="btn btn-sm" type="button" data-supabase-signup>注册</button><button class="btn btn-sm" type="button" data-supabase-sync>立即同步</button><button class="btn btn-sm btn-danger" type="button" data-supabase-signout>退出登录</button></div></div>`,
     extraBtn: `<button class="btn btn-sm" data-act="v4-modules-config" style="margin-right:8px">管理模块入口</button><button class="btn btn-danger btn-sm" data-clear style="margin-right:auto">清空全部数据</button>`,
     onOpen(mask, close) {
       ensureV39Settings();
@@ -6144,6 +6146,74 @@ function openSettings() {
       $('[data-security-lock]', mask).onclick = () => { security.lock(); close(); render(); ui.toast('已上锁', 'ok'); };
       $('[data-security-disable]', mask).onclick = () => security.require('关闭登录锁', () => { security.disable(); ui.toast('登录锁已关闭', 'ok'); });
       $('[data-clear]', mask).onclick = () => { close(); clearAll(); };
+      const cloud = window.CWBSupabase;
+      if (cloud) {
+        const urlInput = $('#supabase-url', mask), anonInput = $('#supabase-anon', mask);
+        const emailInput = $('#supabase-email', mask), passInput = $('#supabase-pass', mask);
+        const statusEl = $('#supabase-status', mask);
+        const savedConfig = cloud.getConfig();
+        if (savedConfig) { urlInput.value = savedConfig.url; anonInput.value = savedConfig.anonKey; }
+        const renderCloudStatus = () => {
+          const info = cloud.status();
+          statusEl.textContent = info.active ? `已连接：${info.user && info.user.email || '已登录'}` : info.configured ? '已配置，未登录' : '未配置';
+        };
+        renderCloudStatus();
+        $('[data-supabase-save]', mask).onclick = () => {
+          const url = urlInput.value.trim(), anonKey = anonInput.value.trim();
+          if (!url || !anonKey) return ui.toast('请填写项目地址与 anon 公开密钥', 'warn');
+          cloud.setConfig({ url, anonKey });
+          ui.toast('Supabase 配置已保存', 'ok');
+          renderCloudStatus();
+        };
+        const requireCredentials = () => {
+          const email = emailInput.value.trim(), password = passInput.value;
+          if (!email || !password) { ui.toast('请填写邮箱与密码', 'warn'); return null; }
+          return { email, password };
+        };
+        $('[data-supabase-signup]', mask).onclick = async () => {
+          const button = $('[data-supabase-signup]', mask);
+          const input = requireCredentials(); if (!input) return;
+          if (input.password.length < 6) return ui.toast('密码至少 6 位', 'warn');
+          statusEl.textContent = '正在注册…';
+          button.disabled = true;
+          try {
+            const payload = await cloud.signUp(input.email, input.password);
+            statusEl.textContent = payload && payload.access_token ? '注册成功，已自动登录' : '注册成功，请先在邮箱完成验证再登录';
+            ui.toast('注册请求已提交，请留意收件箱（含垃圾邮件）中的验证邮件', 'ok');
+          } catch (error) { ui.toast(error.message || '注册失败', 'err'); renderCloudStatus(); }
+          finally { button.disabled = false; }
+        };
+        $('[data-supabase-signin]', mask).onclick = async () => {
+          const button = $('[data-supabase-signin]', mask);
+          const input = requireCredentials(); if (!input) return;
+          statusEl.textContent = '正在登录…';
+          button.disabled = true;
+          try {
+            await cloud.signIn(input.email, input.password);
+            renderCloudStatus();
+            ui.toast('Supabase 登录成功', 'ok');
+          } catch (error) { ui.toast(error.message || '登录失败', 'err'); renderCloudStatus(); }
+          finally { button.disabled = false; }
+        };
+        $('[data-supabase-signout]', mask).onclick = async () => {
+          try { await cloud.signOut(); renderCloudStatus(); ui.toast('已退出 Supabase 登录', 'ok'); }
+          catch (error) { ui.toast(error.message || '退出失败', 'err'); }
+        };
+        $('[data-supabase-sync]', mask).onclick = async () => {
+          if (!window.CWB || !window.CWB.supabase) return ui.toast('工作区尚未就绪，请稍后再试', 'warn');
+          const button = $('[data-supabase-sync]', mask);
+          statusEl.textContent = '正在同步…';
+          button.disabled = true;
+          try {
+            const result = await window.CWB.supabase.syncNow();
+            statusEl.textContent = result && result.pulled ? `已从云端拉取数据（版本 ${result.revision}）`
+              : result && result.pushed ? '已将本机数据推送到云端'
+              : '云端与本机数据一致';
+            ui.toast(statusEl.textContent, 'ok', 3600);
+          } catch (error) { statusEl.textContent = '同步失败：' + (error.message || error); ui.toast(statusEl.textContent, 'err', 5200); }
+          finally { button.disabled = false; }
+        };
+      }
       const restoreButton = document.createElement('button');
       restoreButton.type = 'button';
       restoreButton.className = 'btn btn-sm';
@@ -11622,13 +11692,17 @@ function installV4Integration() {
   const getV8Persistence = () => {
     if (v8Persistence) return v8Persistence;
     if (!window.CWBv8Persistence || typeof window.CWBv8Persistence.createWorkspacePersistence !== 'function') return null;
+    const cloudAdapter = window.CWBSupabase && !CWB_PORTABLE_MODE && window.CWBSupabase.isActive()
+      ? window.CWBSupabase.createV8Adapter({ mirror:v8MetaAdapter })
+      : null;
     v8Persistence = window.CWBv8Persistence.createWorkspacePersistence({
-      adapter:CWB_PORTABLE_MODE ? portableV8Adapter() : v8MetaAdapter,
+      adapter:cloudAdapter || (CWB_PORTABLE_MODE ? portableV8Adapter() : v8MetaAdapter),
       yieldIntervalMs:10,
       yieldEvery:384,
     });
     return v8Persistence;
   };
+  const resetV8Persistence = () => { v8Persistence = null; };
   const readV8WorkspaceEnvelope = async () => {
     const persistence = getV8Persistence();
     if (!persistence) throw new Error('V8_PERSISTENCE_PROTOCOL_UNAVAILABLE');
@@ -11673,10 +11747,11 @@ function installV4Integration() {
     if (!window.document || !document.documentElement || !document.documentElement.isConnected) return;
     const value = status || { state:'compatibility', error:'工作区不可用', pending:0 };
     const state = String(value.state || 'saved');
+    const cloud = !!(window.CWBSupabase && window.CWBSupabase.isActive());
     const label = state === 'saving' ? '正在保存'
       : state === 'pending_recovery' ? '保存失败，待重试'
       : state === 'compatibility' ? '兼容模式，请导出备份'
-      : '已保存';
+      : cloud ? '已保存 · 云端' : '已保存';
     const element = document.querySelector('[data-save-status]');
     if (element) {
       element.dataset.state = state;
@@ -11706,6 +11781,9 @@ function installV4Integration() {
   const activateV8 = () => {
     if (v8Workspace || v8Activation || !window.CWBv8 || !window.CWBv8Migration) return v8Activation || v8Workspace;
     v8Activation = Promise.all(repositoryReady).then(async () => {
+      if (window.CWBSupabase && typeof window.CWBSupabase.init === 'function') {
+        try { await window.CWBSupabase.init(); } catch (_) {}
+      }
       const embeddedWorkspace = window.__CWB_EMBED__ && window.__CWB_EMBED__.workspace
         && Number(window.__CWB_EMBED__.workspace.schemaVersion) === 8
         && window.__CWB_EMBED__.workspace.state && typeof window.__CWB_EMBED__.workspace.state === 'object'
@@ -11753,6 +11831,48 @@ function installV4Integration() {
       updateWorkspaceSaveStatus(v8Workspace.status());
       if (persisted || embeddedWorkspace) applyV8State(v8Workspace.getState(), { operation:'hydrate' }, { type:'workspace.hydrate' });
       window.CWB.workspace = v8Workspace;
+      const supabaseSyncNow = async () => {
+        const cloud = window.CWBSupabase;
+        if (!cloud) throw new Error('云端同步模块不可用');
+        if (typeof cloud.init === 'function') await cloud.init();
+        if (!cloud.isActive()) throw new Error('Supabase 尚未登录，无法同步');
+        if (!v8Workspace) throw new Error('工作区尚未就绪');
+        resetV8Persistence();
+        const persistence = getV8Persistence();
+        if (!persistence) throw new Error('持久化协议不可用');
+        const loaded = await persistence.read();
+        if (loaded && loaded.empty) {
+          await v8Workspace.flush({ type:'supabase.initial_push', actor:'supabase-sync' });
+          return { pulled:false, pushed:true, revision:v8Workspace.diagnostics().revision };
+        }
+        if (loaded && loaded.envelope) {
+          const envelope = loaded.envelope;
+          const backup = {
+            manifest:{ schemaVersion:8, app:'counselor-desk', revision:Number(envelope.revision) || 0 },
+            data:envelope.data,
+            history:envelope.history || [],
+            recoveryPoints:envelope.recoveryPoints || [],
+            attachments:[],
+            auxiliary:{},
+          };
+          const checksum = await window.CWBv8.sha256({
+            manifest:Object.assign({}, backup.manifest),
+            data:backup.data,
+            history:backup.history,
+            recoveryPoints:backup.recoveryPoints,
+            attachments:backup.attachments,
+            auxiliary:backup.auxiliary,
+          });
+          backup.manifest.checksum = checksum;
+          await v8Workspace.hydrateBackup(backup, 'supabase-sync');
+          return { pulled:true, pushed:false, revision:Number(envelope.revision) || 0 };
+        }
+        return { pulled:false, pushed:false };
+      };
+      window.CWB.supabase = {
+        status:() => window.CWBSupabase ? window.CWBSupabase.status() : { configured:false, active:false },
+        syncNow:supabaseSyncNow,
+      };
       const personalViews = new Map();
       const importTasks = new Map();
       const exportTemplates = new Map();
