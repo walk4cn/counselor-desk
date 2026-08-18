@@ -2,7 +2,8 @@ const assert = require('node:assert/strict');
 const { webcrypto } = require('node:crypto');
 const { TextEncoder, TextDecoder } = require('node:util');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const page = path.join(__dirname, '..', 'index.html');
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -39,8 +40,7 @@ function createBridge() {
 }
 
 async function openApp() {
-  const dom = await JSDOM.fromFile(page, {
-    runScripts:'dangerously', resources:'usable', pretendToBeVisual:true,
+  const dom = await bootApp(page, {
     virtualConsole:new VirtualConsole(),
     beforeParse(window) {
       Object.defineProperty(window, 'crypto', { value:webcrypto });

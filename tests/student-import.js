@@ -5,7 +5,8 @@
  * 覆盖：列名模糊匹配（synonym）/ 缺省值容错 / 重复合并 / 非法行跳过。
  * 不依赖真实 .xls 文件，绕过 SheetJS 直接喂字符串测试底层函数。
  */
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 const path = require('path');
 const file = path.join(__dirname, '..', 'index.html');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -22,9 +23,8 @@ const bad = (msg, e) => { fail++; console.log('  ✗ ' + msg + (e ? ('\n      ' 
   vc.on('error', (...a) => { const s = a.join(' '); if (IGNORE.test(s)) return; errors.push('console.error: ' + s); });
   vc.on('log', (...a) => { /* console.log from page */ });
 
-  const dom = await JSDOM.fromFile(file, {
-    runScripts: 'dangerously', resources: 'usable', url: 'file://' + file,
-    pretendToBeVisual: true, virtualConsole: vc,
+  const dom = await bootApp(file, {
+    virtualConsole: vc,
   });
   const { window } = dom;
   // 等待 IIFE 装载完 DB

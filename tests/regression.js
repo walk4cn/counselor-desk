@@ -4,7 +4,8 @@
  *   node tests/regression.js
  * 覆盖：语法/加载无错、22 视图全量渲染、Phase A/B/C 关键特性。
  */
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 const path = require('path');
 const file = path.join(__dirname, '..', 'index.html');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -17,9 +18,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   vc.on('jsdomError', e => { if (IGNORE.test(e.message)) return; errors.push('jsdomError: ' + (e.detail && e.detail.stack || e.message)); });
   vc.on('error', (...a) => { const s = a.join(' '); if (IGNORE.test(s)) return; errors.push('console.error: ' + s); });
   // 加载即触发脚本执行，语法错误会在此抛出
-  const dom = await JSDOM.fromFile(file, {
-    runScripts: 'dangerously', resources: 'usable', url: 'https://c.local/',
-    virtualConsole: vc, pretendToBeVisual: true,
+  const dom = await bootApp(file, {
+    virtualConsole: vc,
   });
   const w = dom.window, d = w.document;
   w.URL.createObjectURL = () => 'blob:mock';

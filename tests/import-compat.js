@@ -5,7 +5,8 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { TextDecoder, TextEncoder } = require('node:util');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 const XLSX = require('xlsx');
 assert.equal(XLSX.version, '0.20.3', 'offline spreadsheet parser must use the audited fixed release');
 
@@ -17,7 +18,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const errors = [];
   const vc = new VirtualConsole();
   vc.on('jsdomError', error => { if (!/scrollTo|Not implemented|Could not load/i.test(error.message)) errors.push(error.message); });
-  const dom = await JSDOM.fromFile(file, { runScripts:'dangerously', resources:'usable', url:'https://c.local/', virtualConsole:vc, pretendToBeVisual:true,
+  const dom = await bootApp(file, { virtualConsole:vc,
     beforeParse(window) { window.TextDecoder = TextDecoder; window.TextEncoder = TextEncoder; }
   });
   const w = dom.window;

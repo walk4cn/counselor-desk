@@ -1,4 +1,5 @@
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 const path = require('path');
 
 const file = path.join(__dirname, '..', 'index.html');
@@ -8,15 +9,11 @@ const collections = ['students', 'tasks', 'talks', 'stay', 'leave', 'honor', 'pl
 (async () => {
   const errors = [];
   const virtualConsole = new VirtualConsole();
-  virtualConsole.on('jsdomError', error => { if (!/Could not load|getaddrinfo/i.test(error.message)) errors.push(error.message); });
+  virtualConsole.on('jsdomError', error => { if (!/Could not load|getaddrinfo|Not implemented/i.test(error.message)) errors.push(error.message); });
   virtualConsole.on('error', (...args) => errors.push(args.join(' ')));
 
-  const dom = await JSDOM.fromFile(file, {
-    runScripts: 'dangerously',
-    resources: 'usable',
-    url: 'https://c.local/',
+  const dom = await bootApp(file, {
     virtualConsole,
-    pretendToBeVisual: true,
   });
   const w = dom.window;
   await sleep(400);
@@ -31,7 +28,16 @@ const collections = ['students', 'tasks', 'talks', 'stay', 'leave', 'honor', 'pl
   const restoreButton = w.document.querySelector('#modal-root [data-restore-demo]');
   if (!restoreButton) throw new Error('restore demo button is missing');
   restoreButton.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
-  await sleep(80);
+
+  const deadline = Date.now() + 15000;
+  while (Date.now() < deadline) {
+    const done = w.CWB.db.students.some(student => student._demo && student.student_number === '2024010101')
+      && w.CWB.db.students.some(student => student.id === ownStudent.id && student.full_name === '我的学生')
+      && w.CWB.db.settings.counselor_name === '我的姓名';
+    if (done) break;
+    await sleep(100);
+  }
+  await sleep(50);
 
   const hasDemoStudent = w.CWB.db.students.some(student => student._demo && student.student_number === '2024010101');
   const hasDemoTask = w.CWB.db.tasks.some(task => task._demo);

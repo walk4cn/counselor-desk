@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -11,11 +12,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     if (!/scrollTo|Not implemented|Could not load|getaddrinfo/i.test(String(error && error.message))) errors.push(String(error && error.message));
   });
   vc.on('error', (...args) => errors.push(args.join(' ')));
-  const dom = await JSDOM.fromFile(path.join(__dirname, '..', 'index.html'), {
-    runScripts:'dangerously',
-    resources:'usable',
-    url:'https://student-pagination.local/',
-    pretendToBeVisual:true,
+  const dom = await bootApp(path.join(__dirname, '..', 'index.html'), {
     virtualConsole:vc,
   });
   await wait(700);

@@ -1,9 +1,10 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 (async () => {
-  const dom = await JSDOM.fromFile(path.join(__dirname, '..', 'output', 'v4-preview.html'), { runScripts:'dangerously', resources:'usable', url:'https://c.local/', virtualConsole:new VirtualConsole(), pretendToBeVisual:true });
+  const dom = await bootApp(path.join(__dirname, '..', 'output', 'v4-preview.html'), { virtualConsole:new VirtualConsole() });
   await new Promise(resolve => setTimeout(resolve, 500));
   const cwb = dom.window.CWB;
   cwb.db.custom = { v4_files:[{ id:'old-file', title:'旧文件' }], v4_positions:[{ id:'old-position', name:'班长' }], v4_employment_resources:[{ id:'resource-1', title:'旧资源', url:'https://example.com/old', category:'公共服务', audience:'毕业生', source:'旧来源', tags:'旧', favorite:true }] };

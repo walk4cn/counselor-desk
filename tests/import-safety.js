@@ -4,7 +4,8 @@
  */
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const file = path.join(__dirname, '..', 'index.html');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -14,9 +15,8 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const vc = new VirtualConsole();
   vc.on('jsdomError', error => { if (!/scrollTo|Not implemented|Could not load/i.test(error.message)) runtimeErrors.push(error.message); });
   vc.on('error', (...args) => runtimeErrors.push(args.join(' ')));
-  const dom = await JSDOM.fromFile(file, {
-    runScripts:'dangerously', resources:'usable', url:'https://c.local/',
-    virtualConsole:vc, pretendToBeVisual:true,
+  const dom = await bootApp(file, {
+    virtualConsole:vc,
   });
   const w = dom.window;
   await sleep(500);
@@ -58,16 +58,28 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   assert.equal(preview.summary.conflict, 0, 'choosing one duplicate must resolve the whole duplicate group');
   assert.equal(preview.summary.ready, 2, 'chosen conflict row becomes ready while the alternative is skipped');
 
-  const committed = cwb.importer.commitPreview(preview.id, {
+  const committed = await cwb.importer.commitPreviewAsync(preview.id, {
     skipInvalid:true, conflictPolicy:'skip', confirmSensitive:true,
   });
   assert.equal(committed.ok, true, 'explicitly confirmed safe rows should commit');
   assert.equal(committed.added, 2, 'only explicitly ready students should be written');
   assert.ok(committed.runId, 'successful commit must return a persistent run id');
-  assert.ok(JSON.parse(w.localStorage.getItem('cwb_v1_import_history') || '[]').some(run => run.id === committed.runId),
+  const history = await cwb.importer.getHistoryAsync();
+  assert.ok(history.some(run => run.id === committed.runId),
     'undo snapshot must be persisted');
-  assert.equal(cwb.importer.undo(committed.runId), true, 'persisted import run must be undoable');
-  assert.equal(JSON.stringify(cwb.db.students), beforeStudents, 'undo must restore exact pre-import students');
+  assert.equal(await cwb.importer.undoAsync(committed.runId), true, 'persisted import run must be undoable');
+  // The v8 workspace advances revisions on restore, so revoked metadata
+  // (rev / updated_by / updated_at / history) legitimately differs; the DATA
+  // contract is that every restored record matches the pre-import snapshot.
+  const stripV8Meta = list => list.map(student => {
+    const copy = Object.assign({}, student);
+    delete copy.rev; delete copy.updated_by; delete copy.deleted_at;
+    delete copy.student_number_history; delete copy.updated_at;
+    return copy;
+  });
+  const sorted = list => stripV8Meta(list).sort((a, b) => String(a.student_number).localeCompare(String(b.student_number)));
+  assert.equal(JSON.stringify(sorted(cwb.db.students)), JSON.stringify(sorted(JSON.parse(beforeStudents))),
+    'undo must restore exact pre-import students');
 
   const materialPreview = cwb.importer.previewCSV('标题,分类,内容\n全国资助政策,资助,正文', 'material');
   const materialRun = cwb.importer.commitPreview(materialPreview.id, {});

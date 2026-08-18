@@ -2,7 +2,8 @@
  * Counselor Desk v3.9 feature contract tests.
  * These assertions guard the v3.9 local-first feature contract.
  */
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 const path = require('path');
 
 const file = path.join(__dirname, '..', 'index.html');
@@ -13,9 +14,8 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const vc = new VirtualConsole();
   vc.on('jsdomError', error => { if (!/scrollTo|Not implemented|Could not load|getaddrinfo/i.test(error.message)) errors.push(error.message); });
   vc.on('error', (...args) => errors.push(args.join(' ')));
-  const dom = await JSDOM.fromFile(file, {
-    runScripts: 'dangerously', resources: 'usable', url: 'https://c.local/',
-    virtualConsole: vc, pretendToBeVisual: true,
+  const dom = await bootApp(file, {
+    virtualConsole: vc,
   });
   const w = dom.window;
   await sleep(450);

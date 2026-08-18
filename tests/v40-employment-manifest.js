@@ -1,10 +1,11 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const { webcrypto } = require('node:crypto');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 (async () => {
-  const dom = await JSDOM.fromFile(path.join(__dirname, '..', 'output', 'v4-preview.html'), { runScripts:'dangerously', resources:'usable', url:'https://c.local/', virtualConsole:new VirtualConsole(), pretendToBeVisual:true, beforeParse(window) { Object.defineProperty(window, 'crypto', { value:webcrypto, configurable:true }); window.TextEncoder = TextEncoder; window.TextDecoder = TextDecoder; } });
+  const dom = await bootApp(path.join(__dirname, '..', 'output', 'v4-preview.html'), { virtualConsole:new VirtualConsole(), beforeParse(window) { Object.defineProperty(window, 'crypto', { value:webcrypto, configurable:true }); window.TextEncoder = TextEncoder; window.TextDecoder = TextDecoder; } });
   await new Promise(resolve => setTimeout(resolve, 500));
   const provider = dom.window.CWB.employmentResourceProvider;
   await provider.add({ id:'field-roundtrip', title:'字段往返资源', url:'https://example.com/roundtrip', category:'测试分类', region:'全国', audience:'毕业生', source:'测试来源', tags:'字段,往返', favorite:true, status:'待核验' });

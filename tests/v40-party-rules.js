@@ -1,9 +1,10 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 (async () => {
-  const dom = await JSDOM.fromFile(path.join(__dirname, '..', 'output', 'v4-preview.html'), { runScripts:'dangerously', resources:'usable', url:'https://c.local/', virtualConsole:new VirtualConsole(), pretendToBeVisual:true });
+  const dom = await bootApp(path.join(__dirname, '..', 'output', 'v4-preview.html'), { virtualConsole:new VirtualConsole() });
   await new Promise(resolve => setTimeout(resolve, 500));
   const validate = dom.window.CWB_V4.validatePartyTransition;
   assert.equal(typeof validate, 'function');

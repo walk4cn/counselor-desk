@@ -8,7 +8,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const root = path.resolve(__dirname, '..');
 const file = path.join(root, 'index.html');
@@ -19,9 +20,8 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const vc = new VirtualConsole();
   vc.on('jsdomError', error => { if (!/scrollTo|Not implemented|Could not load/i.test(error.message)) errors.push(error.message); });
   vc.on('error', (...args) => errors.push(args.join(' ')));
-  const dom = await JSDOM.fromFile(file, {
-    runScripts: 'dangerously', resources: 'usable', url: 'https://c.local/',
-    virtualConsole: vc, pretendToBeVisual: true,
+  const dom = await bootApp(file, {
+    virtualConsole: vc,
   });
   const w = dom.window;
   await sleep(450);

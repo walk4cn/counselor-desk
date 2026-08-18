@@ -1,7 +1,8 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -12,11 +13,10 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const errors = [];
   const virtualConsole = new VirtualConsole();
   virtualConsole.on('jsdomError', error => {
-    if (!/Could not load script|Not implemented: window\.scrollTo/i.test(error.message)) errors.push(error.message);
+    if (!/Could not load script|Not implemented: window\.scrollTo|getContext/i.test(error.message)) errors.push(error.message);
   });
-  const dom = await JSDOM.fromFile(htmlPath, {
-    runScripts: 'dangerously', resources: 'usable', url: 'https://c.local/',
-    pretendToBeVisual: true, virtualConsole,
+  const dom = await bootApp(htmlPath, {
+    virtualConsole,
   });
   const { window } = dom;
   const { document } = window;

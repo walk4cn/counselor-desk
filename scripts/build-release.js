@@ -83,7 +83,7 @@ const portable = html.replace(/<script defer src="vendor\/xlsx\.full\.min\.js" d
     () => `<script data-cwb-employment-resources>\n${cwbEmploymentResources}\n</script>`)
   .replace(/<script defer src="src\/core\/cwb-business\.js" data-cwb-business><\/script>/,
     () => `<script data-cwb-business>\n${cwbBusiness}\n</script>`)
-  .replace(/<script defer src="src\/core\/cwb-supabase\.js" data-cwb-supabase><\/script>/,
+  .replace(/<script (?:defer )?src="src\/core\/cwb-supabase\.js" data-cwb-supabase><\/script>/,
     () => `<script data-cwb-supabase>\n${cwbSupabase}\n</script>`)
   .replace(/<script type="text\/plain" id="cwb-import-worker-source" data-cwb-import-worker><\/script>/,
     () => `<script type="text/plain" id="cwb-import-worker-source" data-cwb-import-worker>${importWorker.replace(/<\//g, '<\\/')}</script>`)

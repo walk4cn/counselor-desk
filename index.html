@@ -938,7 +938,7 @@ tbody tr:last-child td{border-bottom:none}
     <span class="brand-mark"><svg class="ic ic-lg"><use href="#i-logo"/></svg></span>
     <span>辅导员工作台</span>
   </div>
-  <span class="brand-sub" id="brand-sub" style="color:var(--signal);background:var(--signal-soft);border-color:var(--signal-line)">高校学生工作 · 开源版</span>
+  <span class="brand-sub" id="brand-sub" style="color:var(--signal);background:var(--signal-soft);border-color:var(--signal-line)">开源版</span>
   <span class="topbar-sp"></span>
   <div class="topbar-search-wrap">
     <div class="topbar-search">
@@ -2335,7 +2335,7 @@ function normLearningSession(x) {
 const APP_VERSION = '4.4.5';
 
 /* ===================== 9. 示例数据（首次打开可见效果） ===================== */
-function seedDemo() {
+function seedDemo(skipSave) {
   const T = today();
   DB.settings = {
     counselor_name: '示例老师', college_name: '示例学院', org_code: 'demo',
@@ -2611,8 +2611,8 @@ function seedDemo() {
   DB.learning_notes = [normLearningNote({ _demo:true, material_id: DB.learning_materials[0].id, title:'我的入门笔记', content:'先用示例数据熟悉页面，再清理示例数据录入真实记录。', tags:'入门' })];
   DB.learning_sessions = [];
 
-        DB.custom = {};
-  save();
+  DB.custom = {};
+  if (!skipSave) save();
 }
 function cloneData(value) {
   if (value == null) return value;
@@ -2629,7 +2629,7 @@ function restoreDemo() {
   const current = { settings: cloneData(DB.settings), custom: cloneData(DB.custom) };
   DEMO_COLLECTIONS.forEach(collection => { current[collection] = cloneData(DB[collection] || []); });
 
-  seedDemo();
+  seedDemo(true);
   const demo = { settings: cloneData(DB.settings), custom: cloneData(DB.custom) };
   DEMO_COLLECTIONS.forEach(collection => { demo[collection] = cloneData(DB[collection] || []); });
 
@@ -2646,10 +2646,27 @@ function restoreDemo() {
     DB[collection] = preserved.concat(additions);
   });
   DB.custom = current.custom || {};
+  const finish = () => { render(); paintWho(); ui.toast('示例数据已恢复，原有记录未覆盖', 'ok'); };
+  if (window.CWBv8 && window.CWB && window.CWB.workspace && typeof window.CWB.workspace.hydrateBackup === 'function') {
+    const currentState = window.CWB.workspace.getState();
+    const state = {};
+    Object.keys(currentState || {}).forEach(key => {
+      if (key === 'attachments') state[key] = cloneData(currentState.attachments || []);
+      else if (key === 'custom') state[key] = cloneData(DB.custom || {});
+      else if (key === 'settings') state[key] = cloneData(DB.settings || {});
+      else if (Array.isArray(currentState[key])) state[key] = cloneData(DB[key] || []);
+      else state[key] = cloneData(currentState[key]);
+    });
+    state.settings = cloneData(DB.settings);
+    Promise.resolve()
+      .then(() => window.CWBv8.createWorkspace({ initialState:state }).createBackup({ source:'demo-restore' }))
+      .then(backup => window.CWB.workspace.hydrateBackup(backup, 'demo-restore'))
+      .then(finish)
+      .catch(error => { ui.toast('恢复示例数据失败：' + (error && error.message || error), 'err', 5200); save(); });
+    return;
+  }
   save();
-  render();
-  paintWho();
-  ui.toast('示例数据已恢复，原有记录未覆盖', 'ok');
+  finish();
 }
 
 /* ===================== 10. 今日待办聚合 ===================== */
@@ -2939,7 +2956,7 @@ function persistUiState() {
   store.write('ui_state', value);
   const workspace = window.CWB && window.CWB.workspace;
   if (workspace && typeof workspace.mutate === 'function') {
-    const settings = Object.assign({}, workspace.getState().settings || {}, { ui_state:value });
+    const settings = Object.assign({}, DB.settings || {}, { ui_state:value, updated_at:new Date().toISOString() });
     workspace.mutate({ type:'ui_state.save', collection:'settings', operation:'replace', singleton:true, data:settings, actor:'ui-state' }).catch(error => {
       if (typeof reportWorkspaceFailure === 'function') reportWorkspaceFailure(error);
     });
@@ -5566,11 +5583,20 @@ function studentForm(s) {
     ],
     extra: `<datalist id="dl-class2">${classList().map(c => `<option value="${esc(c)}">`).join('')}</datalist>`,
     onSave(v) {
+      let added;
       if (isNew) {
         if (DB.students.some(x => x.student_number === v.student_number)) { ui.toast('该学号已存在', 'warn'); return false; }
-        DB.students.push(normStudent(v)); ui.toast('学生已添加', 'ok');
+        added = normStudent(v); DB.students.push(added); ui.toast('学生已添加', 'ok');
       } else { Object.assign(s, normStudent(Object.assign({}, s, v))); ui.toast('已保存', 'ok'); }
       save('students'); render();
+      if (added) {
+        const list = filterStudents();
+        const idx = list.findIndex(x => x.id === added.id);
+        if (idx >= 0) {
+          app.filters.students.page = Math.floor(idx / studentPageSize(app.filters.students.pageSize)) + 1;
+          persistUiState(); render();
+        }
+      }
     }
   });
 }
@@ -6180,6 +6206,12 @@ function openSettings() {
             const payload = await cloud.signUp(input.email, input.password);
             statusEl.textContent = payload && payload.access_token ? '注册成功，已自动登录' : '注册成功，请先在邮箱完成验证再登录';
             ui.toast('注册请求已提交，请留意收件箱（含垃圾邮件）中的验证邮件', 'ok');
+            if (payload && payload.access_token && window.CWB && window.CWB.supabase) {
+              try {
+                const result = await window.CWB.supabase.syncNow({ pull:false });
+                statusEl.textContent = result && result.pushed ? '注册成功，已自动登录，本机数据已推送到云端' : statusEl.textContent;
+              } catch (_) {}
+            }
           } catch (error) { ui.toast(error.message || '注册失败', 'err'); renderCloudStatus(); }
           finally { button.disabled = false; }
         };
@@ -6191,6 +6223,12 @@ function openSettings() {
           try {
             await cloud.signIn(input.email, input.password);
             renderCloudStatus();
+            if (window.CWB && window.CWB.supabase) {
+              try {
+                const result = await window.CWB.supabase.syncNow({ pull:false });
+                statusEl.textContent = result && result.pushed ? '已登录，本机数据已推送到云端' : '已登录';
+              } catch (error) { statusEl.textContent = '已登录，但初始同步失败：' + (error.message || error); }
+            }
             ui.toast('Supabase 登录成功', 'ok');
           } catch (error) { ui.toast(error.message || '登录失败', 'err'); renderCloudStatus(); }
           finally { button.disabled = false; }
@@ -11782,7 +11820,7 @@ function installV4Integration() {
     if (v8Workspace || v8Activation || !window.CWBv8 || !window.CWBv8Migration) return v8Activation || v8Workspace;
     v8Activation = Promise.all(repositoryReady).then(async () => {
       if (window.CWBSupabase && typeof window.CWBSupabase.init === 'function') {
-        try { await window.CWBSupabase.init(); } catch (_) {}
+        try { await Promise.race([window.CWBSupabase.init(), new Promise(resolve => setTimeout(resolve, 4000))]); } catch (_) {}
       }
       const embeddedWorkspace = window.__CWB_EMBED__ && window.__CWB_EMBED__.workspace
         && Number(window.__CWB_EMBED__.workspace.schemaVersion) === 8
@@ -11809,8 +11847,13 @@ function installV4Integration() {
           DB.settings = cloneData(nextState.settings || {});
           DB.custom = cloneData(nextState.custom || {});
           collectionKeys.forEach(key => { DB[key] = cloneData(nextState[key] || []); });
-        } else if (collection === 'settings') DB.settings = cloneData(nextState.settings || {});
-        else if (collection === 'custom') DB.custom = cloneData(nextState.custom || {});
+        } else if (collection === 'settings') {
+          const incoming = nextState.settings || {};
+          const current = DB.settings || {};
+          if (!incoming.updated_at || !current.updated_at || String(incoming.updated_at) >= String(current.updated_at)) {
+            DB.settings = cloneData(incoming);
+          }
+        } else if (collection === 'custom') DB.custom = cloneData(nextState.custom || {});
         else if (collectionKeys.includes(collection)) DB[collection] = cloneData(nextState[collection] || []);
         if (typeof render === 'function' && result && result.operation !== 'checkpoint' && result.operation !== 'flush') {
           setTimeout(() => { try { render(); } catch (_) {} }, 0);
@@ -11831,8 +11874,21 @@ function installV4Integration() {
       updateWorkspaceSaveStatus(v8Workspace.status());
       if (persisted || embeddedWorkspace) applyV8State(v8Workspace.getState(), { operation:'hydrate' }, { type:'workspace.hydrate' });
       window.CWB.workspace = v8Workspace;
-      const supabaseSyncNow = async () => {
+      let supabaseResetWired = false;
+      const wireSupabaseReset = () => {
+        if (supabaseResetWired) return;
+        if (window.CWBSupabase && typeof window.CWBSupabase.subscribe === 'function') {
+          supabaseResetWired = true;
+          window.CWBSupabase.subscribe(() => resetV8Persistence());
+        }
+      };
+      wireSupabaseReset();
+      if (!supabaseResetWired && typeof window.addEventListener === 'function') {
+        window.addEventListener('load', wireSupabaseReset, { once:true });
+      }
+      const supabaseSyncNow = async options => {
         const cloud = window.CWBSupabase;
+        const allowPull = !options || options.pull !== false;
         if (!cloud) throw new Error('云端同步模块不可用');
         if (typeof cloud.init === 'function') await cloud.init();
         if (!cloud.isActive()) throw new Error('Supabase 尚未登录，无法同步');
@@ -11845,7 +11901,7 @@ function installV4Integration() {
           await v8Workspace.flush({ type:'supabase.initial_push', actor:'supabase-sync' });
           return { pulled:false, pushed:true, revision:v8Workspace.diagnostics().revision };
         }
-        if (loaded && loaded.envelope) {
+        if (allowPull && loaded && loaded.envelope) {
           const envelope = loaded.envelope;
           const backup = {
             manifest:{ schemaVersion:8, app:'counselor-desk', revision:Number(envelope.revision) || 0 },
@@ -11877,11 +11933,7 @@ function installV4Integration() {
       const importTasks = new Map();
       const exportTemplates = new Map();
       const saveWorkspaceSettings = key => {
-        const settings = Object.assign({}, v8Workspace.getState().settings || {});
-        if (Array.isArray(DB.settings.leadership_views)) {
-          settings.leadership_views = cloneData(DB.settings.leadership_views);
-          settings.leadership_view_id = String(DB.settings.leadership_view_id || '');
-        }
+        const settings = Object.assign({}, DB.settings || {});
         settings[key] = key === 'personal_views' ? [...personalViews.values()]
           : key === 'export_templates' ? [...exportTemplates.values()]
             : key === 'import_tasks' ? [...importTasks.values()]

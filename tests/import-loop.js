@@ -15,7 +15,8 @@
  *   6) 表头乱填导回 → 不抛异常、不误写数据。
  * 最后再做一次枚举 / 布尔 / 数字往返保真检查 + 全量视图复渲染。
  */
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 const { TextDecoder, TextEncoder } = require('node:util');
 const path = require('path');
 const fs = require('fs');
@@ -94,9 +95,8 @@ function toCSV(rows) {
   vc.on('jsdomError', e => { if (IGNORE.test(e.message)) return; errors.push('jsdomError: ' + (e.detail && e.detail.stack || e.message)); });
   vc.on('error', (...a) => { const s = a.join(' '); if (IGNORE.test(s)) return; errors.push('console.error: ' + s); });
 
-  const dom = await JSDOM.fromFile(file, {
-    runScripts: 'dangerously', resources: 'usable', url: 'https://c.local/',
-    virtualConsole: vc, pretendToBeVisual: true,
+  const dom = await bootApp(file, {
+    virtualConsole: vc,
     beforeParse(window) { window.TextDecoder = TextDecoder; window.TextEncoder = TextEncoder; },
   });
   const w = dom.window, d = w.document;
@@ -127,6 +127,27 @@ function toCSV(rows) {
   const ok = (label, cond) => { if (!cond) failCount++; out.push('  ' + (cond ? '✓' : '✗ FAIL') + ' ' + label); };
   // v4 stores large collections in IndexedDB/desktop repositories; localStorage is compatibility-only.
   const store = coll => Array.isArray(w.CWB && w.CWB.db && w.CWB.db[coll]) ? w.CWB.db[coll] : (() => { try { return JSON.parse(w.localStorage.getItem(NS + coll) || '[]'); } catch (e) { return []; } })();
+  /* v8 持久化是全量信封提交（jsdom 下可达 1s+）：读库前等待工作区落定，避免读到未收敛的镜像 */
+  const waitIdle = async (timeoutMs) => {
+    const deadline = Date.now() + (timeoutMs || 20000);
+    let lastState = '';
+    while (Date.now() < deadline) {
+      const s = w.CWB && w.CWB.workspace && w.CWB.workspace.status ? w.CWB.workspace.status() : null;
+      const state = s ? s.state : 'unknown';
+      if (state === 'saved' && lastState === 'saved') return true;
+      lastState = state;
+      await sleep(100);
+    }
+    return false;
+  };
+  const waitCount = async (coll, expected, timeoutMs) => {
+    const deadline = Date.now() + (timeoutMs || 20000);
+    while (Date.now() < deadline) {
+      if (store(coll).length === expected) return true;
+      await sleep(100);
+    }
+    return false;
+  };
   const goView = key => { const el = $$('[data-view]').find(x => x.dataset.view === key); click(el); return !!el; };
   /* 像真人一样「选文件」：给隐藏 input 装上文件再触发 change */
   const pickFile = async (inputSel, text, options) => {
@@ -182,7 +203,8 @@ function toCSV(rows) {
       $('#focus-pass').value = '1234';
       if ($('#focus-pass2')) $('#focus-pass2').value = '1234';
       click($$('[data-act="focus-set-pass"]')[0] || $$('[data-act="focus-unlock"]')[0]);
-      await sleep(80);
+      await sleep(150);
+      if ($('#focus-pass')) { click($$('[data-act="focus-unlock"]')[0] || $$('[data-act="focus-set-pass"]')[0]); await sleep(150); }
       ok('隐私锁设置后自动解锁进入档案列表', !$('#focus-pass'));
     }
     const html = $('#main') ? $('#main').innerHTML : '';
@@ -233,6 +255,7 @@ function toCSV(rows) {
     goView(m.view); await sleep(50);
     click($$(`[data-act="gen-import"][data-coll="${m.coll}"]`)[0]);
     await pickFile('#file-gen', '无关表头A,无关表头B\r\n1,2\r\n');
+    if (!(await waitCount(m.coll, afterNew))) out.push('  · 提示：等待收敛超时');
     ok('表头无法识别时不误写数据', store(m.coll).length === afterNew);
   }
 
@@ -285,6 +308,7 @@ function toCSV(rows) {
     ok('恢复弹窗出现且有「合并导入」按钮', !!mergeBtn);
     if (mergeBtn) {
       click(mergeBtn); await sleep(120);
+      await waitIdle();
       ok('合并恢复后各集合条数不减少',
         snapshot.every(([k, n]) => store(k).length >= n));
       const setNow = JSON.parse(w.localStorage.getItem(NS + 'settings') || '{}');

@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -10,8 +11,8 @@ async function openApp() {
   virtualConsole.on('jsdomError', error => {
     if (!/scrollTo|Not implemented|Could not load|getaddrinfo/i.test(String(error && error.message))) errors.push(String(error && error.message));
   });
-  const dom = await JSDOM.fromFile(path.join(__dirname, '..', 'index.html'), {
-    runScripts: 'dangerously', resources: 'usable', url: 'https://student-ledger-advanced.local/', pretendToBeVisual: true, virtualConsole,
+  const dom = await bootApp(path.join(__dirname, '..', 'index.html'), {
+    virtualConsole,
   });
   await wait(760);
   assert.deepEqual(errors, [], 'application starts without relevant errors');

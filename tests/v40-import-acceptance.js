@@ -1,16 +1,13 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const previewPath = path.join(__dirname, '..', 'output', 'v4-preview.html');
 
 async function openApp() {
-  const dom = await JSDOM.fromFile(previewPath, {
-    runScripts: 'dangerously',
-    resources: 'usable',
-    url: 'https://c.local/',
+  const dom = await bootApp(previewPath, {
     virtualConsole: new VirtualConsole(),
-    pretendToBeVisual: true,
   });
   await new Promise(resolve => setTimeout(resolve, 500));
   return dom;

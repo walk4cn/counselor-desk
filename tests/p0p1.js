@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const file = path.join(__dirname, '..', 'index.html');
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -10,7 +11,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const vc = new VirtualConsole();
   vc.on('jsdomError', error => { if (!/scrollTo|Not implemented|Could not load|getaddrinfo/i.test(error.message)) errors.push(error.message); });
   vc.on('error', (...args) => errors.push(args.join(' ')));
-  const dom = await JSDOM.fromFile(file, { runScripts:'dangerously', resources:'usable', url:'https://p0p1.local/', virtualConsole:vc, pretendToBeVisual:true });
+  const dom = await bootApp(file, { virtualConsole:vc });
   await wait(700);
   const { window:w } = dom;
   const d = w.document;
@@ -35,7 +36,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const duplicate = await c.v4.attachments.ingest(attachmentFile, 'p0p1-record', 'data:audio/mp4;base64,AAAA');
   assert.equal(duplicate.id, first.id, 'same record and content should deduplicate attachments');
   await assert.rejects(() => c.v4.attachments.ingest({ name:'large.bin', size:26 * 1024 * 1024 }, 'p0p1-record', 'data:application/octet-stream;base64,AA=='), /25MB/);
-  assert.deepEqual(c.v4.attachments.validateLinks({ attachments:[first.id, 'missing-attachment'] }), ['missing-attachment']);
+  assert.deepEqual([...(await c.v4.attachments.validateLinks({ attachments:[first.id, 'missing-attachment'] }))], ['missing-attachment']);
 
   const preset = c.importer.saveMappingPreset('students', 'P0/P1测试预设', { '教务班级':'class_name' });
   assert.equal(preset.name, 'P0/P1测试预设');

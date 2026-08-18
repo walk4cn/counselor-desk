@@ -1,7 +1,8 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const { TextEncoder, TextDecoder } = require('node:util');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const page = path.join(__dirname, '..', 'index.html');
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -67,8 +68,8 @@ async function readPersistedWorkspace(bridge) {
 }
 
 async function openApp(bridge, virtualConsole) {
-  const dom = await JSDOM.fromFile(page, {
-    runScripts:'dangerously', resources:'usable', pretendToBeVisual:true, virtualConsole,
+  const dom = await bootApp(page, {
+    virtualConsole,
     beforeParse(window) {
       window.TextEncoder = TextEncoder;
       window.TextDecoder = TextDecoder;

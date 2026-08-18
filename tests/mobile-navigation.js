@@ -1,7 +1,8 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const page = path.join(__dirname, '..', 'index.html');
@@ -15,8 +16,8 @@ assert.match(htmlSource, /\.mcard-copy\{[^}]*overflow-wrap:anywhere/, 'mobile re
   virtualConsole.on('jsdomError', error => {
     if (!/scrollTo|Could not load|Not implemented|getaddrinfo/i.test(String(error && error.message))) errors.push(String(error && error.message));
   });
-  const dom = await JSDOM.fromFile(page, {
-    runScripts:'dangerously', resources:'usable', url:'https://mobile-navigation.local/', pretendToBeVisual:true, virtualConsole,
+  const dom = await bootApp(page, {
+    virtualConsole,
     beforeParse(window) { Object.defineProperty(window, 'innerWidth', { value:390, configurable:true }); },
   });
   await wait(820);

@@ -9,7 +9,8 @@
  *           → 点「删除」→ 二次确认 → 确定（条数 -1）
  * 顺带验证必填校验：不填必填项点保存，不应该写进库。
  */
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 const path = require('path');
 const file = path.join(__dirname, '..', 'index.html');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -45,9 +46,8 @@ const SPEC = [
   vc.on('jsdomError', e => { if (IGNORE.test(e.message)) return; errors.push('jsdomError: ' + (e.detail && e.detail.stack || e.message)); });
   vc.on('error', (...a) => { const s = a.join(' '); if (IGNORE.test(s)) return; errors.push('console.error: ' + s); });
 
-  const dom = await JSDOM.fromFile(file, {
-    runScripts: 'dangerously', resources: 'usable', url: 'https://c.local/',
-    virtualConsole: vc, pretendToBeVisual: true,
+  const dom = await bootApp(file, {
+    virtualConsole: vc,
   });
   const w = dom.window, d = w.document;
   w.URL.createObjectURL = () => 'blob:mock';
@@ -60,7 +60,37 @@ const SPEC = [
   const $$ = s => [...d.querySelectorAll(s)];
   const click = el => { if (el) el.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true })); };
   const ok = (label, cond) => { if (!cond) failCount++; out.push('  ' + (cond ? '✓' : '✗ FAIL') + ' ' + label); };
-  const store = coll => { try { return JSON.parse(w.localStorage.getItem(NS + coll) || '[]'); } catch (e) { return []; } };
+  // v4 stores large collections in IndexedDB/desktop repositories; localStorage is compatibility-only.
+  const store = coll => Array.isArray(w.CWB && w.CWB.db && w.CWB.db[coll]) ? w.CWB.db[coll] : (() => { try { return JSON.parse(w.localStorage.getItem(NS + coll) || '[]'); } catch (e) { return []; } })();
+  /* v8 持久化是全量信封提交（jsdom 下可达 1s+）：读库前等待工作区落定，避免读到未收敛的镜像 */
+  const waitIdle = async (timeoutMs) => {
+    const deadline = Date.now() + (timeoutMs || 20000);
+    let lastState = '';
+    while (Date.now() < deadline) {
+      const s = w.CWB && w.CWB.workspace && w.CWB.workspace.status ? w.CWB.workspace.status() : null;
+      const state = s ? s.state : 'unknown';
+      if (state === 'saved' && lastState === 'saved') return true;
+      lastState = state;
+      await sleep(100);
+    }
+    return false;
+  };
+  const waitCount = async (coll, expected, timeoutMs) => {
+    const deadline = Date.now() + (timeoutMs || 20000);
+    while (Date.now() < deadline) {
+      if (store(coll).length === expected) return true;
+      await sleep(100);
+    }
+    return false;
+  };
+  const waitValue = async (coll, field, expected, timeoutMs) => {
+    const deadline = Date.now() + (timeoutMs || 20000);
+    while (Date.now() < deadline) {
+      if (store(coll).some(x => String(x[field] || '') === expected)) return true;
+      await sleep(100);
+    }
+    return false;
+  };
   const goView = key => { const el = $$('[data-view]').find(x => x.dataset.view === key); click(el); return !!el; };
   /* 弹层可能是表单（data-ok）、二次确认（data-yes）或详情抽屉（data-edit-stu / data-e） */
   const modal = () => $$('[class*="mask"]').filter(m => m.querySelector('[data-ok],[data-yes],[data-edit-stu],[data-e]')).pop();
@@ -111,6 +141,7 @@ const SPEC = [
     await sleep(90);
     const afterNew = store(m.coll).length;
     ok(`新建成功（${base} → ${afterNew}）`, afterNew === base + 1);
+    if (!(await waitCount(m.coll, base + 1))) out.push('  · 提示：等待工作区收敛超时');
     const created = store(m.coll).find(x => String(x[m.main] || '') === token);
     ok('新建的记录能按主字段查到', !!created);
     if (!created) continue;
@@ -136,9 +167,11 @@ const SPEC = [
         mainInput.value = token + '_改';
         click(em.querySelector('[data-ok]'));
         await sleep(90);
+        await waitCount(m.coll, afterNew);
+        const edited = await waitValue(m.coll, m.main, token + '_改');
         const list = store(m.coll);
         ok(`编辑后条数不变（${afterNew}）`, list.length === afterNew);
-        ok('编辑内容已落库', list.some(x => String(x[m.main] || '') === token + '_改'));
+        ok('编辑内容已落库', edited);
       }
     }
 
@@ -155,6 +188,7 @@ const SPEC = [
       if (cm && cm.querySelector('[data-yes]')) {
         click(cm.querySelector('[data-yes]'));
         await sleep(90);
+        await waitCount(m.coll, n0 - 1);
         ok(`确认后删除成功（${n0} → ${store(m.coll).length}）`, store(m.coll).length === n0 - 1);
       }
     }

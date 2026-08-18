@@ -2,11 +2,12 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { JSDOM, VirtualConsole } = require('jsdom');
+const { VirtualConsole } = require('jsdom');
+const { bootApp } = require('./helpers/boot');
 
 (async () => {
   const vc = new VirtualConsole();
-  const dom = await JSDOM.fromFile(path.join(__dirname, '..', 'output', 'v4-preview.html'), { runScripts: 'dangerously', resources: 'usable', url: 'https://c.local/', virtualConsole: vc, pretendToBeVisual: true });
+  const dom = await bootApp(path.join(__dirname, '..', 'output', 'v4-preview.html'), { virtualConsole: vc });
   await new Promise(resolve => setTimeout(resolve, 500));
   const cwb = dom.window.CWB;
   const rows = ['学号,姓名,班级'];
