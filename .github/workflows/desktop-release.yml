@@ -1,4 +1,4 @@
-name: Validate and prepare v4.4 release
+name: Validate and prepare release
 
 on:
   push:
@@ -50,7 +50,8 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           pnpm run lint
           pnpm run check:public
-      - name: Run complete v4.4 test gate
+          pnpm run check:secrets
+      - name: Run complete release test gate
         run: xvfb-run -a pnpm test
       - name: Verify release configuration
         run: pnpm run test:release
@@ -92,7 +93,7 @@ jobs:
           @($x64, $arm64) | ForEach-Object { (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash + ' *' + $_.Name } | Set-Content output/desktop/Windows-SHA256.txt -Encoding utf8
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-v4.4
+          name: windows-v${{ needs.validate.outputs.version }}
           path: |
             output/desktop/counselor-desk-*-x64.exe
             output/desktop/counselor-desk-*-arm64.exe
@@ -146,7 +147,7 @@ jobs:
           shasum -a 256 "$dmg" "$zip" > output/desktop/macOS-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: macos-v4.4
+          name: macos-v${{ needs.validate.outputs.version }}
           path: |
             output/desktop/*-mac-universal.dmg
             output/desktop/*-mac-universal.zip
@@ -174,7 +175,7 @@ jobs:
       - run: sha256sum output/辅导员工作台.html > output/Web-SHA256.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: web-v4.4
+          name: web-v${{ needs.validate.outputs.version }}
           path: |
             output/辅导员工作台.html
             output/Web-SHA256.txt
@@ -201,10 +202,25 @@ jobs:
           set -euo pipefail
           tag='${{ needs.validate.outputs.tag }}'
           version='${{ needs.validate.outputs.version }}'
-          web_html="$(find release-assets/web-v4.4 -maxdepth 1 -type f -name '*.html' -print -quit)"
+          web_html="$(find release-assets -type f -name '*.html' -print -quit)"
           test -n "$web_html"
-          mv "$web_html" "release-assets/web-v4.4/CounselorDesk-v$version-Offline.html"
-          if gh release view "$tag" >/dev/null 2>&1; then
+          mv "$web_html" "release-assets/CounselorDesk-v$version-Offline.html"
+          awk -v version="$version" '
+            $0 == "## [" version "]" { found=1 }
+            found && $0 ~ /^## \[/ && $0 != "## [" version "]" { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          test -s release-notes.md
+          printf '\n## Release boundaries\n\n- Windows x64 / ARM64 NSIS installers and macOS Universal DMG / ZIP are unsigned.\n- macOS packages are not notarized. Verify the accompanying SHA-256 manifests before installation.\n' >> release-notes.md
+          existing_release="$(gh release view "$tag" --json isDraft,isPrerelease --jq '[.isDraft,.isPrerelease] | @tsv' 2>/dev/null || true)"
+          if [ -n "$existing_release" ]; then
+            IFS=$'\t' read -r is_draft is_prerelease <<< "$existing_release"
+            if [ "$is_draft" != "true" ] || [ "$is_prerelease" = "true" ]; then
+              echo "Refusing to replace an existing published or prerelease Release: $tag"
+              exit 1
+            fi
             gh release delete "$tag" --yes
           fi
-          gh release create "$tag" --draft --verify-tag --title "辅导员工作台 v$version" --notes "v$version 已完成自动化发布门禁，等待人工确认后公开。未配置代码签名或公证时，发布页会明确标注未签名。" release-assets/**/*
+          mapfile -t assets < <(find release-assets -type f -print | sort)
+          test "${#assets[@]}" -gt 0
+          gh release create "$tag" --draft --verify-tag --title "辅导员工作台 v$version" --notes-file release-notes.md "${assets[@]}"

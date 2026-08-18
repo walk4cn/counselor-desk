@@ -1,6 +1,14 @@
-# v4.4.4 升级实现基线
+# v4.4.5 升级实现基线
 
-完整开发收尾、验证与发布边界见[开发收尾总览](./final-closeout-2026-08-17.md)。
+完整开发收尾、验证与发布边界见[发布收尾记录](./release-v4.4.5.md)；v4.4.4 的历史基础能力见[开发收尾总览](./final-closeout-2026-08-17.md)。
+
+## v4.4.5 本轮新增
+
+- 统一 AI 上下文、敏感字段逐请求授权、建议中心、来源生命周期和记录级转化，所有结果保留审计、来源、风险和稳定 `student_id`。
+- 业务页面接入当前学生/事项/周期上下文；AI 只产生建议或草稿，不自动写入心理、预警、纪律、资助、奖惩和学生事实。
+- 增加 AI relay 的来源、HTTPS、SSRF、超时、响应大小、错误脱敏和可选令牌边界；公开 Pages 仍需独立受控 HTTPS relay。
+- 修复移动端欢迎弹窗遮挡导航、抽屉焦点、折叠搜索和窄屏业务动作区问题。
+- 新增动态版本发布工作流、凭据扫描、CHANGELOG 发布说明、Dependabot、Issue 表单和 PR 模板。
 
 ## 本轮已落地
 
@@ -41,7 +49,7 @@
 - 集成：导航、v8 迁移、Electron surface、Electron package config、v40 UI / runtime / integration layout
 - 桌面：Electron 启动冒烟、已打包应用双次持久化冒烟，均覆盖 SQLite、附件、迁移和备份
 - 浏览器：业务档案、AI、工作留痕入口及 390px 视口无横向溢出
-- 最终 Windows NSIS 重建已成功完成，产物为 `output/desktop/counselor-desk-4.4.4-x64.exe`（约 91.1 MB）和 `output/desktop/counselor-desk-4.4.4-arm64.exe`（约 85.6 MB），同时生成对应 blockmap；本次构建使用 Electron 38.8.6 / electron-builder 26.15.3。
+- v4.4.4 的 Windows NSIS 重建历史产物为 `output/desktop/counselor-desk-4.4.4-x64.exe` 和 `output/desktop/counselor-desk-4.4.4-arm64.exe`；v4.4.5 必须由新 Tag 对应的 Windows runner 重新打包，不能沿用旧哈希。
 
 单条 `pnpm test` 在当前环境超过 10 分钟命令上限；性能门禁及其后的测试已拆批全部通过，不能把单条命令超时误记为测试失败。
 

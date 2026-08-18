@@ -2,15 +2,15 @@
 
 <img src="./assets/logo.svg" width="112" alt="辅导员工作台标志" />
 
-# 辅导员工作台 v4.4.4 · Counselor Desk
+# 辅导员工作台 v4.4.5 · Counselor Desk
 
 ### 为高校辅导员、班主任与学生工作团队准备的本地优先工作台
 
 把学生台账、谈心谈话、重点关注、班团组织、党员发展、成绩帮扶、资料归档、导入导出与备份恢复，放进一处可持续维护、可带走、也可回看的工作空间。
 
 <p>
-  <img alt="version v4.4.4" src="https://img.shields.io/badge/version-v4.4.4-0b3a82?style=flat-square&logo=github" />
-  <img alt="release v4.4.4" src="https://img.shields.io/badge/status-v4.4.4%20Released-2da44e?style=flat-square&logo=githubactions" />
+  <img alt="version v4.4.5" src="https://img.shields.io/badge/version-v4.4.5-0b3a82?style=flat-square&logo=github" />
+  <img alt="release v4.4.5" src="https://img.shields.io/badge/status-v4.4.5%20Release%20candidate-2da44e?style=flat-square&logo=githubactions" />
   <a href="./LICENSE"><img alt="license MIT" src="https://img.shields.io/badge/license-MIT-2da44e?style=flat-square" /></a>
   <img alt="platform web" src="https://img.shields.io/badge/platform-Web-0969da?style=flat-square" />
   <img alt="platform desktop" src="https://img.shields.io/badge/platform-Windows%20%2B%20macOS-8250df?style=flat-square" />
@@ -30,9 +30,9 @@
 
 ![辅导员工作台 v4.4 产品横幅：本地优先的学生工作资料、台账和备份](./assets/github-hero-v4.png)
 
-> **v4.4.4 已正式发布。** 网页、离线 HTML、Windows 安装包与 macOS Universal 包均来自提交 [`438badd`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389)，完整附件与 SHA-256 清单见 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)。macOS 产物未签名、未公证，请按学校的软件管理要求决定是否安装。
+> **v4.4.5 当前为发布候选。** 本批次已完成 AI 跨模块融合、移动端导航修复、relay 安全、仓库门禁和文档收口；正式下载入口、附件与 SHA-256 以本版本 GitHub Release 完成后的真实页面为准。macOS 产物未签名、未公证，请按学校的软件管理要求决定是否安装。
 
-> **开发收尾状态：** v4.4.4 已完成本地与 CI 全量门禁、Windows x64 / ARM64、macOS Universal、离线网页、正式 Release 和 Pages 部署。交付范围、验证证据与剩余限制见[开发收尾总览](./docs/upgrade/final-closeout-2026-08-17.md)。
+> **开发收尾状态：** v4.4.5 已完成源码与文档收口，最终全量门禁和跨平台发布仍以本批真实 Actions、Release 和 Pages 结果为准。完整范围见 [v4.4.5 发布收尾记录](./docs/upgrade/release-v4.4.5.md)。
 
 ---
 
@@ -59,7 +59,7 @@
 | 🛟 换机、交接、清理浏览器有风险 | 提供恢复点、版本历史、备份、迁移与诊断路径，让重要操作有退路。 |
 | 🔐 不希望把学生信息交给陌生云端 | 默认本地优先，不要求项目账号；备份、导出与设备安全由使用者和学校制度共同管理。 |
 
-## ✨ v4.4 的核心体验
+## ✨ v4.4.5 的核心体验
 
 ### 👥 学生台账，终于可以像台账一样反复使用
 
@@ -95,7 +95,7 @@
 
 这不是要求把所有事情都塞进一个系统，而是让每次已经做过的工作能找到、接得上、交得出去。
 
-## 🖼️ v4.4 界面一览
+## 🖼️ v4.4.5 界面一览
 
 以下截图均来自隔离的虚构演示数据。每张均为单独的 `2560 × 1440` PNG，不含真实学生信息。
 
@@ -125,7 +125,7 @@
 
 ## 🚀 从这里开始
 
-1. **先选使用方式。** 想直接体验功能，可打开 [在线体验](https://7752777.github.io/counselor-desk/)；想断网使用或长期维护本机数据，可从 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4) 下载离线 HTML、Windows 安装包或 macOS Universal 包，并先核对对应 SHA-256。
+1. **先选使用方式。** 想直接体验功能，可打开 [在线体验](https://7752777.github.io/counselor-desk/)；想断网使用或长期维护本机数据，可从 [v4.4.5 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.5) 下载离线 HTML、Windows 安装包或 macOS Universal 包，并先核对对应 SHA-256；在 v4.4.5 尚未公开前请使用 Releases 页面实际存在的正式附件。
 2. **先用演示或脱敏数据走一遍。** 按“导入预览 → 确认写入 → 查询 → 建立恢复点 → 导出备份”完成一次练习，再接入正式台账。
 3. **把敏感信息放在受控环境。** 不在 Issue、截图、培训材料或公开演示中提交真实学生数据；重要操作前先建立恢复点或导出备份。
 4. **按你的工作节奏定制。** 在设置中填写称呼、学院与主题色；在学生台账中保存常用筛选和列视图。
@@ -148,9 +148,10 @@
 | 🧰 **v4.4.1** | 2026-08-14 | 面向真实安装与公开使用继续打磨：Windows 桌面端隐藏系统默认菜单，整理下载、安装、迁移、验收与归档说明，所有平台附件仍按同一发布门禁交付。 |
 | 🌿 **v4.4.2** | 2026-08-14 | 把首次打开的教育场景、每日金句背景、窄屏分页排版与离线资源一并收口：网页、离线 HTML 和桌面包不再依赖错误的相对路径，使用体验与公开说明同步更新。 |
 | 🧭 **v4.4.3** | 2026-08-14 | 面向真实高校表格继续加固：识别更多日期写法和教务成绩列，避免大批量导入被旧本地快照容量拦截；修复离线 HTML 中 Excel 运行库的完整性，并把导入撤销记录接入持久化工作区。 |
-| 🧠 **v4.4.4** | 2026-08-17 | 补齐本地 AI 治理、证书人工确认、日期范围工作总结、就业资源、业务档案、稳定 ID 联动和领导统计视图，并把新增集合统一接入 v8 工作区、备份、迁移与桌面边界；2026-08-17 完成 Tests、Windows、macOS、网页、Release 与 Pages 发布门禁。 |
+| 🧠 **v4.4.4** | 2026-08-17 | 补齐本地 AI 治理、证书人工确认、日期范围工作总结、就业资源、业务档案、稳定 ID 联动和领导统计视图，并把新增集合统一接入 v8 工作区、备份、迁移与桌面边界；该版本保留为历史正式发布。 |
+| 🚀 **v4.4.5** | 2026-08-18 | 完成 AI 跨模块上下文、统一建议中心、来源核验、记录级工作流、relay 安全、移动端导航和窄屏动作区收口；增加发布密钥扫描、动态 Release 说明、仓库协作模板和全量上线门禁。 |
 
-详细事实记录见 [CHANGELOG](./CHANGELOG.md) 和 [v4.4.4 Release](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)。历史版本保留在历程表中，不冒充当前下载版。
+详细事实记录见 [CHANGELOG](./CHANGELOG.md) 和 [v4.4.5 发布收尾记录](./docs/upgrade/release-v4.4.5.md)。正式上线后以 v4.4.5 Release、Pages 和附件清单为准；历史版本保留在历程表中，不冒充当前下载版。
 
 ### v4.4.0 这次具体带来了什么
 
@@ -192,6 +193,6 @@
 
 ### 🌟 让信息更清楚，让跟进更连续，让每一份用心都有迹可循。
 
-**辅导员工作台 v4.4.4 · Counselor Desk**
+**辅导员工作台 v4.4.5 · Counselor Desk**
 
 </div>

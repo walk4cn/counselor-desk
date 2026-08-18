@@ -37,6 +37,7 @@ jobs:
         run: |
           pnpm run lint
           pnpm run check:public
+          pnpm run check:secrets
 
       - name: Run complete suite
         run: xvfb-run -a pnpm test

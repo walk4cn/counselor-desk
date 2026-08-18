@@ -4,9 +4,9 @@
 
 ## 当前发布线
 
-`v4.4.4` 已完成本地与 CI 全量门禁并正式公开。发布提交为 [`438badd4`](https://github.com/7752777/counselor-desk/commit/438badd4fd1fffd6aff36412912309642f02d389)，正式下载入口为 [`v4.4.4 Release`](https://github.com/7752777/counselor-desk/releases/tag/v4.4.4)，在线体验为 [GitHub Pages](https://7752777.github.io/counselor-desk/)。`v4.4.3` Tag 保留为历史版本，不被本批重新指向；`v4.4.0` 保留为首个完整发布基线。
+`v4.4.5` 是当前发布候选，目标是把 AI 深度融合、移动端收口、relay 安全和仓库门禁与网页、离线 HTML、Windows、macOS、Release、Pages 一起正式交付。`v4.4.4` 的正式发布事实保留在[开发收尾总览](./upgrade/final-closeout-2026-08-17.md)，不得用旧产物证明新版本。
 
-### v4.4.4 实际发布记录
+### v4.4.4 历史发布记录
 
 | 项目 | 已验证事实 |
 | --- | --- |
@@ -28,7 +28,7 @@
 
 ## 版本事实检查
 
-发布说明必须把“候选已集成”“CI 已验证”“Release 已公开”“Pages 已切换”四种状态分开写。v4.4.4 已完成这四个状态，后续版本仍须按相同规则填写：
+发布说明必须把“候选已集成”“CI 已验证”“Release 已公开”“Pages 已切换”四种状态分开写。v4.4.4 已完成这四个状态；v4.4.5 在真实结果写回前只能标为候选：
 
 - Git tag、Release URL、Pages URL 与发布提交 SHA；
 - Windows/macOS 安装包名称、SHA-256、签名和公证状态；
@@ -39,7 +39,7 @@
 
 ## 发布顺序
 
-测试 → Windows → macOS → 网页产物 → Draft Release → 人工确认 → Pages。
+测试 → Windows → macOS → 网页产物 → Draft Release → 人工公开确认 → Pages。
 
 任何一步失败、缺少产物或无法验证，都应停止在 Draft 阶段，不能让 Pages 指向未经验证的提交。
 

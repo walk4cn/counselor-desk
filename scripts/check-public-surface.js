@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
+const packageVersion = require(path.join(root, 'package.json')).version;
 const required = ['index.html', 'README.md', 'LICENSE', 'CONTRIBUTING.md', 'SECURITY.md'];
 const publicDocs = ['README.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'SECURITY.md'];
 const forbiddenText = [
@@ -122,7 +123,7 @@ if (!appHtml.includes("function welcomeSceneSource()") || !appHtml.includes("emb
 if (!fs.existsSync(path.join(root, welcomeIllustration))) throw new Error(`Missing welcome illustration: ${welcomeIllustration}`);
 if (!appHtml.includes("function welcomeQuoteSceneSource()") || !appHtml.includes("'welcome-morning.png'")) throw new Error('Daily quote must resolve the bundled reading-scene image');
 if (!fs.existsSync(path.join(root, welcomeQuoteIllustration))) throw new Error(`Missing daily quote illustration: ${welcomeQuoteIllustration}`);
-for (const heading of ['🎯 这是给一线工作留出来的一张工作台', '✨ v4.4 的核心体验', '🚀 从这里开始', '🔐 本地优先，也把边界说清楚', '🖼️ v4.4 界面一览']) {
+for (const heading of ['🎯 这是给一线工作留出来的一张工作台', `✨ v${packageVersion} 的核心体验`, '🚀 从这里开始', '🔐 本地优先，也把边界说清楚', `🖼️ v${packageVersion} 界面一览`]) {
   if (!readme.includes(`## ${heading}`)) throw new Error(`README is missing product section: ${heading}`);
 }
 if (!appHtml.includes('data-student-page-size')) throw new Error('Student page-size selector is missing');

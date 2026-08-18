@@ -14,7 +14,7 @@
   const custom = Object.freeze([
     'v4_positions', 'v4_party_cases', 'v4_files', 'v4_employment_resources', 'v4_employment_intents',
     'v4_employment_contacts', 'v4_ai_providers', 'v4_ai_audit', 'v4_assessments', 'v4_academic_terms',
-    'v4_disciplines', 'v4_aid_records', 'v4_ai_drafts', 'v4_test_snapshots',
+    'v4_disciplines', 'v4_aid_records', 'v4_ai_drafts', 'v4_ai_suggestions', 'v4_ai_sources', 'v4_ai_consents', 'v4_test_snapshots',
   ]);
   const logical = Object.freeze([...canonical, ...custom]);
   const phoneSync = Object.freeze([...canonical, ...custom]);

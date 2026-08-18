@@ -1,10 +1,12 @@
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
+const { handleAiRelayRequest, isLoopbackHost } = require('./ai-relay');
 
 const root = path.resolve(__dirname, '..');
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4173);
+const requireRelayToken = !isLoopbackHost(host);
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
   '.gif': 'image/gif',
@@ -27,7 +29,8 @@ function resolveRequestPath(requestUrl) {
   return target;
 }
 
-const server = http.createServer((request, response) => {
+const server = http.createServer(async (request, response) => {
+  if (await handleAiRelayRequest(request, response, { requireToken:requireRelayToken })) return;
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     response.writeHead(405, { Allow: 'GET, HEAD' });
     response.end('Method Not Allowed');

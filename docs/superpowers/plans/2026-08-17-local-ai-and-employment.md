@@ -1,6 +1,6 @@
 # 本地 AI 与就业资源升级 Implementation Plan
 
-> 实施状态：已完成。本计划中的复选框是原始执行步骤，完整实际验证、后续持久化修复和发布边界见[开发收尾总览](../../upgrade/final-closeout-2026-08-17.md)。
+> 实施状态：源码与本地验证已完成，已纳入 v4.4.5 发布候选。本计划中的复选框保留原始执行轨迹；完整实际结果、后续持久化修复、移动端收口和正式发布边界见[发布收尾记录](../../upgrade/release-v4.4.5.md)。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -9,6 +9,12 @@
 **Architecture:** 新增无 DOM 的 AI 工作流模块，用于校验任务授权、每日额度、草稿与证书字段。页面只负责配置、编辑和明确确认；所有新增集合由 `CWBCollections` 驱动并透传到浏览器、便携包、Electron、备份与迁移。既有初版页面被收敛到这一工作流，不改变稳定学生 ID 或附件仓边界。
 
 **Tech Stack:** Vanilla JavaScript、单文件 `index.html`、IndexedDB、Electron SQLite、Node assert/JSDOM、schema v8。
+
+## 实际完成情况
+
+- AI 治理、可取消草稿、证书人工确认、日期范围总结、就业资源、统一集合清单和跨端迁移边界均已实现并完成对应定向/综合验证。
+- 后续补齐了跨模块上下文、建议中心、来源核验、记录级动作、敏感字段逐请求授权、relay 安全和移动端导航/窄屏交互。
+- 原始步骤中的“预期失败”仅描述开发时的测试驱动阶段，不代表当前代码仍未完成；当前唯一待回填内容是 v4.4.5 的真实 GitHub Release、Pages 和跨平台 runner 证据。
 
 ---
 

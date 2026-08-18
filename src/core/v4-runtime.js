@@ -243,7 +243,7 @@
               const clear = objectStore.clear();
               // Keep the transaction alive through request callbacks, but cap
               // each synchronous submission burst for slower browser runners.
-              clear.onsuccess = () => queueAtomicReplaceBatches(objectStore, values, 16, error => {
+              clear.onsuccess = () => queueAtomicReplaceBatches(objectStore, values, 64, error => {
                 try { tx.abort(); } catch (_) {}
                 reject(error);
               });

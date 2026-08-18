@@ -55,6 +55,7 @@ git clone https://github.com/7752777/counselor-desk.git
 cd counselor-desk
 pnpm install --frozen-lockfile
 pnpm test
+pnpm run check:secrets
 ```
 
 - 修改行为前先补充会失败的测试。
@@ -62,5 +63,6 @@ pnpm test
 - 修改界面时请检查桌面、窄屏、键盘操作和长文本布局。
 - 提交前运行与改动相关的测试；若无法在本机验证 Windows/macOS 打包，请如实写明。
 - PR 说明应包括：解决的问题、改动范围、验证命令/结果、尚未验证的风险。
+- 涉及发布、配置、relay 或外部来源时，必须说明公开面检查、凭据扫描和外部服务边界；不得把 API key 写入测试、文档、备份或示例。
 
 更多开发命令见 [开发与构建](./docs/development.md)。项目采用 [MIT License](./LICENSE)。

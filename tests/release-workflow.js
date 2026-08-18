@@ -11,6 +11,7 @@ const tests = fs.readFileSync(path.join(root, '.github', 'workflows', 'tests.yml
 assert.match(tests, /timeout-minutes:\s*(?:[2-9]\d|1\d\d)/, 'the complete test workflow must allow the measured full suite to finish');
 assert.match(tests, /pnpm run lint/, 'the PR test gate must check the source surface before tests run');
 assert.match(tests, /pnpm run check:public/, 'the PR test gate must scan the public product surface');
+assert.match(tests, /pnpm run check:secrets/, 'the PR test gate must scan for exposed credentials');
 assert.match(tests, /xvfb-run -a pnpm test/, 'Ubuntu CI must provide a virtual display for the required Electron smoke');
 
 assert.match(release, /name: Tests/, 'the release pipeline must begin with the complete test gate');
@@ -25,6 +26,13 @@ assert.match(release, /release:\s*\n[\s\S]*?needs: \[validate, web\]/, 'a Releas
 assert.match(release, /release:\s*\n[\s\S]*?uses: actions\/checkout@v4[\s\S]*?ref: refs\/tags\/\$\{\{ needs\.validate\.outputs\.tag \}\}[\s\S]*?actions\/download-artifact@v4/, 'the draft Release job must check out the verified tag before gh --verify-tag');
 assert.match(release, /--draft --verify-tag/, 'the public release starts as a verified draft');
 assert.match(release, /gh release delete "\$tag" --yes/, 'rebuilding an explicitly retagged release must replace its stale draft and assets');
+assert.match(release, /isDraft,isPrerelease/, 'release rebuilds must inspect existing release state before replacement');
+assert.match(release, /Refusing to replace an existing published or prerelease Release/, 'published releases must never be deleted by a rerun');
+assert.match(release, /find release-assets -type f -name '\*\.html'/, 'the web artifact must be found without a stale hard-coded version directory');
+assert.match(release, /--notes-file release-notes\.md/, 'Release notes must be generated from the checked-in changelog');
+assert.match(release, /name: windows-v\$\{\{ needs\.validate\.outputs\.version \}\}/, 'Windows artifact names must follow the validated version');
+assert.match(release, /name: macos-v\$\{\{ needs\.validate\.outputs\.version \}\}/, 'macOS artifact names must follow the validated version');
+assert.match(release, /name: web-v\$\{\{ needs\.validate\.outputs\.version \}\}/, 'web artifact names must follow the validated version');
 assert.match(release, /CounselorDesk-v\$version-Offline\.html/, 'the offline HTML asset must have a recognizable product download name');
 assert.match(release, /desktop:build:win/, 'the workflow must build Windows packages');
 assert.match(release, /desktop:build:mac/, 'the workflow must build macOS universal packages');

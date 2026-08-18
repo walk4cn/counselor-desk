@@ -1,8 +1,8 @@
 # 开发源权威清单
 
-更新时间：2026-08-17
+更新时间：2026-08-18
 
-本次开发的已交付范围、验证证据和 v4.4.4 公开发布结果见[开发收尾总览](./final-closeout-2026-08-17.md)。
+本次开发的已交付范围、验证证据和 v4.4.5 发布边界见[发布收尾记录](./release-v4.4.5.md)；v4.4.4 公开发布结果仍见[开发收尾总览](./final-closeout-2026-08-17.md)。
 
 ## 唯一开发基线
 
@@ -10,9 +10,9 @@
 
 - 路径：`F:\CounselorDesk\counselor-desk-development`
 - 分支：`codex/ai-upgrade`
-- 当前基线提交：`438badd4fd1fffd6aff36412912309642f02d389`
+- 当前候选基线提交：`849076a`（正式发布提交在最终验证后回填完整 SHA）
 - 既有历史 Tag：`v4.4.3` 指向 `5ddb502e527543f5f8e4f3f922979e09d57f1cf0`，本批不改写
-- 当前正式版本：`v4.4.4`，Tag、Release 与 Pages 均已公开
+- 当前候选版本：`v4.4.5`；Tag、Release 与 Pages 状态待本次真实发布结果回填
 - 远程仓库：`origin https://github.com/7752777/counselor-desk.git`
 - Git 形态：独立完整克隆，不依赖外部 linked worktree 或主仓库目录
 - 当前架构：本地优先 Web/单文件离线 HTML/Electron 共用业务界面

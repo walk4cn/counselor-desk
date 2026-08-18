@@ -36,6 +36,9 @@ jobs:
       - name: Validate public release surface
         run: pnpm run check:public
 
+      - name: Scan tracked source for exposed credentials
+        run: pnpm run check:secrets
+
       - name: Size check
         run: |
           SIZE=$(stat -c%s index.html)
