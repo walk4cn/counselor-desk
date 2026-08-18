@@ -19,6 +19,7 @@ function createMockSupabase() {
   let sessionSerial = 0;
   const expireNextLogin = { current: false };
   const secondsNow = () => Math.floor(Date.now() / 1000);
+  const userIdFor = email => String(email).toLowerCase() === 'two@example.com' ? 'user-2' : 'user-1';
   const fetch = async (url, init = {}) => {
     const full = String(url);
     calls.push({ url: full, method: init.method || 'GET' });
@@ -35,14 +36,14 @@ function createMockSupabase() {
       return respond(200, {
         access_token: `at-${++sessionSerial}`, refresh_token: 'rt-1', expires_in: 3600, token_type: 'bearer',
         expires_at: secondsNow() + (expired ? -60 : 3600),
-        user: { id: 'user-1', email: body.email },
+        user: { id: userIdFor(body.email), email: body.email },
       });
     }
     if (full.startsWith(`${base}/auth/v1/signup`)) {
       return respond(200, {
         access_token: `at-${++sessionSerial}`, refresh_token: 'rt-1', expires_in: 3600,
         expires_at: secondsNow() + 3600,
-        user: { id: 'user-1', email: body.email },
+        user: { id: userIdFor(body.email), email: body.email },
       });
     }
     if (full.startsWith(`${base}/auth/v1/logout`)) return respond(204, null);
@@ -55,7 +56,7 @@ function createMockSupabase() {
     }
     if (full.includes('/rest/v1/workspace_records')) {
       if (init.method === 'GET') {
-        return respond(200, Array.from(storage.values()).map(record => ({ payload: record.payload })));
+        return respond(200, Array.from(storage.values()).map(record => ({ id: record.id, payload: record.payload })));
       }
       if (init.method === 'POST') {
         storage.set(String(body.id), { id: String(body.id), payload: body.payload });
@@ -84,8 +85,11 @@ async function run() {
   const mock = createMockSupabase();
   global.fetch = mock.fetch;
 
+  assert.equal(supabase.isConfigured(), true, 'the built-in default config is recognised without setup');
+  assert.equal(supabase.getConfig().url, 'https://mxbhgtciagudibpfqnbd.supabase.co', 'the default config exposes the managed Supabase project');
   supabase.setConfig({ url: 'https://demo.supabase.co', anonKey: 'anon-key' });
-  assert.equal(supabase.isConfigured(), true, 'config is recognised');
+  assert.equal(supabase.isConfigured(), true, 'a custom config is recognised');
+  assert.equal(supabase.getConfig().url, 'https://demo.supabase.co', 'the saved custom config wins over the default');
   assert.equal(supabase.isActive(), false, 'no session before sign in');
 
   const signup = await supabase.signUp('demo@example.com', 'password123');
@@ -119,7 +123,7 @@ async function run() {
 
   const committed = await persistence.commit(makeEnvelope('cloud-first', 3));
   assert.equal(committed.committed, true);
-  assert.equal(mock.storage.has('workspace_v8_active'), true, 'pointer row is written to the cloud table');
+  assert.equal(mock.storage.has('user-1:workspace_v8_active'), true, 'pointer row is written to the cloud table under the account namespace');
   const chunks = Array.from(mock.storage.values()).filter(record => record.payload && record.payload.kind === 'workspace_v8_chunk');
   assert.ok(chunks.length > 1, 'the envelope is chunked into several cloud rows');
   assert.equal(mirror.puts[mirror.puts.length - 1], 'workspace_v8_active', 'the local mirror receives the pointer last');
@@ -149,13 +153,42 @@ async function run() {
   const orphanId = 'workspace_v8_chunk:g_orphan:0';
   await adapter.put({ id: orphanId, kind: 'workspace_v8_chunk', generation: 'g_orphan', index: 0, chunkCount: 1, protocolVersion: 1, encoding: 'base64', value: 'AA==' });
   await adapter.delete(orphanId);
-  assert.equal(mock.storage.has(orphanId), false, 'adapter delete removes the cloud row');
+  assert.equal(mock.storage.has('user-1:workspace_v8_chunk:g_orphan:0'), false, 'adapter delete removes the cloud row');
+
+  mock.storage.set('user-9:workspace_v8_active', {
+    id: 'user-9:workspace_v8_active',
+    payload: { id: 'workspace_v8_active', kind: 'workspace_v8_pointer', protocolVersion: 1, schemaVersion: 8, active: { generation: 'g_other' }, previous: [] },
+  });
+  mock.storage.set('workspace_v8_active', {
+    id: 'workspace_v8_active',
+    payload: { id: 'workspace_v8_active', kind: 'workspace_v8_pointer', protocolVersion: 1, schemaVersion: 8, active: { generation: 'g_legacy' }, previous: [] },
+  });
+
+  await supabase.signOut();
+  await supabase.signIn('two@example.com', 'password123');
+  assert.equal(supabase.status().user.id, 'user-2', 'the second account signs in');
+  const secondAccount = supabase.createV8Adapter();
+  const secondListed = await secondAccount.list();
+  assert.equal(secondListed.length, 0, 'a new account never sees records written by other accounts (id namespace filter)');
+  const secondAccountPersistence = createWorkspacePersistence({
+    adapter: secondAccount, digest, chunkBytes: 64, now: () => '2026-08-18T01:00:00.000Z',
+  });
+  const secondCommit = await secondAccountPersistence.commit(makeEnvelope('second-account', 7));
+  assert.equal(secondCommit.committed, true, 'a new account commits without colliding with rows owned by other accounts');
+  const secondRead = await secondAccountPersistence.read();
+  assert.equal(secondRead.envelope.data.settings.title, 'second-account', 'the new account reads back only its own workspace');
+  assert.equal(mock.storage.has('user-2:workspace_v8_active'), true, 'the new account writes its own namespaced pointer row');
+  assert.equal(mock.storage.has('user-1:workspace_v8_active'), true, 'the first account pointer row is untouched');
+  await supabase.signOut();
+  await supabase.signIn('demo@example.com', 'password123');
 
   await supabase.signOut();
   await assert.rejects(() => adapter.put({ id: 'x', kind: 'x' }), /登录/, 'writes are rejected when signed out');
   await assert.rejects(() => supabase.createV8Adapter().list(), /登录/, 'reads are rejected when signed out');
   supabase.setConfig(null);
-  await assert.rejects(() => supabase.createV8Adapter().list(), /项目地址/, 'reads are rejected when unconfigured');
+  assert.equal(supabase.isConfigured(), true, 'clearing a custom config falls back to the built-in default');
+  assert.equal(supabase.getConfig().url, 'https://mxbhgtciagudibpfqnbd.supabase.co', 'the fallback config is the managed project');
+  await assert.rejects(() => supabase.createV8Adapter().list(), /登录/, 'reads still require a signed-in session under the default config');
   supabase.setConfig({ url: 'https://demo.supabase.co', anonKey: 'anon-key' });
 
   const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'https://demo.app', runScripts: 'outside-only' });

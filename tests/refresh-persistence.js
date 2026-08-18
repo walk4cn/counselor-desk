@@ -55,7 +55,7 @@ function createMockSupabase() {
       return respond(200, { access_token: 'at-2', refresh_token: 'rt-2', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'user-1', email: 'demo@example.com' } });
     }
     if (full.includes('/rest/v1/workspace_records')) {
-      if (init.method === 'GET') return respond(200, Array.from(storage.values()).map(record => ({ payload: record.payload })));
+      if (init.method === 'GET') return respond(200, Array.from(storage.values()).map(record => ({ id: record.id, payload: record.payload })));
       if (init.method === 'POST') { storage.set(String(body.id), { id: String(body.id), payload: body.payload }); return respond(201, null); }
       if (init.method === 'DELETE') {
         const match = full.match(/id=eq\.([^&]+)/);

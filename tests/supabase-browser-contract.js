@@ -50,7 +50,7 @@ function createMockSupabase() {
       return respond(200, { access_token: 'at-1', refresh_token: 'rt-1', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'user-1', email: 'demo@example.com' } });
     }
     if (full.includes('/rest/v1/workspace_records')) {
-      if (init.method === 'GET') return respond(200, Array.from(storage.values()).map(record => ({ payload: record.payload })));
+      if (init.method === 'GET') return respond(200, Array.from(storage.values()).map(record => ({ id: record.id, payload: record.payload })));
       if (init.method === 'POST') { storage.set(String(body.id), { id: String(body.id), payload: body.payload }); return respond(201, null); }
       if (init.method === 'DELETE') {
         const match = full.match(/id=eq\.([^&]+)/);
@@ -92,9 +92,8 @@ async function run() {
   const dom = await openApp(mock, bridge, virtualConsole);
 
   assert.ok(dom.window.CWB, 'the app boots with the supabase module installed');
-  assert.equal(dom.window.CWBSupabase.isConfigured(), false, 'no config before setup');
+  assert.equal(dom.window.CWBSupabase.isConfigured(), true, 'the built-in Supabase config is active before any setup');
   dom.window.CWBSupabase.setConfig({ url: 'https://demo.supabase.co', anonKey: 'anon-key' });
-  assert.equal(dom.window.CWBSupabase.isConfigured(), true, 'config is recognised');
   assert.equal(dom.window.CWBSupabase.isActive(), false, 'no active session before sign in');
 
   const session = await dom.window.CWBSupabase.signIn('demo@example.com', 'password123');
@@ -103,10 +102,10 @@ async function run() {
 
   const synced = await dom.window.CWB.supabase.syncNow();
   assert.ok(synced.pushed === true, 'an empty cloud receives the local workspace on first sync');
-  assert.equal(mock.storage.has('workspace_v8_active'), true, 'the pointer row reaches the cloud table');
+  assert.equal(mock.storage.has('user-1:workspace_v8_active'), true, 'the pointer row reaches the cloud table under the account namespace');
   const chunks = Array.from(mock.storage.values()).filter(record => record.payload && record.payload.kind === 'workspace_v8_chunk');
   assert.ok(chunks.length > 0, 'chunk rows reach the cloud table');
-  const pointer = mock.storage.get('workspace_v8_active').payload;
+  const pointer = mock.storage.get('user-1:workspace_v8_active').payload;
   assert.equal(Number(pointer.active.schemaVersion), 8, 'the cloud pointer is schema v8');
   const expectedGenerations = new Set([pointer.active.generation, ...pointer.previous.map(item => item.generation)]);
   assert.equal(chunks.every(chunk => expectedGenerations.has(chunk.payload.generation)), true, 'cloud chunks belong to retained generations');

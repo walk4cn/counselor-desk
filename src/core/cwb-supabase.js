@@ -7,12 +7,19 @@
  * workspace from several devices without adding any build dependency.
  *
  * Data model: one row per workspace record in the `workspace_records` table.
- *   - id       text  primary key (workspace_v8_pointer or workspace_v8_chunk:...)
+ *   - id       text  primary key; rows are namespaced per account so every user
+ *                    writes disjoint keys: `<auth user id>:<record id>` (e.g. a
+ *                    uuid followed by workspace_v8_active or
+ *                    workspace_v8_chunk:generation:index). The v8 record ids are
+ *                    identical across all accounts, so without the namespace the
+ *                    upsert below would collide with another account's row and
+ *                    fail the RLS USING check on UPDATE.
  *   - owner_id uuid  the authenticated user (RLS enforces owner isolation)
  *   - payload  jsonb the full record written by the v8 persistence protocol
  *
- * Setup: run supabase/schema.sql once in the Supabase SQL editor, then enter
- * the project URL and anon key in 设置 -> 云端同步（Supabase）.
+ * Setup: run supabase/schema.sql once in the Supabase SQL editor. The hosted
+ * build bakes in a default project URL and anon key (设置 -> 云端同步); a custom
+ * config may still be set programmatically via setConfig() to override it.
  */
 (function attachCWBSupabase(root, factory) {
   const api = factory(root);
@@ -25,6 +32,15 @@
   const SESSION_KEY = 'cwb_supabase_session';
   const TABLE = 'workspace_records';
   const REFRESH_GRACE_MS = 30 * 1000;
+
+  // 内置默认配置：静态站点没有运行期环境变量，把托管方 Supabase 项目的公开配置
+  // （项目地址 + anon 公开密钥）编译进运行时，用户无需在设置面板填写即可使用；
+  // 在设置面板保存的自定义配置始终优先。anon 密钥是公开密钥，访问控制由数据库
+  // 行级安全（RLS）承担，可安全内置。
+  const DEFAULT_CONFIG = {
+    url: 'https://mxbhgtciagudibpfqnbd.supabase.co',
+    anonKey: 'sb_publishable_mTVURczr9JbAL-fRIM89rw_a9HExnFg',
+  };
 
   function safeStorage() {
     try {
@@ -77,6 +93,7 @@
 
   function currentConfig() {
     if (config && typeof config === 'object' && String(config.url || '').trim() && String(config.anonKey || '').trim()) return config;
+    if (DEFAULT_CONFIG && String(DEFAULT_CONFIG.url || '').trim() && String(DEFAULT_CONFIG.anonKey || '').trim()) return DEFAULT_CONFIG;
     return null;
   }
 
@@ -97,11 +114,12 @@
   }
 
   function status() {
+    const cfg = currentConfig();
     return {
       configured:isConfigured(),
       active:isActive(),
       user:isActive() && session && session.user ? { id:session.user.id, email:session.user.email } : null,
-      url:isConfigured() ? config.url : '',
+      url:cfg ? cfg.url : '',
     };
   }
 
@@ -249,9 +267,19 @@
     return true;
   }
 
-  function encodeRecord(record) {
+  function ownerPrefix(session) {
+    const owner = session && session.user && session.user.id;
+    if (!owner) {
+      const error = new Error('请先在设置中登录 Supabase 账号');
+      error.code = 'SUPABASE_NOT_SIGNED_IN';
+      throw error;
+    }
+    return String(owner);
+  }
+
+  function encodeRecord(record, storedId) {
     if (!record || record.id == null) throw new Error('SUPABASE_RECORD_ID_REQUIRED');
-    return { id:String(record.id), payload:record };
+    return { id:String(storedId), payload:record };
   }
 
   function createV8Adapter(options) {
@@ -266,10 +294,13 @@
       async list() {
         await init();
         const { session } = requireContext();
-        const rows = await request('GET', `/rest/v1/${TABLE}?select=payload&limit=100000`, {
+        const prefix = `${ownerPrefix(session)}:`;
+        const rows = await request('GET', `/rest/v1/${TABLE}?select=id,payload&limit=100000`, {
           headers:{ Authorization:`Bearer ${session.access_token}` },
         });
-        return Array.isArray(rows) ? rows.map(row => row && row.payload).filter(Boolean) : [];
+        return Array.isArray(rows)
+          ? rows.filter(row => row && String(row.id || '').startsWith(prefix)).map(row => row && row.payload).filter(Boolean)
+          : [];
       },
       put(record) {
         return enqueue(async () => {
@@ -281,7 +312,7 @@
               Authorization:`Bearer ${session.access_token}`,
               Prefer:'resolution=merge-duplicates,return=minimal',
             },
-            body:encodeRecord(record),
+            body:encodeRecord(record, `${ownerPrefix(session)}:${record.id}`),
           });
           return record;
         });
@@ -291,7 +322,7 @@
           await init();
           const { session } = requireContext();
           if (mirror) { try { await mirror.delete(id); } catch (_) {} }
-          await request('DELETE', `/rest/v1/${TABLE}?id=eq.${encodeURIComponent(String(id))}`, {
+          await request('DELETE', `/rest/v1/${TABLE}?id=eq.${encodeURIComponent(`${ownerPrefix(session)}:${String(id)}`)}`, {
             headers:{ Authorization:`Bearer ${session.access_token}` },
           });
           return true;
@@ -317,7 +348,7 @@
     status,
     isConfigured,
     isActive,
-    getConfig:() => config ? { url:config.url, anonKey:config.anonKey } : null,
+    getConfig:() => { const cfg = currentConfig(); return cfg ? { url:cfg.url, anonKey:cfg.anonKey } : null; },
     setConfig,
     signUp,
     signIn,

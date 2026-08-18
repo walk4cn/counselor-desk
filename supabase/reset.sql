@@ -1,6 +1,9 @@
--- 辅导员工作台 · Supabase 云端同步初始化脚本
--- 用法：在 Supabase 控制台 → SQL Editor（SQL 编辑器）中新建查询，粘贴本文件全部内容后运行一次即可。
--- 该脚本只创建一个数据表并开启按登录用户隔离的行级安全（RLS），不会改动其他任何结构。
+-- 辅导员工作台 · Supabase 重置脚本（清空云端数据后重新初始化）
+-- 用法：在 Supabase 控制台 → SQL Editor 中粘贴本文件全部内容并运行一次。
+-- 注意：该操作会删除 workspace_records 表及其中所有账号的云端数据
+-- （各终端本机数据不受影响，重新登录后点击“立即同步”即可重新上传）。
+
+drop table if exists public.workspace_records;
 
 -- 工作区记录表：每一行对应 v8 工作区持久化协议写入的一条记录
 -- （workspace_v8_pointer 指针，或 workspace_v8_chunk:世代:序号 数据块）。
