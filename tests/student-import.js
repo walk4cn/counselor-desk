@@ -267,8 +267,8 @@ const bad = (msg, e) => { fail++; console.log('  ✗ ' + msg + (e ? ('\n      ' 
   else bad('APP_VERSION 错误：' + cwb.version);
 
   const brandSub = $1('#brand-sub');
-  if (brandSub && brandSub.textContent.includes('开源版') && !brandSub.textContent.includes('低空学院')) ok('品牌副标适用于全国高校开源场景');
-  else bad('品牌副标仍带有单一学院限定：' + (brandSub && brandSub.textContent));
+  if (brandSub && brandSub.textContent.includes('华夏理工学院-土木建筑工程学院')) ok('品牌副标已定制为学院名称');
+  else bad('品牌副标内容异常：' + (brandSub && brandSub.textContent));
 
   // KPI 字号检查（读取计算样式）
   const kpi = $1('.kpi');
